@@ -1,0 +1,7 @@
+.DS_Store
+.vercel/
+node_modules/
+npm-debug.log*
+
+# Source image kept locally; the deployed site uses the optimized JPG.
+assets/ngo-command-center-hero.png

@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Смета Горна — бюджет мероприятий НГО</title>
+  <style>
+    /* =========================================================
+       СМЕТА ГОРНА — штабной калькулятор НГО
+       Идея: считать деньги до того, как они сгорят.
+       Стиль: кузница кадров, постерная сетка, красный/чёрный/молочный.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --warning: #B87333;
+      --green: #34785C;
+      --line: rgba(17,17,17,.18);
+      --shadow-hard: 7px 7px 0 #111111;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .26), transparent 18%),
+        radial-gradient(circle at 82% 4%, rgba(255, 59, 47, .12), transparent 20%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+    button.active { background: var(--black); color: var(--white); }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 rgba(255,59,47,.22);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17,17,17,.66);
+    }
+
+    .app {
+      width: min(1500px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 22px 0 72px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.15fr 330px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 3px solid var(--black);
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.78) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.24) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.65) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "СМЕТА\\A ГОРНА";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233,228,218,.075);
+      font-size: clamp(62px, 10vw, 150px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.07);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .spark {
+      width: 10px;
+      height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red);
+      display: inline-block;
+    }
+
+    .logo-drop {
+      width: 86px;
+      height: 86px;
+      flex: 0 0 auto;
+      border: 2px dashed rgba(255,255,255,.62);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.78);
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.06);
+    }
+
+    h1 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 1080px;
+      font-size: clamp(58px, 10vw, 150px);
+      line-height: .78;
+      letter-spacing: -.09em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .subtitle {
+      position: relative;
+      z-index: 2;
+      margin: 16px 0 0;
+      max-width: 830px;
+      color: rgba(233,228,218,.84);
+      font-size: clamp(17px, 2.2vw, 30px);
+      line-height: 1.02;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -.035em;
+    }
+
+    .red-thread {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      height: 8px;
+      background: var(--red);
+      width: min(560px, 82%);
+      box-shadow: 0 0 24px rgba(255,59,47,.5);
+    }
+
+    .panel-actions {
+      min-width: 310px;
+      border: 3px solid var(--black);
+      background: linear-gradient(180deg, var(--white), var(--paper));
+      padding: 16px;
+      display: grid;
+      gap: 9px;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-actions::before {
+      content: "ДЕНЕЖНЫЙ ПУЛЬТ";
+      position: absolute;
+      right: -50px;
+      top: 28px;
+      transform: rotate(35deg);
+      background: var(--black);
+      color: var(--white);
+      padding: 5px 52px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+    }
+
+    .technical {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .115em;
+      color: rgba(17,17,17,.56);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar, .main-section, .modal-card {
+      border: 3px solid var(--black);
+      background: rgba(248,244,236,.92);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background: linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%), rgba(248,244,236,.94);
+    }
+
+    .main-section {
+      padding: 16px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%), rgba(248,244,236,.94);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--black);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 36px;
+      line-height: .82;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: .88;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tab.active { background: var(--black); color: var(--white); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      border: 3px solid var(--black);
+      background: var(--white);
+      min-height: 118px;
+      padding: 13px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+    }
+
+    .stat.wide { grid-column: span 2; }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .stat::after {
+      content: "₽";
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      color: rgba(17,17,17,.08);
+      font-size: 58px;
+      font-weight: 1000;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: clamp(32px, 4vw, 58px);
+      line-height: .82;
+      font-weight: 1000;
+      color: var(--red);
+      letter-spacing: -.08em;
+      word-break: break-word;
+    }
+
+    .stat-title {
+      margin-top: 9px;
+      font-size: 11px;
+      line-height: .95;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .filters { display: grid; gap: 12px; }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      text-align: left;
+      display: grid;
+      gap: 4px;
+      background: var(--white);
+    }
+
+    .mode-btn strong { font-size: 13px; line-height: 1; }
+    .mode-btn span { font-size: 11px; color: rgba(17,17,17,.62); font-weight: 800; }
+
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 12px;
+    }
+
+    .budget-card, .expense-card, .form-card, .subcard {
+      border: 3px solid var(--black);
+      background: rgba(255,255,255,.74);
+      padding: 14px;
+    }
+
+    .budget-card {
+      min-height: 250px;
+      display: grid;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .budget-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+
+    .budget-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 12px;
+      background: var(--red);
+    }
+
+    .budget-card::after {
+      content: "СМЕТА";
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      font-size: 46px;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      color: rgba(17,17,17,.045);
+      pointer-events: none;
+    }
+
+    .budget-head { display: grid; gap: 8px; padding-top: 8px; }
+
+    .budget-title {
+      margin: 0;
+      font-size: 27px;
+      line-height: .86;
+      letter-spacing: -.06em;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid var(--black);
+      padding: 5px 8px;
+      background: rgba(17,17,17,.045);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge.red { background: var(--red); color: var(--white); }
+    .badge.black { background: var(--black); color: var(--white); }
+    .badge.warn { background: var(--warning); color: var(--white); }
+    .badge.green { background: var(--green); color: var(--white); }
+
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .meta {
+      border-left: 4px solid var(--black);
+      padding-left: 8px;
+      min-height: 42px;
+    }
+
+    .meta small {
+      display: block;
+      color: rgba(17,17,17,.52);
+      font-size: 9px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .meta b { display: block; font-size: 14px; line-height: 1.05; }
+
+    .card-actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 2; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .form-grid .span-2 { grid-column: span 2; }
+    .form-grid .span-4 { grid-column: span 4; }
+
+    .calculator-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 440px) 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .expense-list { display: grid; gap: 10px; }
+
+    .expense-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .expense-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .expense-title {
+      font-size: 20px;
+      line-height: .9;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: -.04em;
+    }
+
+    .expense-sum {
+      color: var(--red);
+      font-size: 24px;
+      font-weight: 1000;
+      letter-spacing: -.06em;
+      white-space: nowrap;
+    }
+
+    .progress-wrap {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .progress-bar {
+      height: 28px;
+      border: 3px solid var(--black);
+      background: rgba(17,17,17,.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      background: var(--red);
+      min-width: 2%;
+      max-width: 100%;
+    }
+
+    .chart-wrap {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .donut {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 3px solid var(--black);
+      background: conic-gradient(var(--red) 0 100%);
+      position: relative;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+    }
+
+    .donut::after {
+      content: "";
+      position: absolute;
+      inset: 38px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--black);
+    }
+
+    .legend { display: grid; gap: 8px; }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--black);
+      background: var(--red);
+    }
+
+    .warning-list { display: grid; gap: 8px; }
+
+    .warning-item {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .warning-item.danger { border-left: 9px solid var(--red); }
+    .warning-item.ok { border-left: 9px solid var(--green); }
+    .warning-item.warn { border-left: 9px solid var(--warning); }
+    .warning-item strong { text-transform: uppercase; font-size: 13px; }
+    .warning-item span { font-size: 12px; font-weight: 800; color: rgba(17,17,17,.66); }
+
+    .table-wrap {
+      overflow: auto;
+      border: 3px solid var(--black);
+      background: var(--white);
+    }
+
+    table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 2px solid rgba(17,17,17,.14); text-align: left; font-size: 13px; vertical-align: top; }
+    th { background: var(--black); color: var(--white); text-transform: uppercase; font-size: 10px; letter-spacing: .09em; position: sticky; top: 0; z-index: 2; }
+    tr:hover td { background: rgba(255,59,47,.07); }
+
+    .empty-state {
+      border: 3px dashed var(--black);
+      padding: 22px;
+      background: rgba(255,255,255,.5);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,17,17,.74);
+      display: none;
+      align-items: start;
+      justify-content: center;
+      padding: 24px 14px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(980px, 100%);
+      padding: 16px;
+      background: var(--milk);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+      border-bottom: 4px solid var(--black);
+      padding-bottom: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--white);
+      padding: 12px 14px;
+      font-weight: 900;
+      z-index: 80;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: .2s ease;
+      max-width: 360px;
+      box-shadow: 6px 6px 0 var(--red);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .hidden { display: none !important; }
+
+    @media print {
+      body { background: white; }
+      body::before, body::after, .panel-actions, .sidebar, .tabs, .modal, .toast, .no-print, .card-actions { display: none !important; }
+      .app { width: 100%; padding: 0; }
+      .topbar, .workspace, .calculator-layout { grid-template-columns: 1fr; }
+      .hero, .main-section, .stat, .budget-card, .form-card, .subcard, .expense-card, .progress-wrap, .chart-wrap { box-shadow: none; break-inside: avoid; }
+      .tab-panel.hidden { display: none !important; }
+      .print-estimate #estimatePanel { display: block !important; }
+      .print-estimate .tab-panel:not(#estimatePanel) { display: none !important; }
+    }
+
+    @media (max-width: 1100px) {
+      .topbar, .workspace, .calculator-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .chart-wrap { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app { width: min(100% - 18px, 1500px); padding-top: 10px; }
+      .hero { padding: 16px; min-height: 240px; }
+      .brand-row { align-items: start; }
+      .logo-drop { width: 68px; height: 68px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .span-2, .form-grid .span-4 { grid-column: span 1; }
+      .expense-card { grid-template-columns: 1fr; }
+      .modal-head { display: grid; }
+      h2 { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / СМЕТА / BACKSTAGE</div>
+          <div class="logo-drop" title="Сюда можно вставить SVG/PNG логотип через тег img">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Смета Горна</h1>
+        <p class="subtitle">Считай деньги до того, как они сгорят</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions no-print">
+        <div class="technical">операции со сметами</div>
+        <button class="primary" id="createBudgetBtn">+ новая смета</button>
+        <button id="duplicateBudgetBtn">дублировать смету</button>
+        <button id="exportJsonBtn">резервная копия</button>
+        <button id="importJsonBtn">загрузить сметы</button>
+        <button id="exportCsvBtn">таблица расходов</button>
+        <button id="printBtn">смета PDF</button>
+        <button class="dark" id="clearDraftBtn">очистить черновик</button>
+        <input type="file" id="jsonFileInput" accept="application/json" hidden />
+      </aside>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar no-print">
+        <div class="section-title">
+          <h2>Сметы</h2>
+          <button class="small ghost" id="resetSearchBtn">сброс</button>
+        </div>
+        <div class="filters">
+          <label>поиск
+            <input id="searchInput" placeholder="слёт, Бунгурский, фестиваль..." />
+          </label>
+        </div>
+
+        <div class="subcard">
+          <div class="technical">режим бюджета</div>
+          <div class="mode-switch" id="modeSwitch"></div>
+        </div>
+
+        <div class="subcard">
+          <div class="technical">быстрый старт</div>
+          <p style="margin:8px 0 12px; font-size:13px; font-weight:800; line-height:1.35;">Создай смету, выбери режим, внеси расходы и проверь оргвзнос для 150 / 180 / 220 / 250 участников.</p>
+          <button class="primary" id="sampleBudgetBtn">добавить пример слёта</button>
+        </div>
+
+        <div class="subcard">
+          <div class="technical">предупреждения</div>
+          <div class="warning-list" id="sidebarWarnings"></div>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <div class="stats" id="stats"></div>
+
+        <nav class="tabs no-print">
+          <button class="tab active" data-tab="budgetsPanel">сметы</button>
+          <button class="tab" data-tab="projectPanel">проект</button>
+          <button class="tab" data-tab="estimatePanel">расходы</button>
+          <button class="tab" data-tab="calculatorPanel">оргвзнос</button>
+          <button class="tab" data-tab="scenariosPanel">сценарии</button>
+          <button class="tab" data-tab="visualPanel">визуализация</button>
+          <button class="tab" data-tab="tablePanel">таблица</button>
+        </nav>
+
+        <section id="budgetsPanel" class="tab-panel">
+          <div class="section-title">
+            <h2>Карточки смет</h2>
+            <div class="technical" id="budgetCount"></div>
+          </div>
+          <div class="budget-grid" id="budgetGrid"></div>
+        </section>
+
+        <section id="projectPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Проект сметы</h2>
+            <div class="technical" id="currentBudgetLabel">смета не выбрана</div>
+          </div>
+          <div class="form-card">
+            <form id="budgetForm" class="form-grid">
+              <label class="span-2">название мероприятия <input name="name" required /></label>
+              <label>дата <input name="date" type="date" /></label>
+              <label>место <input name="place" /></label>
+              <label>план участников <input name="participants" type="number" min="0" /></label>
+              <label>минимальный план <input name="minParticipants" type="number" min="0" /></label>
+              <label>макс. вместимость <input name="maxCapacity" type="number" min="0" /></label>
+              <label>бюджет штаба, ₽ <input name="hqBudget" type="number" min="0" /></label>
+              <label>партнёрская поддержка, ₽ <input name="partnerSupport" type="number" min="0" /></label>
+              <label>резерв, % <input name="reservePercent" type="number" min="0" /></label>
+              <label class="span-4">комментарий <textarea name="comment" placeholder="Что важно помнить по площадке, участникам, рискам и договорённостям?"></textarea></label>
+            </form>
+            <div class="card-actions" style="margin-top:14px;">
+              <button class="primary" id="saveBudgetBtn">сохранить проект</button>
+              <button id="deleteBudgetBtn">удалить смету</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="estimatePanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Расходы</h2>
+            <div class="technical" id="expenseTotalLabel">0 ₽</div>
+          </div>
+          <div class="calculator-layout">
+            <aside class="form-card no-print">
+              <h3>Добавить расход</h3>
+              <div class="form-grid" style="grid-template-columns:1fr; margin-top:12px;">
+                <label>название <input id="expenseName" placeholder="проживание, питание, мерч..." /></label>
+                <label>категория <select id="expenseCategory"></select></label>
+                <label>своя категория <input id="customCategory" placeholder="если нет в списке" /></label>
+                <label>количество <input id="expenseQty" type="number" min="0" value="1" /></label>
+                <label>цена за единицу, ₽ <input id="expensePrice" type="number" min="0" value="0" /></label>
+                <label>кто оплачивает <select id="expensePayer"></select></label>
+                <label>комментарий <textarea id="expenseComment"></textarea></label>
+                <button class="primary" id="addExpenseBtn">+ добавить расход</button>
+              </div>
+            </aside>
+            <section>
+              <div class="expense-list" id="expenseList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="calculatorPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Калькулятор оргвзноса</h2>
+            <div class="technical">сколько реально нужно собрать</div>
+          </div>
+          <div class="stats" id="calculatorStats"></div>
+          <div class="progress-wrap">
+            <div class="technical">сколько покрыто / сколько нужно</div>
+            <div class="progress-bar"><span id="coverageBar"></span></div>
+            <div class="meta-grid" id="coverageMeta"></div>
+          </div>
+        </section>
+
+        <section id="scenariosPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Сценарии участников</h2>
+            <div class="technical">150 / 180 / 220 / 250</div>
+          </div>
+          <div class="table-wrap" id="scenariosTable"></div>
+        </section>
+
+        <section id="visualPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Визуализация</h2>
+            <div class="technical">категории, сбор, риски</div>
+          </div>
+          <div class="chart-wrap">
+            <div class="donut" id="categoryDonut"></div>
+            <div class="legend" id="categoryLegend"></div>
+          </div>
+          <div style="height:14px"></div>
+          <div class="warning-list" id="visualWarnings"></div>
+        </section>
+
+        <section id="tablePanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Таблица расходов</h2>
+            <div class="technical">готово для проверки и экспорта</div>
+          </div>
+          <div class="table-wrap" id="tableWrap"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="expenseModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="technical">редактирование строки</div>
+          <h2 id="modalExpenseTitle">Расход</h2>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="primary" id="saveExpenseBtn">сохранить</button>
+          <button id="deleteExpenseBtn">удалить</button>
+          <button class="dark" id="closeExpenseModalBtn">закрыть</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <label class="span-2">название <input id="editExpenseName" /></label>
+        <label>категория <select id="editExpenseCategory"></select></label>
+        <label>кто оплачивает <select id="editExpensePayer"></select></label>
+        <label>количество <input id="editExpenseQty" type="number" min="0" /></label>
+        <label>цена за единицу, ₽ <input id="editExpensePrice" type="number" min="0" /></label>
+        <label class="span-4">комментарий <textarea id="editExpenseComment"></textarea></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    /* =========================================================
+       ДАННЫЕ
+       ========================================================= */
+
+    const CATEGORIES = [
+      'проживание', 'питание', 'трансфер', 'аренда площадки', 'техника', 'печать',
+      'мерч', 'призы', 'оформление', 'расходники', 'фото/видео', 'непредвиденные расходы'
+    ];
+
+    const PAYERS = ['штаб', 'участники', 'партнёр', 'смешанно'];
+
+    const MODES = [
+      { id:'minimum', title:'минимум, но не стыдно', hint:'режем лишнее, оставляем основу' },
+      { id:'normal', title:'нормально', hint:'баланс качества и цены' },
+      { id:'wow', title:'вау, если дадут деньги', hint:'усиленный сценарий и запас' }
+    ];
+
+    const CHART_COLORS = ['#FF3B2F', '#111111', '#B87333', '#6F7478', '#B51B16', '#34785C', '#8F8A80', '#D8A23A', '#2A2A2A', '#D95F45', '#4E5A61', '#9D2C25'];
+
+    const DEFAULT_EXPENSES = [
+      { name:'Проживание в лагере', category:'проживание', qty:150, price:900, payer:'участники', comment:'Базовый расчёт на 150 человек.' },
+      { name:'Питание', category:'питание', qty:150, price:1200, payer:'участники', comment:'Комплексное питание на период слёта.' },
+      { name:'Аренда площадки / залов', category:'аренда площадки', qty:1, price:60000, payer:'штаб', comment:'Площадки и общие зоны.' },
+      { name:'Техника и звук', category:'техника', qty:1, price:35000, payer:'штаб', comment:'Звук, микрофоны, световая база.' },
+      { name:'Печать и навигация', category:'печать', qty:1, price:18000, payer:'штаб', comment:'Программа, бейджи, указатели.' },
+      { name:'Мерч / браслеты / стикеры', category:'мерч', qty:150, price:180, payer:'участники', comment:'Минимальный комплект участника.' },
+      { name:'Призы и награды', category:'призы', qty:1, price:25000, payer:'партнёр', comment:'Можно закрывать партнёрской поддержкой.' },
+      { name:'Оформление', category:'оформление', qty:1, price:16000, payer:'штаб', comment:'Баннеры, фотозона, сцена.' },
+      { name:'Фото/видео', category:'фото/видео', qty:1, price:20000, payer:'смешанно', comment:'Съёмка и быстрые материалы.' },
+      { name:'Непредвиденные расходы', category:'непредвиденные расходы', qty:1, price:15000, payer:'штаб', comment:'Ручной запас сверх процента резерва.' }
+    ];
+
+    const DEFAULT_BUDGET = {
+      name:'Городской слёт НГО — Бунгурский',
+      date:'',
+      place:'ДОЛ «Бунгурский»',
+      participants:150,
+      minParticipants:150,
+      maxCapacity:250,
+      hqBudget:500000,
+      partnerSupport:25000,
+      reservePercent:10,
+      comment:'Текущая база — около 150 участников. Цель роста — 220–250 человек при вместимости площадки до 250.',
+      activeMode:'normal',
+      modes:{
+        minimum:{ expenses: DEFAULT_EXPENSES.map(e => ({ ...e, id: crypto.randomUUID() })) },
+        normal:{ expenses: DEFAULT_EXPENSES.map(e => ({ ...e, id: crypto.randomUUID() })) },
+        wow:{ expenses: DEFAULT_EXPENSES.map(e => ({ ...e, id: crypto.randomUUID(), price: Math.round(e.price * 1.22) })) }
+      }
+    };
+
+    const state = {
+      budgets: loadBudgets(),
+      currentId: null,
+      activeTab: 'budgetsPanel',
+      editingExpenseId: null,
+      filters: { search:'' }
+    };
+
+    function normalizeExpense(expense) {
+      return {
+        id: expense.id || crypto.randomUUID(),
+        name: expense.name || 'Новый расход',
+        category: expense.category || 'расходники',
+        qty: Number(expense.qty || 1),
+        price: Number(expense.price || 0),
+        payer: expense.payer || 'участники',
+        comment: expense.comment || ''
+      };
+    }
+
+    function normalizeBudget(budget, index = 0) {
+      const modes = budget.modes || {};
+      const normalizedModes = {};
+      MODES.forEach(mode => {
+        normalizedModes[mode.id] = {
+          expenses: ((modes[mode.id] && modes[mode.id].expenses) || budget.expenses || []).map(normalizeExpense)
+        };
+      });
+      return {
+        id: budget.id || crypto.randomUUID(),
+        name: budget.name || 'Новая смета',
+        date: budget.date || '',
+        place: budget.place || '',
+        participants: Number(budget.participants || 150),
+        minParticipants: Number(budget.minParticipants || 120),
+        maxCapacity: Number(budget.maxCapacity || 250),
+        hqBudget: Number(budget.hqBudget || 0),
+        partnerSupport: Number(budget.partnerSupport || 0),
+        reservePercent: Number(budget.reservePercent || 0),
+        comment: budget.comment || '',
+        activeMode: budget.activeMode || 'normal',
+        modes: normalizedModes,
+        createdAt: budget.createdAt || new Date().toISOString(),
+        order: budget.order ?? index
+      };
+    }
+
+    function loadBudgets() {
+      let budgets = null;
+      const saved = localStorage.getItem('smetaGornaData');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) budgets = parsed;
+        } catch (error) {
+          console.warn('Не удалось прочитать localStorage', error);
+        }
+      }
+      if (!budgets) budgets = [DEFAULT_BUDGET];
+      if (window.NgoSystem) budgets = window.NgoSystem.mergeBudgetsWithEvents(budgets);
+      return budgets.map(normalizeBudget);
+    }
+
+    function saveBudgets() {
+      if (window.NgoSystem) window.NgoSystem.publishBudgets(state.budgets);
+      else localStorage.setItem('smetaGornaData', JSON.stringify(state.budgets));
+    }
+
+    function qs(selector) { return document.querySelector(selector); }
+    function qsa(selector) { return [...document.querySelectorAll(selector)]; }
+
+    function fillSelect(select, values, placeholder) {
+      select.innerHTML = placeholder ? `<option value="">${placeholder}</option>` : '';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function initControls() {
+      fillSelect(qs('#expenseCategory'), CATEGORIES);
+      fillSelect(qs('#editExpenseCategory'), CATEGORIES);
+      fillSelect(qs('#expensePayer'), PAYERS);
+      fillSelect(qs('#editExpensePayer'), PAYERS);
+      const eventIdFromUrl = new URLSearchParams(location.search).get('event');
+      const activeEvent = window.NgoSystem?.getActiveEvent();
+      const eventBudget = eventIdFromUrl
+        ? state.budgets.find(budget => budget.sourceEventId === eventIdFromUrl)
+        : window.NgoSystem?.budgetForEvent(activeEvent, state.budgets);
+      if (!state.currentId && eventBudget) state.currentId = eventBudget.id;
+      if (!state.currentId && state.budgets[0]) state.currentId = state.budgets[0].id;
+    }
+
+    function currentBudget() {
+      return state.budgets.find(budget => budget.id === state.currentId) || null;
+    }
+
+    function activeExpenses(budget = currentBudget()) {
+      if (!budget) return [];
+      return budget.modes[budget.activeMode]?.expenses || [];
+    }
+
+    function expenseSum(expense) {
+      return Number(expense.qty || 0) * Number(expense.price || 0);
+    }
+
+    function totalExpenses(budget = currentBudget()) {
+      return activeExpenses(budget).reduce((sum, expense) => sum + expenseSum(expense), 0);
+    }
+
+    function reserveAmount(budget = currentBudget()) {
+      return Math.round(totalExpenses(budget) * Number(budget?.reservePercent || 0) / 100);
+    }
+
+    function totalWithReserve(budget = currentBudget()) {
+      return totalExpenses(budget) + reserveAmount(budget);
+    }
+
+    function coveredByPayers(budget = currentBudget()) {
+      const expenses = activeExpenses(budget);
+      const byPayer = { 'штаб':0, 'участники':0, 'партнёр':0, 'смешанно':0 };
+      expenses.forEach(expense => byPayer[expense.payer] = (byPayer[expense.payer] || 0) + expenseSum(expense));
+      return byPayer;
+    }
+
+    function availableSupport(budget = currentBudget()) {
+      return Number(budget?.hqBudget || 0) + Number(budget?.partnerSupport || 0);
+    }
+
+    function neededFromParticipants(budget = currentBudget()) {
+      return Math.max(0, totalWithReserve(budget) - availableSupport(budget));
+    }
+
+    function feePerPerson(budget = currentBudget(), participants = Number(budget?.participants || 0), withReserve = true) {
+      if (!participants) return 0;
+      const base = withReserve ? totalWithReserve(budget) : totalExpenses(budget);
+      return Math.ceil(Math.max(0, base - availableSupport(budget)) / participants);
+    }
+
+    function breakEvenParticipants(budget = currentBudget()) {
+      const fee = feePerPerson(budget, Number(budget?.participants || 0), true);
+      if (!fee) return 0;
+      return Math.ceil(neededFromParticipants(budget) / fee);
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('ru-RU').format(Math.round(Number(value || 0))) + ' ₽';
+    }
+
+    function getFilteredBudgets() {
+      return state.budgets.filter(budget => {
+        const text = [budget.name, budget.place, budget.comment].join(' ').toLowerCase();
+        return !state.filters.search || text.includes(state.filters.search.toLowerCase());
+      }).sort((a,b) => (a.order ?? 0) - (b.order ?? 0));
+    }
+
+    function selectBudget(id) {
+      state.currentId = id;
+      const budget = currentBudget();
+      if (budget?.sourceEventId && window.NgoSystem) window.NgoSystem.setActiveEvent(budget.sourceEventId);
+      renderAll();
+      setTab('projectPanel');
+      toast('Смета выбрана. Можно править проект и расходы.');
+    }
+
+    function createBudget() {
+      const budget = normalizeBudget({
+        name:'Новая смета',
+        place:'Новокузнецк',
+        participants:150,
+        minParticipants:120,
+        maxCapacity:250,
+        hqBudget:0,
+        partnerSupport:0,
+        reservePercent:10,
+        activeMode:'normal',
+        modes:{ minimum:{ expenses:[] }, normal:{ expenses:[] }, wow:{ expenses:[] } }
+      }, state.budgets.length);
+      state.budgets.unshift(budget);
+      state.currentId = budget.id;
+      renderAll();
+      setTab('projectPanel');
+      toast('Создана новая смета.');
+    }
+
+    function addSampleBudget() {
+      const budget = normalizeBudget({ ...DEFAULT_BUDGET, id: crypto.randomUUID(), name:'Городской слёт НГО — Бунгурский / пример' }, state.budgets.length);
+      state.budgets.unshift(budget);
+      state.currentId = budget.id;
+      renderAll();
+      setTab('calculatorPanel');
+      toast('Пример слёта добавлен. Его можно редактировать.');
+    }
+
+    function duplicateCurrentBudget() {
+      const budget = currentBudget();
+      if (!budget) return toast('Сначала выбери смету.');
+      const copy = normalizeBudget({ ...JSON.parse(JSON.stringify(budget)), id: crypto.randomUUID(), name: budget.name + ' / копия', createdAt: new Date().toISOString() }, 0);
+      state.budgets.unshift(copy);
+      state.currentId = copy.id;
+      renderAll();
+      toast('Смета продублирована.');
+    }
+
+    function deleteCurrentBudget() {
+      const budget = currentBudget();
+      if (!budget) return;
+      if (!confirm(`Удалить смету «${budget.name}»?`)) return;
+      state.budgets = state.budgets.filter(item => item.id !== budget.id);
+      state.currentId = state.budgets[0]?.id || null;
+      renderAll();
+      setTab('budgetsPanel');
+      toast('Смета удалена.');
+    }
+
+    function saveCurrentBudgetFromForm() {
+      const budget = currentBudget();
+      if (!budget) return toast('Сначала создай смету.');
+      const data = Object.fromEntries(new FormData(qs('#budgetForm')).entries());
+      Object.assign(budget, {
+        name: data.name,
+        date: data.date,
+        place: data.place,
+        participants: Number(data.participants || 0),
+        minParticipants: Number(data.minParticipants || 0),
+        maxCapacity: Number(data.maxCapacity || 0),
+        hqBudget: Number(data.hqBudget || 0),
+        partnerSupport: Number(data.partnerSupport || 0),
+        reservePercent: Number(data.reservePercent || 0),
+        comment: data.comment
+      });
+      renderAll();
+      toast('Проект сметы сохранён.');
+    }
+
+    function setMode(modeId) {
+      const budget = currentBudget();
+      if (!budget) return;
+      budget.activeMode = modeId;
+      renderAll();
+      toast('Режим бюджета переключён.');
+    }
+
+    function renderModeSwitch() {
+      const budget = currentBudget();
+      qs('#modeSwitch').innerHTML = MODES.map(mode => `
+        <button class="mode-btn ${budget?.activeMode === mode.id ? 'active' : ''}" onclick="setMode('${mode.id}')">
+          <strong>${mode.title}</strong>
+          <span>${mode.hint}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderStats() {
+      const budget = currentBudget();
+      const total = totalWithReserve(budget);
+      const fee = feePerPerson(budget, budget?.participants || 0, true);
+      const deficit = Math.max(0, total - availableSupport(budget) - fee * Number(budget?.participants || 0));
+      const warnings = analyzeBudget(budget);
+      qs('#stats').innerHTML = `
+        <article class="stat wide"><span class="stat-value">${formatMoney(total)}</span><div class="stat-title">итоговый бюджет с резервом</div></article>
+        <article class="stat"><span class="stat-value">${formatMoney(fee).replace(' ₽','')}</span><div class="stat-title">оргвзнос на человека</div></article>
+        <article class="stat"><span class="stat-value">${budget?.participants || 0}</span><div class="stat-title">план участников</div></article>
+        <article class="stat"><span class="stat-value">${warnings.filter(w => w.level === 'danger').length}</span><div class="stat-title">красных предупреждений</div></article>
+      `;
+    }
+
+    function renderBudgets() {
+      const items = getFilteredBudgets();
+      qs('#budgetCount').textContent = `${items.length} из ${state.budgets.length}`;
+      qs('#budgetGrid').innerHTML = items.map(budget => {
+        const total = totalWithReserve(budget);
+        const fee = feePerPerson(budget, budget.participants, true);
+        const warnings = analyzeBudget(budget).filter(w => w.level === 'danger').length;
+        return `
+          <article class="budget-card">
+            <div class="budget-head">
+              <h3 class="budget-title">${escapeHtml(budget.name)}</h3>
+              <div class="badges">
+                <span class="badge red">${escapeHtml(getModeTitle(budget.activeMode))}</span>
+                <span class="badge black">${budget.participants} участников</span>
+                ${warnings ? `<span class="badge warn">${warnings} риска</span>` : `<span class="badge green">стабильно</span>`}
+              </div>
+            </div>
+            <div class="meta-grid">
+              <div class="meta"><small>место</small><b>${escapeHtml(budget.place || 'не указано')}</b></div>
+              <div class="meta"><small>дата</small><b>${budget.date || 'не указана'}</b></div>
+              <div class="meta"><small>бюджет</small><b>${formatMoney(total)}</b></div>
+              <div class="meta"><small>оргвзнос</small><b>${formatMoney(fee)}</b></div>
+            </div>
+            <p style="margin:0; font-size:13px; line-height:1.25; font-weight:750; color:rgba(17,17,17,.72)">${escapeHtml(budget.comment || 'Комментарий пока не заполнен.')}</p>
+            <div class="card-actions">
+              <button class="small primary" onclick="selectBudget('${budget.id}')">открыть</button>
+              <button class="small" onclick="quickOpenCalc('${budget.id}')">оргвзнос</button>
+            </div>
+          </article>
+        `;
+      }).join('') || `<div class="empty-state">Смет не найдено. Ослабь фильтр или создай новый проект.</div>`;
+    }
+
+    function renderCurrentForm() {
+      const budget = currentBudget();
+      const form = qs('#budgetForm');
+      qs('#currentBudgetLabel').textContent = budget ? budget.name : 'смета не выбрана';
+      [...form.elements].forEach(el => {
+        if (!el.name) return;
+        el.value = budget ? (budget[el.name] ?? '') : '';
+      });
+    }
+
+    function renderExpenses() {
+      const budget = currentBudget();
+      const expenses = activeExpenses(budget);
+      qs('#expenseTotalLabel').textContent = formatMoney(totalExpenses(budget));
+      qs('#expenseList').innerHTML = expenses.map(expense => `
+        <article class="expense-card">
+          <div style="display:grid; gap:8px; padding-left:8px;">
+            <div class="badges"><span class="badge red">${escapeHtml(expense.category)}</span><span class="badge black">${escapeHtml(expense.payer)}</span></div>
+            <div class="expense-title">${escapeHtml(expense.name)}</div>
+            <div class="meta-grid">
+              <div class="meta"><small>количество</small><b>${expense.qty}</b></div>
+              <div class="meta"><small>цена</small><b>${formatMoney(expense.price)}</b></div>
+            </div>
+            <div class="technical">${escapeHtml(expense.comment || 'без комментария')}</div>
+          </div>
+          <div style="display:grid; gap:8px; justify-items:end;">
+            <div class="expense-sum">${formatMoney(expenseSum(expense))}</div>
+            <button class="small primary" onclick="openExpenseModal('${expense.id}')">править</button>
+          </div>
+        </article>
+      `).join('') || `<div class="empty-state">Расходов пока нет. Добавь первую строку сметы или импортируй JSON.</div>`;
+    }
+
+    function renderCalculator() {
+      const budget = currentBudget();
+      const total = totalExpenses(budget);
+      const reserve = reserveAmount(budget);
+      const totalReserve = totalWithReserve(budget);
+      const support = availableSupport(budget);
+      const needed = neededFromParticipants(budget);
+      const fee = feePerPerson(budget, budget?.participants || 0, false);
+      const feeReserve = feePerPerson(budget, budget?.participants || 0, true);
+      const breakEven = breakEvenParticipants(budget);
+      const coverage = totalReserve ? Math.min(100, support / totalReserve * 100) : 0;
+
+      qs('#calculatorStats').innerHTML = `
+        <article class="stat"><span class="stat-value">${formatMoney(total)}</span><div class="stat-title">общие расходы</div></article>
+        <article class="stat"><span class="stat-value">${formatMoney(support)}</span><div class="stat-title">штаб + партнёры</div></article>
+        <article class="stat"><span class="stat-value">${formatMoney(needed)}</span><div class="stat-title">нужно собрать с участников</div></article>
+        <article class="stat"><span class="stat-value">${formatMoney(feeReserve).replace(' ₽','')}</span><div class="stat-title">оргвзнос с резервом</div></article>
+      `;
+      qs('#coverageBar').style.width = `${coverage}%`;
+      qs('#coverageMeta').innerHTML = `
+        <div class="meta"><small>покрыто</small><b>${formatMoney(support)}</b></div>
+        <div class="meta"><small>нужно всего</small><b>${formatMoney(totalReserve)}</b></div>
+        <div class="meta"><small>резерв</small><b>${formatMoney(reserve)}</b></div>
+        <div class="meta"><small>точка безубыточности</small><b>${breakEven} чел.</b></div>
+      `;
+    }
+
+    function renderScenarios() {
+      const scenarios = [150, 180, 220, 250];
+      const budget = currentBudget();
+      qs('#scenariosTable').innerHTML = `
+        <table>
+          <thead><tr><th>участников</th><th>оргвзнос</th><th>общий сбор</th><th>дефицит / профицит</th><th>комментарий</th></tr></thead>
+          <tbody>
+            ${scenarios.map(count => {
+              const fee = feePerPerson(budget, count, true);
+              const collected = fee * count;
+              const result = collected + availableSupport(budget) - totalWithReserve(budget);
+              return `<tr>
+                <td><b>${count}</b></td>
+                <td>${formatMoney(fee)}</td>
+                <td>${formatMoney(collected)}</td>
+                <td>${result >= 0 ? '+' : ''}${formatMoney(result)}</td>
+                <td>${scenarioComment(count, fee, result, budget)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function scenarioComment(count, fee, result, budget) {
+      if (!budget) return '';
+      if (count < budget.minParticipants) return 'ниже минимального плана — высокий риск окупаемости';
+      if (count > budget.maxCapacity) return 'выше вместимости площадки — нужен другой объект';
+      if (fee > 5000) return 'оргвзнос может выглядеть тяжёлым для участников';
+      if (result < 0) return 'дефицит — нужна поддержка штаба, партнёр или сокращение расходов';
+      if (count >= 220) return 'целевой рост: ближе к сильной модели слёта';
+      return 'рабочий сценарий, но есть пространство для роста';
+    }
+
+    function renderVisuals() {
+      const grouped = groupByCategory();
+      const total = Object.values(grouped).reduce((sum, value) => sum + value, 0);
+      let current = 0;
+      const gradient = Object.entries(grouped).map(([category, value], index) => {
+        const start = current;
+        const part = total ? value / total * 100 : 0;
+        current += part;
+        return `${CHART_COLORS[index % CHART_COLORS.length]} ${start}% ${current}%`;
+      }).join(', ');
+      qs('#categoryDonut').style.background = gradient ? `conic-gradient(${gradient})` : 'conic-gradient(#FF3B2F 0 100%)';
+      qs('#categoryLegend').innerHTML = Object.entries(grouped).sort((a,b) => b[1]-a[1]).map(([category, value], index) => `
+        <div class="legend-row">
+          <span class="legend-color" style="background:${CHART_COLORS[index % CHART_COLORS.length]}"></span>
+          <span>${escapeHtml(category)}</span>
+          <b>${formatMoney(value)}</b>
+        </div>
+      `).join('') || `<div class="empty-state">Добавь расходы, чтобы появилась диаграмма категорий.</div>`;
+
+      const warnings = analyzeBudget(currentBudget());
+      qs('#visualWarnings').innerHTML = warnings.map(w => `
+        <div class="warning-item ${w.level}"><strong>${escapeHtml(w.title)}</strong><span>${escapeHtml(w.text)}</span></div>
+      `).join('') || `<div class="warning-item ok"><strong>критичных рисков нет</strong><span>Смета выглядит управляемой.</span></div>`;
+    }
+
+    function groupByCategory() {
+      return activeExpenses().reduce((acc, expense) => {
+        acc[expense.category] = (acc[expense.category] || 0) + expenseSum(expense);
+        return acc;
+      }, {});
+    }
+
+    function renderWarnings() {
+      const warnings = analyzeBudget(currentBudget());
+      qs('#sidebarWarnings').innerHTML = warnings.map(w => `
+        <div class="warning-item ${w.level}"><strong>${escapeHtml(w.title)}</strong><span>${escapeHtml(w.text)}</span></div>
+      `).join('') || `<div class="warning-item ok"><strong>критичных рисков нет</strong><span>Смета выглядит управляемой.</span></div>`;
+    }
+
+    function renderTable() {
+      const expenses = activeExpenses();
+      qs('#tableWrap').innerHTML = `
+        <table>
+          <thead><tr><th>название</th><th>категория</th><th>кол-во</th><th>цена</th><th>сумма</th><th>кто оплачивает</th><th>комментарий</th></tr></thead>
+          <tbody>
+            ${expenses.map(expense => `<tr onclick="openExpenseModal('${expense.id}')">
+              <td><b>${escapeHtml(expense.name)}</b></td>
+              <td>${escapeHtml(expense.category)}</td>
+              <td>${expense.qty}</td>
+              <td>${formatMoney(expense.price)}</td>
+              <td>${formatMoney(expenseSum(expense))}</td>
+              <td>${escapeHtml(expense.payer)}</td>
+              <td>${escapeHtml(expense.comment)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderAll() {
+      saveBudgets();
+      renderModeSwitch();
+      renderStats();
+      renderBudgets();
+      renderCurrentForm();
+      renderExpenses();
+      renderCalculator();
+      renderScenarios();
+      renderVisuals();
+      renderWarnings();
+      renderTable();
+    }
+
+    function getModeTitle(modeId) {
+      return MODES.find(mode => mode.id === modeId)?.title || 'режим';
+    }
+
+    function analyzeBudget(budget) {
+      if (!budget) return [{ level:'danger', title:'смета не выбрана', text:'Создай или выбери проект сметы.' }];
+      const warnings = [];
+      const expenses = activeExpenses(budget);
+      const total = totalWithReserve(budget);
+      const support = availableSupport(budget);
+      const fee = feePerPerson(budget, budget.participants, true);
+      const breakEven = breakEvenParticipants(budget);
+
+      if (!expenses.length) warnings.push({ level:'danger', title:'расходов нет', text:'Добавь строки сметы, иначе расчёт оргвзноса бессмысленен.' });
+      if (budget.reservePercent <= 0) warnings.push({ level:'danger', title:'нет резерва', text:'Добавь хотя бы 5–10% резерва на срывы цен и мелкие расходы.' });
+      if (fee > 5000) warnings.push({ level:'danger', title:'оргвзнос слишком высокий', text:`Сейчас получается ${formatMoney(fee)} на человека. Проверь расходы, поддержку или число участников.` });
+      if (budget.participants < budget.minParticipants) warnings.push({ level:'danger', title:'мало участников', text:'План участников ниже минимального — есть риск не выйти в окупаемость.' });
+      if (budget.participants > budget.maxCapacity) warnings.push({ level:'danger', title:'выше вместимости', text:'План участников больше максимальной вместимости площадки.' });
+      if (breakEven > budget.participants) warnings.push({ level:'warn', title:'точка безубыточности выше плана', text:`Нужно около ${breakEven} участников при текущем взносе.` });
+      if (support < total * .15) warnings.push({ level:'warn', title:'мало внешнего покрытия', text:'Штаб и партнёры покрывают меньше 15% бюджета. Основная нагрузка уйдёт на участников.' });
+
+      return uniqueWarnings(warnings);
+    }
+
+    function uniqueWarnings(warnings) {
+      const seen = new Set();
+      return warnings.filter(w => {
+        const key = w.title + w.text;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function addExpenseFromInputs() {
+      const budget = currentBudget();
+      if (!budget) return toast('Сначала выбери смету.');
+      const custom = qs('#customCategory').value.trim();
+      const category = custom || qs('#expenseCategory').value;
+      if (custom && !CATEGORIES.includes(custom)) {
+        CATEGORIES.push(custom);
+        fillSelect(qs('#expenseCategory'), CATEGORIES);
+        fillSelect(qs('#editExpenseCategory'), CATEGORIES);
+      }
+      const expense = normalizeExpense({
+        name: qs('#expenseName').value || 'Новый расход',
+        category,
+        qty: qs('#expenseQty').value || 1,
+        price: qs('#expensePrice').value || 0,
+        payer: qs('#expensePayer').value,
+        comment: qs('#expenseComment').value
+      });
+      budget.modes[budget.activeMode].expenses.push(expense);
+      clearExpenseInputs();
+      renderAll();
+      toast('Расход добавлен.');
+    }
+
+    function clearExpenseInputs() {
+      ['#expenseName','#customCategory','#expenseComment'].forEach(id => qs(id).value = '');
+      qs('#expenseQty').value = 1;
+      qs('#expensePrice').value = 0;
+      qs('#expensePayer').value = 'участники';
+    }
+
+    function openExpenseModal(id) {
+      const expense = activeExpenses().find(item => item.id === id);
+      if (!expense) return;
+      state.editingExpenseId = id;
+      qs('#modalExpenseTitle').textContent = expense.name;
+      qs('#editExpenseName').value = expense.name;
+      qs('#editExpenseCategory').value = expense.category;
+      qs('#editExpenseQty').value = expense.qty;
+      qs('#editExpensePrice').value = expense.price;
+      qs('#editExpensePayer').value = expense.payer;
+      qs('#editExpenseComment').value = expense.comment;
+      qs('#expenseModal').classList.add('open');
+    }
+
+    function saveEditedExpense() {
+      const expense = activeExpenses().find(item => item.id === state.editingExpenseId);
+      if (!expense) return;
+      expense.name = qs('#editExpenseName').value || 'Расход';
+      expense.category = qs('#editExpenseCategory').value;
+      expense.qty = Number(qs('#editExpenseQty').value || 0);
+      expense.price = Number(qs('#editExpensePrice').value || 0);
+      expense.payer = qs('#editExpensePayer').value;
+      expense.comment = qs('#editExpenseComment').value;
+      closeExpenseModal();
+      renderAll();
+      toast('Расход сохранён.');
+    }
+
+    function deleteEditedExpense() {
+      const budget = currentBudget();
+      if (!budget) return;
+      budget.modes[budget.activeMode].expenses = activeExpenses().filter(expense => expense.id !== state.editingExpenseId);
+      closeExpenseModal();
+      renderAll();
+      toast('Расход удалён.');
+    }
+
+    function closeExpenseModal() {
+      qs('#expenseModal').classList.remove('open');
+      state.editingExpenseId = null;
+    }
+
+    function renderCsvRows() {
+      const budget = currentBudget();
+      const fields = ['name','category','qty','price','sum','payer','comment'];
+      const rows = [fields.join(';')];
+      activeExpenses(budget).forEach(expense => {
+        rows.push([
+          expense.name,
+          expense.category,
+          expense.qty,
+          expense.price,
+          expenseSum(expense),
+          expense.payer,
+          expense.comment
+        ].map(csvCell).join(';'));
+      });
+      return rows.join('\n');
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? '').replaceAll('"', '""');
+      return `"${text}"`;
+    }
+
+    function exportCsv() {
+      const budget = currentBudget();
+      const name = budget?.name || 'smeta-gorna';
+      downloadFile(`${slugify(name)}.csv`, renderCsvRows(), 'text/csv;charset=utf-8');
+    }
+
+    function exportJson() {
+      downloadFile('smeta-gorna-data.json', JSON.stringify(state.budgets, null, 2), 'application/json');
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error('JSON должен быть массивом смет');
+          state.budgets = parsed.map(normalizeBudget);
+          state.currentId = state.budgets[0]?.id || null;
+          renderAll();
+          toast('JSON импортирован.');
+        } catch (error) {
+          toast('Ошибка импорта: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function slugify(text) {
+      return String(text).toLowerCase().replace(/[^a-zа-я0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'smeta-gorna';
+    }
+
+    function printEstimate() {
+      setTab('estimatePanel');
+      document.body.classList.add('print-estimate');
+      window.print();
+      setTimeout(() => document.body.classList.remove('print-estimate'), 300);
+    }
+
+    function clearDraft() {
+      if (!confirm('Очистить все сохранённые сметы в этом браузере?')) return;
+      localStorage.removeItem('smetaGornaData');
+      state.budgets = [normalizeBudget(DEFAULT_BUDGET)];
+      state.currentId = state.budgets[0].id;
+      renderAll();
+      toast('Черновик очищен. Загружен пример по умолчанию.');
+    }
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tabs .tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+    }
+
+    function quickOpenCalc(id) {
+      state.currentId = id;
+      const budget = currentBudget();
+      if (budget?.sourceEventId && window.NgoSystem) window.NgoSystem.setActiveEvent(budget.sourceEventId);
+      renderAll();
+      setTab('calculatorPanel');
+    }
+
+    function resetSearch() {
+      state.filters = { search:'' };
+      qs('#searchInput').value = '';
+      renderAll();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function bindEvents() {
+      qs('#createBudgetBtn').addEventListener('click', createBudget);
+      qs('#duplicateBudgetBtn').addEventListener('click', duplicateCurrentBudget);
+      qs('#sampleBudgetBtn').addEventListener('click', addSampleBudget);
+      qs('#saveBudgetBtn').addEventListener('click', saveCurrentBudgetFromForm);
+      qs('#deleteBudgetBtn').addEventListener('click', deleteCurrentBudget);
+      qs('#addExpenseBtn').addEventListener('click', addExpenseFromInputs);
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());
+      qs('#jsonFileInput').addEventListener('change', event => event.target.files[0] && importJson(event.target.files[0]));
+      qs('#exportCsvBtn').addEventListener('click', exportCsv);
+      qs('#printBtn').addEventListener('click', printEstimate);
+      qs('#clearDraftBtn').addEventListener('click', clearDraft);
+      qs('#resetSearchBtn').addEventListener('click', resetSearch);
+      qs('#searchInput').addEventListener('input', event => { state.filters.search = event.target.value; renderAll(); });
+
+      qsa('.tabs .tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+
+      qs('#saveExpenseBtn').addEventListener('click', saveEditedExpense);
+      qs('#deleteExpenseBtn').addEventListener('click', deleteEditedExpense);
+      qs('#closeExpenseModalBtn').addEventListener('click', closeExpenseModal);
+      qs('#expenseModal').addEventListener('click', event => { if (event.target.id === 'expenseModal') closeExpenseModal(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeExpenseModal(); });
+    }
+
+    window.selectBudget = selectBudget;
+    window.quickOpenCalc = quickOpenCalc;
+    window.setMode = setMode;
+    window.openExpenseModal = openExpenseModal;
+
+    initControls();
+    bindEvents();
+    renderAll();
+  </script>
+</body>
+</html>

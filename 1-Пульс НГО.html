@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Пульс НГО — карта отрядов</title>
+  <style>
+    /* =========================================================
+       ПУЛЬС НГО — единый визуальный стиль
+       Идея: НГО как кузница кадров — сталь, огонь, красная нить,
+       штабные метки, постерная сетка, крупная типографика.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --line: rgba(17, 17, 17, .18);
+      --good: #FF3B2F;
+      --mid: #B87333;
+      --sleep: #696969;
+      --risk: #111111;
+      --shadow-hard: 7px 7px 0 #111111;
+      --shadow-soft: 0 18px 50px rgba(17, 17, 17, .16);
+      --radius: 0px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .26), transparent 18%),
+        radial-gradient(circle at 82% 4%, rgba(255, 59, 47, .12), transparent 20%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17, 17, 17, .08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 17, 17, .08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 var(--black);
+    }
+
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255, 255, 255, .78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 rgba(255,59,47,.22);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17, 17, 17, .66);
+    }
+
+    .app {
+      width: min(1500px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 22px 0 72px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.15fr 330px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 250px;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.78) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.24) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.65) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "КУЗНИЦА\A КАДРОВ";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233, 228, 218, .075);
+      font-size: clamp(66px, 10vw, 150px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .logo-drop {
+      width: 86px;
+      height: 86px;
+      flex: 0 0 auto;
+      border: 2px dashed rgba(255,255,255,.62);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.78);
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.06);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.07);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .spark {
+      width: 10px;
+      height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red);
+      display: inline-block;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 1000px;
+      font-size: clamp(66px, 11vw, 168px);
+      line-height: .78;
+      letter-spacing: -.09em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .subtitle {
+      position: relative;
+      z-index: 2;
+      margin: 16px 0 0;
+      max-width: 780px;
+      color: rgba(233,228,218,.84);
+      font-size: clamp(16px, 2vw, 25px);
+      line-height: 1.06;
+      font-weight: 850;
+      text-transform: lowercase;
+    }
+
+    .red-thread {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      height: 8px;
+      background: var(--red);
+      width: min(520px, 82%);
+      box-shadow: 0 0 24px rgba(255,59,47,.5);
+    }
+
+    .panel-actions {
+      min-width: 310px;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background:
+        linear-gradient(180deg, var(--white), var(--paper));
+      padding: 16px;
+      display: grid;
+      gap: 9px;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-actions::before {
+      content: "ШТАБНЫЙ БЛОК";
+      position: absolute;
+      right: -42px;
+      top: 24px;
+      transform: rotate(35deg);
+      background: var(--black);
+      color: var(--white);
+      padding: 5px 42px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+    }
+
+    .technical {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .115em;
+      color: rgba(17,17,17,.56);
+    }
+
+    .dash {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .stat {
+      grid-column: span 2;
+      min-height: 136px;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background: var(--white);
+      padding: 14px;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat.wide { grid-column: span 4; }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .stat::after {
+      content: "№";
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      color: rgba(17,17,17,.08);
+      font-size: 60px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 64px;
+      line-height: .78;
+      font-weight: 1000;
+      color: var(--red);
+      letter-spacing: -.09em;
+    }
+
+    .stat-title {
+      margin-top: 11px;
+      max-width: 150px;
+      font-size: 12px;
+      line-height: .95;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .mini-bars { display: grid; gap: 8px; margin-top: 12px; }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 92px 1fr 32px;
+      gap: 8px;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .bar {
+      height: 13px;
+      border: 2px solid var(--black);
+      overflow: hidden;
+      background: rgba(17,17,17,.08);
+    }
+
+    .bar span { display: block; height: 100%; background: var(--red); }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar, .main-section, .modal-card {
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background: rgba(248, 244, 236, .9);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%),
+        rgba(248,244,236,.94);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--black);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 36px;
+      line-height: .82;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .filters { display: grid; gap: 12px; }
+
+    .main-section {
+      padding: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%),
+        rgba(248,244,236,.94);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab.active { background: var(--black); color: var(--white); }
+
+    .touch-list { display: grid; gap: 8px; }
+
+    .touch-item {
+      display: grid;
+      gap: 4px;
+      border: 2px solid var(--black);
+      padding: 10px;
+      background: var(--white);
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .touch-item strong { font-size: 13px; text-transform: uppercase; }
+    .touch-item span { font-size: 12px; font-weight: 800; color: rgba(17,17,17,.68); }
+
+    .brigade-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+      gap: 12px;
+    }
+
+    .brigade-card {
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background: var(--white);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      min-height: 270px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .brigade-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+
+    .brigade-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 12px;
+      background: var(--status-color, var(--steel));
+    }
+
+    .brigade-card::after {
+      content: "ПУЛЬС";
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      font-size: 44px;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      color: rgba(17,17,17,.045);
+      pointer-events: none;
+    }
+
+    .brigade-card.attention { background: linear-gradient(135deg, var(--white), #F0E8DD); }
+
+    .brigade-card.attention .brigade-head::after {
+      content: "ЗОНА ВНИМАНИЯ";
+      width: fit-content;
+      background: var(--black);
+      color: var(--white);
+      padding: 5px 8px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: .1em;
+    }
+
+    .brigade-head { display: grid; gap: 8px; padding-top: 8px; }
+
+    .brigade-title {
+      margin: 0;
+      font-size: 25px;
+      line-height: .88;
+      letter-spacing: -.055em;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid var(--black);
+      padding: 5px 8px;
+      background: rgba(17,17,17,.045);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge.red { background: var(--red); color: var(--white); }
+    .badge.black { background: var(--black); color: var(--white); }
+    .badge.soft { background: rgba(255,59,47,.13); }
+
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .meta {
+      border-left: 4px solid var(--black);
+      padding-left: 8px;
+      min-height: 42px;
+    }
+
+    .meta small {
+      display: block;
+      color: rgba(17,17,17,.52);
+      font-size: 9px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .meta b { display: block; font-size: 14px; line-height: 1.05; }
+
+    .card-actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 2; }
+
+    .influence-wrap { display: grid; gap: 16px; }
+
+    .contour-lane {
+      position: relative;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      padding: 16px;
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.11), transparent 34%),
+        var(--white);
+      overflow: hidden;
+    }
+
+    .contour-lane::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 72px;
+      height: 3px;
+      background: var(--red);
+      opacity: .22;
+    }
+
+    .contour-lane h3 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      line-height: .82;
+      text-transform: uppercase;
+      letter-spacing: -.07em;
+      position: relative;
+      z-index: 2;
+    }
+
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .node {
+      border: 3px solid var(--contour-color, var(--black));
+      border-radius: 0;
+      padding: 10px;
+      background: var(--paper);
+      min-height: 116px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      position: relative;
+      text-align: left;
+    }
+
+    .node::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 0;
+      background: var(--status-color, var(--steel));
+      border: 2px solid var(--black);
+      position: absolute;
+      right: 9px;
+      top: 9px;
+      transform: rotate(45deg);
+    }
+
+    .node strong {
+      padding-right: 24px;
+      font-size: 15px;
+      line-height: .96;
+      text-transform: uppercase;
+      letter-spacing: -.035em;
+    }
+
+    .node .badge { font-size: 9px; }
+
+    .links-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 12px;
+    }
+
+    .link-card {
+      border: 3px solid var(--black);
+      border-radius: 0;
+      padding: 13px;
+      background: var(--white);
+      display: grid;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .link-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      font-weight: 1000;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+    }
+
+    .arrow { width: 40px; height: 3px; background: var(--red); position: relative; }
+    .arrow::after { content: ""; position: absolute; right: -2px; top: -5px; border-left: 10px solid var(--red); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background: var(--white);
+    }
+
+    table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 2px solid rgba(17,17,17,.14);
+      text-align: left;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--black);
+      color: var(--white);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .09em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tr:hover td { background: rgba(255,59,47,.07); cursor: pointer; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,17,17,.74);
+      display: none;
+      align-items: start;
+      justify-content: center;
+      padding: 24px 14px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(1120px, 100%);
+      padding: 16px;
+      background: var(--milk);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+      border-bottom: 4px solid var(--black);
+      padding-bottom: 12px;
+    }
+
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .form-grid .span-2 { grid-column: span 2; }
+    .form-grid .span-4 { grid-column: span 4; }
+
+    .subcard {
+      border: 3px solid var(--black);
+      border-radius: 0;
+      padding: 14px;
+      background: rgba(255,255,255,.74);
+      margin-top: 14px;
+    }
+
+    .records { display: grid; gap: 8px; margin-top: 10px; }
+
+    .record {
+      border: 2px solid var(--black);
+      border-radius: 0;
+      padding: 10px;
+      display: grid;
+      gap: 5px;
+      background: var(--white);
+    }
+
+    .record strong { text-transform: uppercase; }
+    .record small { font-weight: 850; color: rgba(17,17,17,.6); }
+
+    .empty-state {
+      border: 3px dashed var(--black);
+      padding: 22px;
+      background: rgba(255,255,255,.5);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .screen-mode .sidebar,
+    .screen-mode .tabs,
+    .screen-mode .controls-hide,
+    .screen-mode .panel-actions,
+    .screen-mode .card-actions,
+    .screen-mode #listPanel,
+    .screen-mode #tablePanel { display: none !important; }
+
+    .screen-mode .topbar { grid-template-columns: 1fr; }
+    .screen-mode .hero { min-height: 180px; }
+    .screen-mode .workspace { grid-template-columns: 1fr; }
+    .screen-mode .dash .stat { min-height: 112px; }
+    .screen-mode #mapPanel,
+    .screen-mode #linksPanel { display: block !important; }
+
+    .hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--white);
+      padding: 12px 14px;
+      font-weight: 900;
+      z-index: 80;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: .2s ease;
+      max-width: 360px;
+      box-shadow: 6px 6px 0 var(--red);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media print {
+      body { background: white; }
+      body::before, body::after, .panel-actions, .sidebar, .tabs, .card-actions, .modal, .toast { display: none !important; }
+      .app { width: 100%; padding: 0; }
+      .topbar, .workspace { grid-template-columns: 1fr; }
+      .hero, .stat, .main-section, .contour-lane, .brigade-card, .table-wrap { box-shadow: none; break-inside: avoid; }
+      #listPanel, #mapPanel, #linksPanel, #tablePanel { display: block !important; }
+      .hidden { display: block !important; }
+    }
+
+    @media (max-width: 1100px) {
+      .topbar, .workspace { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stat { grid-column: span 4; }
+      .stat.wide { grid-column: span 6; }
+    }
+
+    @media (max-width: 720px) {
+      .app { width: min(100% - 18px, 1500px); padding-top: 10px; }
+      .hero { padding: 16px; min-height: 220px; }
+      .brand-row { align-items: start; }
+      .logo-drop { width: 68px; height: 68px; }
+      .dash { grid-template-columns: repeat(2, 1fr); }
+      .stat, .stat.wide { grid-column: span 1; }
+      .stat-value { font-size: 44px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .span-2, .form-grid .span-4 { grid-column: span 1; }
+      .modal-head { display: grid; }
+      h2 { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / ВНУТРЕННИЙ КОНТУР / ШТАБ</div>
+          <div class="logo-drop" title="Сюда можно вставить SVG/PNG логотип через тег img">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Пульс НГО</h1>
+        <p class="subtitle">карта отрядов, связей и точек роста</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions controls-hide">
+        <div class="technical">операции с базой</div>
+        <button class="primary" id="addBrigadeBtn">+ добавить отряд</button>
+        <button id="exportJsonBtn">резервная копия</button>
+        <button id="importJsonBtn">загрузить данные</button>
+        <button id="exportCsvBtn">таблица для отчёта</button>
+        <button id="printBtn">печать PDF</button>
+        <button class="dark" id="screenModeBtn">режим штабного экрана</button>
+        <input type="file" id="jsonFileInput" accept="application/json" hidden />
+      </aside>
+    </header>
+
+    <section class="dash" id="dashboard"></section>
+
+    <main class="workspace">
+      <aside class="sidebar controls-hide">
+        <div class="section-title">
+          <h2>Фильтр</h2>
+          <button class="small ghost" id="resetFiltersBtn">сброс</button>
+        </div>
+        <div class="filters">
+          <label>поиск
+            <input id="searchInput" placeholder="название, командир, комиссар..." />
+          </label>
+          <label>контур
+            <select id="contourFilter"><option value="">все контуры</option></select>
+          </label>
+          <label>направление
+            <select id="directionFilter"><option value="">все направления</option></select>
+          </label>
+          <label>активность
+            <select id="activityFilter"><option value="">вся активность</option></select>
+          </label>
+          <label>лояльность
+            <select id="loyaltyFilter"><option value="">любая лояльность</option></select>
+          </label>
+          <label>зона внимания
+            <select id="attentionFilter">
+              <option value="">все</option>
+              <option value="true">да</option>
+              <option value="false">нет</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="subcard">
+          <div class="section-title">
+            <h2 style="font-size:24px">Касания</h2>
+          </div>
+          <div class="touch-list" id="touchList"></div>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <nav class="tabs">
+          <button class="tab active" data-tab="listPanel">отряды</button>
+          <button class="tab" data-tab="mapPanel">сетка влияния</button>
+          <button class="tab" data-tab="linksPanel">карта связей</button>
+          <button class="tab" data-tab="tablePanel">таблица</button>
+        </nav>
+
+        <section id="listPanel" class="tab-panel">
+          <div class="section-title">
+            <h2>Отряды</h2>
+            <div class="technical" id="resultCount"></div>
+          </div>
+          <div class="brigade-grid" id="brigadeGrid"></div>
+        </section>
+
+        <section id="mapPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Сетка влияния</h2>
+            <div class="technical">цвет = активность / рамка = контур</div>
+          </div>
+          <div class="influence-wrap" id="influenceMap"></div>
+        </section>
+
+        <section id="linksPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Карта связей</h2>
+            <div class="technical">дружит / конфликт / мост / общий человек</div>
+          </div>
+          <div class="links-board" id="linksBoard"></div>
+        </section>
+
+        <section id="tablePanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Таблица</h2>
+            <div class="technical">оперативная база отрядов</div>
+          </div>
+          <div class="table-wrap" id="tableWrap"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="technical">карточка отряда</div>
+          <h2 id="modalTitle">Отряд</h2>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="primary" id="saveBrigadeBtn">сохранить</button>
+          <button id="deleteBrigadeBtn">удалить</button>
+          <button class="dark" id="closeModalBtn">закрыть</button>
+        </div>
+      </div>
+
+      <form id="brigadeForm" class="form-grid">
+        <label class="span-2">название <input name="name" required /></label>
+        <label>направление <select name="direction" required></select></label>
+        <label>контур <select name="contour" required></select></label>
+        <label>командир <input name="commander" placeholder="ФИО / ник" /></label>
+        <label>комиссар <input name="commissar" placeholder="ФИО / ник" /></label>
+        <label>контакты <input name="contacts" placeholder="телефон / tg / vk" /></label>
+        <label>численность <input name="size" type="number" min="0" /></label>
+        <label>активность <select name="activity"></select></label>
+        <label>лояльность к городскому штабу <select name="loyalty"></select></label>
+        <label>сила командира <select name="leaderStrength"></select></label>
+        <label>потенциал роста <select name="growth"></select></label>
+        <label>зона внимания <select name="attention"><option value="false">нет</option><option value="true">да</option></select></label>
+        <label>последнее касание <input name="lastTouch" type="date" /></label>
+        <label class="span-2">следующее действие <input name="nextAction" /></label>
+        <label class="span-4">описание ситуации <textarea name="description"></textarea></label>
+        <label class="span-4">заметки <textarea name="notes"></textarea></label>
+      </form>
+
+      <section class="subcard">
+        <div class="section-title">
+          <h2 style="font-size:26px">Связи</h2>
+          <button class="small primary" id="addRelationBtn">+ связь</button>
+        </div>
+        <div class="form-grid" id="relationForm" style="display:none; margin-bottom:12px;">
+          <label>тип связи
+            <select id="relationType">
+              <option>дружит с</option>
+              <option>конфликтует с</option>
+              <option>потенциальный мост</option>
+              <option>общий человек</option>
+            </select>
+          </label>
+          <label>отряд
+            <select id="relationTarget"></select>
+          </label>
+          <label class="span-2">комментарий
+            <input id="relationNote" placeholder="кто связывает / в чём суть" />
+          </label>
+          <button class="primary" id="saveRelationBtn" type="button">добавить связь</button>
+        </div>
+        <div class="records" id="relationRecords"></div>
+      </section>
+
+      <section class="subcard">
+        <div class="section-title">
+          <h2 style="font-size:26px">Личные касания</h2>
+          <button class="small primary" id="addTouchBtn">+ касание</button>
+        </div>
+        <div class="form-grid" id="touchForm" style="display:none; margin-bottom:12px;">
+          <label>дата <input id="touchDate" type="date" /></label>
+          <label>с кем говорили <input id="touchPerson" /></label>
+          <label>формат
+            <select id="touchFormat">
+              <option>встреча</option>
+              <option>звонок</option>
+              <option>сообщение</option>
+              <option>мероприятие</option>
+            </select>
+          </label>
+          <label>следующий шаг <input id="touchNext" /></label>
+          <label class="span-4">итог <textarea id="touchResult"></textarea></label>
+          <button class="primary" id="saveTouchBtn" type="button">добавить касание</button>
+        </div>
+        <div class="records" id="touchRecords"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    const DICTIONARY = {
+      contours: ['СибГИУ', 'КГПИ', 'НГО'],
+      directions: ['СОП', 'ТОП', 'СПО', 'ССервО', 'СООПр', 'СМО', 'ГПО'],
+      activity: ['живой', 'средний', 'спящий'],
+      loyalty: ['тёплая', 'нейтральная', 'сложная'],
+      leaderStrength: ['сильный', 'средний', 'слабый', 'неизвестно'],
+      growth: ['высокий', 'средний', 'низкий']
+    };
+
+    const DIRECTION_LABELS = {
+      'СОП': 'проводники',
+      'ТОП': 'подростковые',
+      'СПО': 'педагогические',
+      'ССервО': 'сервисные',
+      'СООПр': 'охрана правопорядка',
+      'СМО': 'медицинские',
+      'ГПО': 'городской профильный'
+    };
+
+    const STATUS_COLORS = {
+      'живой': '#d71920',
+      'средний': '#b76b24',
+      'спящий': '#615b54'
+    };
+
+    const CONTOUR_COLORS = {
+      'СибГИУ': '#14110f',
+      'КГПИ': '#d71920',
+      'НГО': '#6e6b66'
+    };
+
+    const DEFAULT_BRIGADES = [
+      { name:'СПО «Взгляд»', direction:'СПО', contour:'СибГИУ', activity:'средний', loyalty:'сложная', attention:true, description:'Зона внимания: важно мягко восстановить контакт, убрать напряжение старого конфликтного фона, работать через доверие и регулярные касания.', nextAction:'Личная встреча с командиром и спокойная сверка ожиданий.' },
+      { name:'СОП «За Гранью»', direction:'СОП', contour:'СибГИУ', activity:'живой', loyalty:'нейтральная', attention:false, description:'Один из живых отрядов. Можно использовать как опорную точку для вовлечения контура СибГИУ.', nextAction:'Поддержать активность и предложить совместный городской проект.' },
+      { name:'ССервО «Клюква»', direction:'ССервО', contour:'СибГИУ', activity:'живой', loyalty:'тёплая', attention:false, description:'Сильная живая точка. Хороший кандидат на роль видимого примера для сервисного направления.', nextAction:'Дать публичное усиление и включить в общую повестку.' },
+      { name:'ТОП «Созвездие»', direction:'ТОП', contour:'СибГИУ', activity:'средний', loyalty:'нейтральная', attention:false, description:'Нейтральная позиция. Есть потенциал роста через совместные события.', nextAction:'Позвать в рабочий чат по подростковому направлению.' },
+      { name:'СООПр «Атлант»', direction:'СООПр', contour:'СибГИУ', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Слабая активность. Нужен аккуратный аудит состава и понятный повод вернуться в движение.', nextAction:'Найти действующего контактного человека.' },
+      { name:'ТОП «Оригами»', direction:'ТОП', contour:'СибГИУ', activity:'средний', loyalty:'нейтральная', attention:false, description:'Средний уровень активности. Можно развивать через точечные задачи.', nextAction:'Предложить небольшую роль на ближайшем мероприятии.' },
+
+      { name:'СООПр «Альтаир»', direction:'СООПр', contour:'КГПИ', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Отряд просел по активности. Нужна диагностика: люди, командир, реальные планы.', nextAction:'Провести короткий разговор с командиром.' },
+      { name:'СПО «Крылатый»', direction:'СПО', contour:'КГПИ', activity:'живой', loyalty:'тёплая', attention:false, description:'Один из самых живых отрядов. Опорная педагогическая сила.', nextAction:'Зафиксировать успешные практики и тиражировать на слабые СПО.' },
+      { name:'СОП «Сопрано»', direction:'СОП', contour:'КГПИ', activity:'средний', loyalty:'нейтральная', attention:false, description:'Стабильный средний уровень. Может вырасти через понятные цели на сезон.', nextAction:'Обсудить набор и подготовку к целине.' },
+      { name:'СПО «Стимул»', direction:'СПО', contour:'КГПИ', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Слабая динамика. Нужен простой план оживления через события и личные роли.', nextAction:'Проверить актив и актуальность командира.' },
+      { name:'ССервО «Заря»', direction:'ССервО', contour:'КГПИ', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Сервисный отряд в спящей зоне. Нужен поиск ядра и понятный ближайший проект.', nextAction:'Найти 2–3 человека, готовых вернуться в актив.' },
+
+      { name:'ГПО «Splash»', direction:'ГПО', contour:'НГО', activity:'средний', loyalty:'тёплая', attention:false, description:'Городской профильный отряд. Может быть гибким инструментом для общих задач НГО.', nextAction:'Назначить роль в ближайшей городской активности.' },
+      { name:'СОП «Сибирский путь»', direction:'СОП', contour:'НГО', activity:'живой', loyalty:'тёплая', attention:false, description:'Один из самых живых отрядов. Сильная точка проводникового направления.', nextAction:'Использовать как мост для новых проводников.' },
+      { name:'СПО «Пламя»', direction:'СПО', contour:'НГО', activity:'средний', loyalty:'тёплая', attention:false, description:'Педагогический отряд с нормальным потенциалом роста.', nextAction:'Усилить через совместный контент и участие в событиях.' },
+      { name:'СПО «Восток Юности»', direction:'СПО', contour:'НГО', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Спящая зона. Нужен бережный перезапуск без давления.', nextAction:'Собрать мини-встречу с активом.' },
+      { name:'СОП «Сапсан»', direction:'СОП', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Средняя активность. Можно подключать к проводниковому общему контуру.', nextAction:'Сверить планы на сезон.' },
+      { name:'СМО «Ритмус»', direction:'СМО', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Медицинское направление. Требует отдельной повестки и точных задач.', nextAction:'Уточнить ближайшую активность и кадровую ситуацию.' },
+      { name:'СМО «Сирена»', direction:'СМО', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Медицинское направление с потенциалом для общего городского присутствия.', nextAction:'Связать с Ритмусом для общего действия.' },
+      { name:'ССервО «Осинники»', direction:'ССервО', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Сервисный отряд. Нужна регулярность касаний.', nextAction:'Проверить участие в ближайших городских событиях.' },
+      { name:'ТОП «Прометей»', direction:'ТОП', contour:'НГО', activity:'живой', loyalty:'тёплая', attention:false, description:'Один из самых живых отрядов. Хорошая энергия для подросткового направления.', nextAction:'Дать им видимую роль в общей карте НГО.' },
+      { name:'СОП «Сияние»', direction:'СОП', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Проводниковый отряд в стабильном состоянии.', nextAction:'Сверить командирский контур и планы набора.' },
+      { name:'СОП «Кузнецкий экспресс»', direction:'СОП', contour:'НГО', activity:'спящий', loyalty:'нейтральная', attention:true, description:'Спящий отряд. Требуется понять, есть ли ядро для восстановления.', nextAction:'Найти контактное лицо и провести диагностику.' },
+      { name:'СОП «Змеи»', direction:'СОП', contour:'НГО', activity:'средний', loyalty:'нейтральная', attention:false, description:'Стабильная средняя зона. Может стать мостом внутри проводников.', nextAction:'Предложить совместное действие с Сибирским путём.' }
+    ];
+
+    const state = {
+      brigades: loadData(),
+      activeTab: 'listPanel',
+      currentId: null,
+      filters: { search:'', contour:'', direction:'', activity:'', loyalty:'', attention:'' }
+    };
+
+    function enrichDefaults(items) {
+      return items.map((item, index) => ({
+        id: item.id || crypto.randomUUID(),
+        commander: item.commander || '',
+        commissar: item.commissar || '',
+        contacts: item.contacts || '',
+        size: item.size || '',
+        leaderStrength: item.leaderStrength || 'неизвестно',
+        growth: item.growth || inferGrowth(item.activity),
+        lastTouch: item.lastTouch || '',
+        notes: item.notes || '',
+        relations: item.relations || [],
+        touches: item.touches || [],
+        order: item.order ?? index,
+        ...item
+      }));
+    }
+
+    function inferGrowth(activity) {
+      if (activity === 'живой') return 'высокий';
+      if (activity === 'спящий') return 'низкий';
+      return 'средний';
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem('pulsNgoData');
+      if (saved) {
+        try { return enrichDefaults(JSON.parse(saved)); }
+        catch (error) { console.warn('Не удалось прочитать localStorage', error); }
+      }
+      return enrichDefaults(DEFAULT_BRIGADES);
+    }
+
+    function saveData() {
+      localStorage.setItem('pulsNgoData', JSON.stringify(state.brigades));
+    }
+
+    function qs(selector) { return document.querySelector(selector); }
+    function qsa(selector) { return [...document.querySelectorAll(selector)]; }
+
+    function fillSelect(select, values, placeholder) {
+      select.innerHTML = placeholder ? `<option value="">${placeholder}</option>` : '';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function initControls() {
+      fillSelect(qs('#contourFilter'), DICTIONARY.contours, 'все контуры');
+      fillSelect(qs('#directionFilter'), DICTIONARY.directions, 'все направления');
+      fillSelect(qs('#activityFilter'), DICTIONARY.activity, 'вся активность');
+      fillSelect(qs('#loyaltyFilter'), DICTIONARY.loyalty, 'любая лояльность');
+
+      const form = qs('#brigadeForm');
+      fillSelect(form.elements.direction, DICTIONARY.directions);
+      fillSelect(form.elements.contour, DICTIONARY.contours);
+      fillSelect(form.elements.activity, DICTIONARY.activity);
+      fillSelect(form.elements.loyalty, DICTIONARY.loyalty);
+      fillSelect(form.elements.leaderStrength, DICTIONARY.leaderStrength);
+      fillSelect(form.elements.growth, DICTIONARY.growth);
+    }
+
+    function getFilteredBrigades() {
+      const f = state.filters;
+      return state.brigades.filter(b => {
+        const text = [b.name, b.commander, b.commissar, b.contacts, b.description, b.notes].join(' ').toLowerCase();
+        const searchOk = !f.search || text.includes(f.search.toLowerCase());
+        const contourOk = !f.contour || b.contour === f.contour;
+        const directionOk = !f.direction || b.direction === f.direction;
+        const activityOk = !f.activity || b.activity === f.activity;
+        const loyaltyOk = !f.loyalty || b.loyalty === f.loyalty;
+        const attentionOk = f.attention === '' || String(Boolean(b.attention)) === f.attention;
+        return searchOk && contourOk && directionOk && activityOk && loyaltyOk && attentionOk;
+      }).sort((a,b) => (a.order ?? 0) - (b.order ?? 0));
+    }
+
+    function countBy(items, key) {
+      return items.reduce((acc, item) => {
+        acc[item[key]] = (acc[item[key]] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    function renderDashboard() {
+      const all = state.brigades;
+      const live = all.filter(b => b.activity === 'живой').length;
+      const middle = all.filter(b => b.activity === 'средний').length;
+      const sleeping = all.filter(b => b.activity === 'спящий').length;
+      const attention = all.filter(b => b.attention).length;
+      const byDirection = countBy(all, 'direction');
+      const byContour = countBy(all, 'contour');
+
+      qs('#dashboard').innerHTML = `
+        <article class="stat"><span class="stat-value">${all.length}</span><div class="stat-title">отрядов в карте</div></article>
+        <article class="stat"><span class="stat-value">${live}</span><div class="stat-title">живые</div></article>
+        <article class="stat"><span class="stat-value">${middle}</span><div class="stat-title">нейтральные / средние</div></article>
+        <article class="stat"><span class="stat-value">${sleeping}</span><div class="stat-title">спящие</div></article>
+        <article class="stat"><span class="stat-value">${attention}</span><div class="stat-title">зона внимания</div></article>
+        <article class="stat wide">
+          <div class="technical">по направлениям</div>
+          <div class="mini-bars">${renderBars(byDirection, all.length)}</div>
+        </article>
+        <article class="stat wide">
+          <div class="technical">по контурам</div>
+          <div class="mini-bars">${renderBars(byContour, all.length)}</div>
+        </article>
+      `;
+    }
+
+    function renderBars(data, total) {
+      return Object.entries(data).sort((a,b) => b[1]-a[1]).map(([key, value]) => `
+        <div class="bar-row">
+          <span>${key}</span>
+          <div class="bar"><span style="width:${Math.max(6, value / total * 100)}%"></span></div>
+          <b>${value}</b>
+        </div>
+      `).join('');
+    }
+
+    function renderTouchList() {
+      const today = new Date();
+      const week = state.brigades
+        .map(b => ({
+          ...b,
+          priority: b.attention ? 3 : b.activity === 'спящий' ? 2 : b.activity === 'живой' ? 1 : 1.5,
+          daysFromTouch: b.lastTouch ? Math.floor((today - new Date(b.lastTouch)) / 86400000) : 999
+        }))
+        .sort((a,b) => (b.priority + b.daysFromTouch/100) - (a.priority + a.daysFromTouch/100))
+        .slice(0, 7);
+
+      qs('#touchList').innerHTML = week.map(b => `
+        <button class="touch-item" onclick="openBrigade('${b.id}')">
+          <strong>${b.name}</strong>
+          <span>${b.attention ? 'зона внимания · ' : ''}${b.nextAction || 'назначить следующее действие'}</span>
+        </button>
+      `).join('');
+    }
+
+    function statusStyle(b) {
+      return `--status-color:${STATUS_COLORS[b.activity]}; --contour-color:${CONTOUR_COLORS[b.contour]};`;
+    }
+
+    function renderBrigades() {
+      const items = getFilteredBrigades();
+      qs('#resultCount').textContent = `${items.length} из ${state.brigades.length}`;
+      qs('#brigadeGrid').innerHTML = items.map(b => `
+        <article class="brigade-card ${b.attention ? 'attention' : ''}" style="${statusStyle(b)}">
+          <div class="brigade-head">
+            <h3 class="brigade-title">${escapeHtml(b.name)}</h3>
+            <div class="badges">
+              <span class="badge red">${b.direction}</span>
+              <span class="badge black">${b.contour}</span>
+              <span class="badge">${DIRECTION_LABELS[b.direction] || ''}</span>
+            </div>
+          </div>
+          <div class="meta-grid">
+            <div class="meta"><small>активность</small><b>${b.activity}</b></div>
+            <div class="meta"><small>лояльность</small><b>${b.loyalty}</b></div>
+            <div class="meta"><small>командир</small><b>${b.commander || 'не указан'}</b></div>
+            <div class="meta"><small>рост</small><b>${b.growth}</b></div>
+          </div>
+          <p style="margin:0; font-size:13px; line-height:1.25; font-weight:700; color:rgba(20,17,15,.72)">${escapeHtml(b.description || 'Описание ситуации не заполнено.')}</p>
+          <div class="card-actions">
+            <button class="small primary" onclick="openBrigade('${b.id}')">открыть</button>
+            <button class="small" onclick="quickTouch('${b.id}')">касание сегодня</button>
+          </div>
+        </article>
+      `).join('') || `<div class="empty-state">Ничего не найдено. Ослабь фильтр или сбрось параметры поиска. Карточки появятся здесь сразу после совпадения.</div>`;
+    }
+
+    function renderInfluenceMap() {
+      const items = getFilteredBrigades();
+      qs('#influenceMap').innerHTML = DICTIONARY.contours.map(contour => {
+        const group = items.filter(b => b.contour === contour);
+        return `
+          <section class="contour-lane">
+            <h3>${contour}</h3>
+            <div class="node-grid">
+              ${group.map(b => `
+                <button class="node" style="${statusStyle(b)}" onclick="openBrigade('${b.id}')">
+                  <strong>${escapeHtml(b.name)}</strong>
+                  <span class="badge red">${b.direction}</span>
+                  <span class="technical">${b.activity} · ${b.loyalty}${b.attention ? ' · внимание' : ''}</span>
+                </button>
+              `).join('') || `<div class="technical">нет отрядов по фильтру</div>`}
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    function renderLinksBoard() {
+      const links = [];
+      state.brigades.forEach(source => {
+        (source.relations || []).forEach(rel => {
+          const target = state.brigades.find(b => b.id === rel.targetId);
+          if (target) links.push({ source, target, ...rel });
+        });
+      });
+
+      qs('#linksBoard').innerHTML = links.map(link => `
+        <article class="link-card">
+          <div class="badges"><span class="badge red">${link.type}</span><span class="badge">${link.source.contour}</span></div>
+          <div class="link-flow">
+            <span>${escapeHtml(link.source.name)}</span><span class="arrow"></span><span>${escapeHtml(link.target.name)}</span>
+          </div>
+          <div class="technical">${escapeHtml(link.note || 'без комментария')}</div>
+        </article>
+      `).join('') || `<div class="empty-state">Пока связей нет. Открой карточку отряда, нажми “+ связь” и укажи, какой отряд является другом, конфликтной точкой, мостом или общим человеком.</div>`;
+    }
+
+    function renderTable() {
+      const items = getFilteredBrigades();
+      qs('#tableWrap').innerHTML = `
+        <table>
+          <thead><tr>
+            <th>отряд</th><th>направление</th><th>контур</th><th>командир</th><th>комиссар</th><th>численность</th><th>активность</th><th>лояльность</th><th>зона</th><th>последнее касание</th><th>следующее действие</th>
+          </tr></thead>
+          <tbody>
+            ${items.map(b => `<tr onclick="openBrigade('${b.id}')">
+              <td><b>${escapeHtml(b.name)}</b></td><td>${b.direction}</td><td>${b.contour}</td><td>${escapeHtml(b.commander || '')}</td><td>${escapeHtml(b.commissar || '')}</td><td>${b.size || ''}</td><td>${b.activity}</td><td>${b.loyalty}</td><td>${b.attention ? 'да' : 'нет'}</td><td>${b.lastTouch || ''}</td><td>${escapeHtml(b.nextAction || '')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderAll() {
+      saveData();
+      renderDashboard();
+      renderTouchList();
+      renderBrigades();
+      renderInfluenceMap();
+      renderLinksBoard();
+      renderTable();
+    }
+
+    function openBrigade(id) {
+      state.currentId = id;
+      const b = state.brigades.find(item => item.id === id);
+      if (!b) return;
+      qs('#modalTitle').textContent = b.name;
+      const form = qs('#brigadeForm');
+      Object.keys(b).forEach(key => {
+        if (form.elements[key]) form.elements[key].value = key === 'attention' ? String(Boolean(b[key])) : b[key];
+      });
+      qs('#deleteBrigadeBtn').style.display = 'inline-block';
+      renderRelationTargets();
+      renderModalRelations();
+      renderModalTouches();
+      qs('#modal').classList.add('open');
+    }
+
+    function createBrigade() {
+      const id = crypto.randomUUID();
+      const newItem = enrichDefaults([{
+        id,
+        name:'Новый отряд',
+        direction:'СОП',
+        contour:'НГО',
+        activity:'средний',
+        loyalty:'нейтральная',
+        attention:false,
+        description:'',
+        nextAction:'Заполнить карточку и назначить первое касание.'
+      }])[0];
+      state.brigades.push(newItem);
+      openBrigade(id);
+      toast('Создана новая карточка. Заполни поля и сохрани.');
+    }
+
+    function saveCurrentBrigade() {
+      const form = qs('#brigadeForm');
+      const b = state.brigades.find(item => item.id === state.currentId);
+      if (!b) return;
+      const data = Object.fromEntries(new FormData(form).entries());
+      Object.assign(b, data, {
+        size: data.size ? Number(data.size) : '',
+        attention: data.attention === 'true'
+      });
+      qs('#modalTitle').textContent = b.name;
+      renderAll();
+      toast('Карточка сохранена.');
+    }
+
+    function deleteCurrentBrigade() {
+      if (!state.currentId) return;
+      const current = state.brigades.find(b => b.id === state.currentId);
+      if (!confirm(`Удалить ${current?.name || 'отряд'}?`)) return;
+      state.brigades = state.brigades
+        .filter(b => b.id !== state.currentId)
+        .map(b => ({ ...b, relations: (b.relations || []).filter(r => r.targetId !== state.currentId) }));
+      closeModal();
+      renderAll();
+      toast('Отряд удалён.');
+    }
+
+    function closeModal() {
+      qs('#modal').classList.remove('open');
+      state.currentId = null;
+      qs('#relationForm').style.display = 'none';
+      qs('#touchForm').style.display = 'none';
+    }
+
+    function renderRelationTargets() {
+      const select = qs('#relationTarget');
+      select.innerHTML = '';
+      state.brigades
+        .filter(b => b.id !== state.currentId)
+        .forEach(b => {
+          const option = document.createElement('option');
+          option.value = b.id;
+          option.textContent = b.name;
+          select.appendChild(option);
+        });
+    }
+
+    function renderModalRelations() {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      const records = qs('#relationRecords');
+      records.innerHTML = (b.relations || []).map(rel => {
+        const target = state.brigades.find(item => item.id === rel.targetId);
+        return `
+          <div class="record">
+            <strong>${rel.type} → ${escapeHtml(target?.name || 'отряд удалён')}</strong>
+            <small>${escapeHtml(rel.note || 'без комментария')}</small>
+            <button class="small" onclick="deleteRelation('${rel.id}')">удалить</button>
+          </div>
+        `;
+      }).join('') || `<div class="empty-state">Связей пока нет. Добавь первую связь, чтобы видеть реальную карту влияния.</div>`;
+    }
+
+    function addRelation() {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      if (!b) return;
+      b.relations = b.relations || [];
+      b.relations.push({
+        id: crypto.randomUUID(),
+        type: qs('#relationType').value,
+        targetId: qs('#relationTarget').value,
+        note: qs('#relationNote').value
+      });
+      qs('#relationNote').value = '';
+      qs('#relationForm').style.display = 'none';
+      renderModalRelations();
+      renderAll();
+      toast('Связь добавлена.');
+    }
+
+    function deleteRelation(id) {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      b.relations = (b.relations || []).filter(rel => rel.id !== id);
+      renderModalRelations();
+      renderAll();
+    }
+
+    function renderModalTouches() {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      qs('#touchRecords').innerHTML = (b.touches || []).sort((a,b) => String(b.date).localeCompare(String(a.date))).map(t => `
+        <div class="record">
+          <strong>${t.date || 'без даты'} · ${escapeHtml(t.person || 'контакт не указан')} · ${t.format}</strong>
+          <small>Итог: ${escapeHtml(t.result || 'не заполнено')}</small>
+          <small>Следующий шаг: ${escapeHtml(t.next || 'не заполнено')}</small>
+          <button class="small" onclick="deleteTouch('${t.id}')">удалить</button>
+        </div>
+      `).join('') || `<div class="empty-state">Касаний пока нет. Добавь встречу, звонок, сообщение или событие — история сохранится в карточке отряда.</div>`;
+    }
+
+    function addTouch() {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      if (!b) return;
+      const record = {
+        id: crypto.randomUUID(),
+        date: qs('#touchDate').value || todayISO(),
+        person: qs('#touchPerson').value,
+        format: qs('#touchFormat').value,
+        result: qs('#touchResult').value,
+        next: qs('#touchNext').value
+      };
+      b.touches = b.touches || [];
+      b.touches.push(record);
+      b.lastTouch = record.date;
+      if (record.next) b.nextAction = record.next;
+      qs('#touchForm').style.display = 'none';
+      qs('#touchPerson').value = '';
+      qs('#touchResult').value = '';
+      qs('#touchNext').value = '';
+      renderModalTouches();
+      renderAll();
+      openBrigade(b.id);
+      toast('Касание добавлено.');
+    }
+
+    function deleteTouch(id) {
+      const b = state.brigades.find(item => item.id === state.currentId);
+      b.touches = (b.touches || []).filter(t => t.id !== id);
+      b.lastTouch = b.touches?.length ? b.touches.map(t => t.date).sort().at(-1) : '';
+      renderModalTouches();
+      renderAll();
+    }
+
+    function quickTouch(id) {
+      const b = state.brigades.find(item => item.id === id);
+      if (!b) return;
+      const record = { id: crypto.randomUUID(), date: todayISO(), person:'', format:'сообщение', result:'Быстрое касание отмечено.', next:b.nextAction || '' };
+      b.touches = b.touches || [];
+      b.touches.push(record);
+      b.lastTouch = record.date;
+      renderAll();
+      toast(`Касание отмечено: ${b.name}`);
+    }
+
+    function todayISO() {
+      return new Date().toISOString().slice(0,10);
+    }
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+    }
+
+    function exportJson() {
+      downloadFile('puls-ngo-data.json', JSON.stringify(state.brigades, null, 2), 'application/json');
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error('JSON должен быть массивом отрядов');
+          state.brigades = enrichDefaults(parsed);
+          renderAll();
+          toast('JSON импортирован.');
+        } catch (error) {
+          toast('Ошибка импорта: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCsv() {
+      const fields = ['name','direction','contour','commander','commissar','contacts','size','activity','loyalty','leaderStrength','growth','attention','description','lastTouch','nextAction','notes'];
+      const rows = [fields.join(';')].concat(state.brigades.map(b => fields.map(field => csvCell(b[field])).join(';')));
+      downloadFile('puls-ngo-brigades.csv', rows.join('\n'), 'text/csv;charset=utf-8');
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? '').replaceAll('"', '""');
+      return `"${text}"`;
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetFilters() {
+      state.filters = { search:'', contour:'', direction:'', activity:'', loyalty:'', attention:'' };
+      qs('#searchInput').value = '';
+      qs('#contourFilter').value = '';
+      qs('#directionFilter').value = '';
+      qs('#activityFilter').value = '';
+      qs('#loyaltyFilter').value = '';
+      qs('#attentionFilter').value = '';
+      renderAll();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function bindEvents() {
+      qs('#addBrigadeBtn').addEventListener('click', createBrigade);
+      qs('#saveBrigadeBtn').addEventListener('click', saveCurrentBrigade);
+      qs('#deleteBrigadeBtn').addEventListener('click', deleteCurrentBrigade);
+      qs('#closeModalBtn').addEventListener('click', closeModal);
+      qs('#modal').addEventListener('click', event => { if (event.target.id === 'modal') closeModal(); });
+
+      qsa('.tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+      qs('#resetFiltersBtn').addEventListener('click', resetFilters);
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());
+      qs('#jsonFileInput').addEventListener('change', event => event.target.files[0] && importJson(event.target.files[0]));
+      qs('#exportCsvBtn').addEventListener('click', exportCsv);
+      qs('#printBtn').addEventListener('click', () => window.print());
+      qs('#screenModeBtn').addEventListener('click', () => {
+        document.body.classList.toggle('screen-mode');
+        qs('#screenModeBtn').textContent = document.body.classList.contains('screen-mode') ? 'обычный режим' : 'режим штабного экрана';
+        if (document.body.classList.contains('screen-mode')) setTab('mapPanel');
+      });
+
+      qs('#addRelationBtn').addEventListener('click', () => qs('#relationForm').style.display = qs('#relationForm').style.display === 'none' ? 'grid' : 'none');
+      qs('#saveRelationBtn').addEventListener('click', addRelation);
+      qs('#addTouchBtn').addEventListener('click', () => {
+        qs('#touchForm').style.display = qs('#touchForm').style.display === 'none' ? 'grid' : 'none';
+        qs('#touchDate').value = todayISO();
+      });
+      qs('#saveTouchBtn').addEventListener('click', addTouch);
+
+      const filterMap = {
+        searchInput: 'search', contourFilter: 'contour', directionFilter: 'direction', activityFilter: 'activity', loyaltyFilter: 'loyalty', attentionFilter: 'attention'
+      };
+      Object.entries(filterMap).forEach(([id, key]) => {
+        qs('#' + id).addEventListener('input', event => {
+          state.filters[key] = event.target.value;
+          renderAll();
+        });
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeModal();
+      });
+    }
+
+    window.openBrigade = openBrigade;
+    window.deleteRelation = deleteRelation;
+    window.deleteTouch = deleteTouch;
+    window.quickTouch = quickTouch;
+
+    initControls();
+    bindEvents();
+    renderAll();
+  </script>
+</body>
+</html>

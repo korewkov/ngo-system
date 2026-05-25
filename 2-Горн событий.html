@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Горн событий — конструктор мероприятий НГО</title>
+  <style>
+    /* =========================================================
+       ГОРН СОБЫТИЙ — единый стиль НГО
+       Метафора: мероприятие как заготовка, которую штаб куёт:
+       цель → программа → роли → сценарий → итог.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --warning: #B87333;
+      --line: rgba(17,17,17,.18);
+      --shadow-hard: 7px 7px 0 #111111;
+      --shadow-soft: 0 18px 50px rgba(17,17,17,.16);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .26), transparent 18%),
+        radial-gradient(circle at 82% 4%, rgba(255, 59, 47, .12), transparent 20%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+    button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 rgba(255,59,47,.22);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17,17,17,.66);
+    }
+
+    .app {
+      width: min(1500px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 22px 0 72px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.15fr 330px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 3px solid var(--black);
+      border-radius: 0;
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.78) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.24) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.65) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "ГОРН\\A СОБЫТИЙ";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233,228,218,.075);
+      font-size: clamp(62px, 10vw, 150px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.07);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .spark {
+      width: 10px;
+      height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red);
+      display: inline-block;
+    }
+
+    .logo-drop {
+      width: 86px;
+      height: 86px;
+      flex: 0 0 auto;
+      border: 2px dashed rgba(255,255,255,.62);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.78);
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.06);
+    }
+
+    h1 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 1080px;
+      font-size: clamp(58px, 10vw, 150px);
+      line-height: .78;
+      letter-spacing: -.09em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .subtitle {
+      position: relative;
+      z-index: 2;
+      margin: 16px 0 0;
+      max-width: 830px;
+      color: rgba(233,228,218,.84);
+      font-size: clamp(17px, 2.2vw, 30px);
+      line-height: 1.02;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -.035em;
+    }
+
+    .red-thread {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      height: 8px;
+      background: var(--red);
+      width: min(560px, 82%);
+      box-shadow: 0 0 24px rgba(255,59,47,.5);
+    }
+
+    .panel-actions {
+      min-width: 310px;
+      border: 3px solid var(--black);
+      background: linear-gradient(180deg, var(--white), var(--paper));
+      padding: 16px;
+      display: grid;
+      gap: 9px;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-actions::before {
+      content: "КУЗНЕЧНЫЙ ПУЛЬТ";
+      position: absolute;
+      right: -54px;
+      top: 28px;
+      transform: rotate(35deg);
+      background: var(--black);
+      color: var(--white);
+      padding: 5px 52px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+    }
+
+    .technical {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .115em;
+      color: rgba(17,17,17,.56);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar, .main-section, .modal-card {
+      border: 3px solid var(--black);
+      background: rgba(248,244,236,.92);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background: linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%), rgba(248,244,236,.94);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--black);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 36px;
+      line-height: .82;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: .88;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .main-section {
+      padding: 16px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%), rgba(248,244,236,.94);
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tab.active { background: var(--black); color: var(--white); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      border: 3px solid var(--black);
+      background: var(--white);
+      min-height: 110px;
+      padding: 13px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+    }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .stat::after {
+      content: "№";
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      color: rgba(17,17,17,.08);
+      font-size: 58px;
+      font-weight: 1000;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 54px;
+      line-height: .8;
+      font-weight: 1000;
+      color: var(--red);
+      letter-spacing: -.08em;
+    }
+
+    .stat-title {
+      margin-top: 9px;
+      font-size: 11px;
+      line-height: .95;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .filters { display: grid; gap: 12px; }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 12px;
+    }
+
+    .event-card {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 14px;
+      min-height: 250px;
+      display: grid;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .event-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+
+    .event-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 12px;
+      background: var(--red);
+    }
+
+    .event-card::after {
+      content: "ГОРН";
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      font-size: 48px;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      color: rgba(17,17,17,.045);
+      pointer-events: none;
+    }
+
+    .event-head { display: grid; gap: 8px; padding-top: 8px; }
+
+    .event-title {
+      margin: 0;
+      font-size: 27px;
+      line-height: .86;
+      letter-spacing: -.06em;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid var(--black);
+      padding: 5px 8px;
+      background: rgba(17,17,17,.045);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge.red { background: var(--red); color: var(--white); }
+    .badge.black { background: var(--black); color: var(--white); }
+    .badge.warn { background: var(--warning); color: var(--white); }
+
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .meta {
+      border-left: 4px solid var(--black);
+      padding-left: 8px;
+      min-height: 42px;
+    }
+
+    .meta small {
+      display: block;
+      color: rgba(17,17,17,.52);
+      font-size: 9px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .meta b { display: block; font-size: 14px; line-height: 1.05; }
+
+    .card-actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 2; }
+
+    .builder-layout {
+      display: grid;
+      grid-template-columns: minmax(310px, 420px) 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .form-card, .subcard {
+      border: 3px solid var(--black);
+      background: rgba(255,255,255,.74);
+      padding: 14px;
+    }
+
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .form-grid .span-2 { grid-column: span 2; }
+    .form-grid .span-4 { grid-column: span 4; }
+
+    .block-library {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 8px;
+    }
+
+    .library-item {
+      text-align: left;
+      min-height: 82px;
+      display: grid;
+      gap: 6px;
+      align-content: start;
+      background: var(--white);
+    }
+
+    .library-item strong { font-size: 13px; line-height: 1; }
+    .library-item small { color: rgba(17,17,17,.62); font-weight: 800; }
+
+    .timeline-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 10px;
+      padding-left: 18px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: var(--red);
+      box-shadow: 0 0 20px rgba(255,59,47,.35);
+    }
+
+    .timeline-block {
+      position: relative;
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 110px 1fr auto;
+      gap: 12px;
+      align-items: start;
+      min-height: 96px;
+    }
+
+    .timeline-block::before {
+      content: "";
+      position: absolute;
+      left: -23px;
+      top: 18px;
+      width: 17px;
+      height: 17px;
+      background: var(--red);
+      border: 3px solid var(--black);
+      transform: rotate(45deg);
+    }
+
+    .time-code {
+      display: grid;
+      gap: 4px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .time-code strong {
+      color: var(--red);
+      font-size: 18px;
+      line-height: .95;
+    }
+
+    .time-code span { font-size: 11px; color: rgba(17,17,17,.58); }
+
+    .block-content { display: grid; gap: 7px; }
+    .block-title { font-size: 21px; line-height: .9; font-weight: 1000; text-transform: uppercase; letter-spacing: -.04em; }
+    .block-note { font-size: 13px; line-height: 1.3; font-weight: 750; color: rgba(17,17,17,.72); }
+
+    .warning-list { display: grid; gap: 8px; }
+
+    .warning-item {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .warning-item.danger { border-left: 9px solid var(--red); }
+    .warning-item.ok { border-left: 9px solid var(--steel); }
+    .warning-item strong { text-transform: uppercase; font-size: 13px; }
+    .warning-item span { font-size: 12px; font-weight: 800; color: rgba(17,17,17,.66); }
+
+    .script-box {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .script-part {
+      border-left: 8px solid var(--red);
+      padding: 10px 12px;
+      background: rgba(255,59,47,.06);
+      page-break-inside: avoid;
+    }
+
+    .script-part h3 { margin-bottom: 8px; }
+    .script-part p { margin: 0; font-size: 15px; line-height: 1.45; font-weight: 650; white-space: pre-line; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 3px solid var(--black);
+      background: var(--white);
+    }
+
+    table { width: 100%; min-width: 1000px; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 2px solid rgba(17,17,17,.14); text-align: left; font-size: 13px; vertical-align: top; }
+    th { background: var(--black); color: var(--white); text-transform: uppercase; font-size: 10px; letter-spacing: .09em; position: sticky; top: 0; z-index: 2; }
+    tr:hover td { background: rgba(255,59,47,.07); }
+
+    .empty-state {
+      border: 3px dashed var(--black);
+      padding: 22px;
+      background: rgba(255,255,255,.5);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,17,17,.74);
+      display: none;
+      align-items: start;
+      justify-content: center;
+      padding: 24px 14px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(980px, 100%);
+      padding: 16px;
+      background: var(--milk);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+      border-bottom: 4px solid var(--black);
+      padding-bottom: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--white);
+      padding: 12px 14px;
+      font-weight: 900;
+      z-index: 80;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: .2s ease;
+      max-width: 360px;
+      box-shadow: 6px 6px 0 var(--red);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .hidden { display: none !important; }
+
+    @media print {
+      body { background: white; }
+      body::before, body::after, .panel-actions, .sidebar, .tabs, .modal, .toast, .no-print, .card-actions, .timeline-tools { display: none !important; }
+      .app { width: 100%; padding: 0; }
+      .topbar, .workspace, .builder-layout { grid-template-columns: 1fr; }
+      .hero, .main-section, .stat, .event-card, .form-card, .subcard, .timeline-block, .script-box { box-shadow: none; break-inside: avoid; }
+      .tab-panel.hidden { display: none !important; }
+      .print-script #scriptPanel, .print-program #programPanel { display: block !important; }
+      .print-script .tab-panel:not(#scriptPanel), .print-program .tab-panel:not(#programPanel) { display: none !important; }
+    }
+
+    @media (max-width: 1100px) {
+      .topbar, .workspace, .builder-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .app { width: min(100% - 18px, 1500px); padding-top: 10px; }
+      .hero { padding: 16px; min-height: 240px; }
+      .brand-row { align-items: start; }
+      .logo-drop { width: 68px; height: 68px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .span-2, .form-grid .span-4 { grid-column: span 1; }
+      .timeline-block { grid-template-columns: 1fr; }
+      .modal-head { display: grid; }
+      h2 { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / ГОРН / BACKSTAGE</div>
+          <div class="logo-drop" title="Сюда можно вставить SVG/PNG логотип через тег img">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Горн событий</h1>
+        <p class="subtitle">Собери мероприятие, которое не выглядит как отчёт</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions no-print">
+        <div class="technical">операции с мероприятиями</div>
+        <button class="primary" id="createEventBtn">+ новое событие</button>
+        <button id="duplicateEventBtn">дублировать событие</button>
+        <button id="exportJsonBtn">резервная копия</button>
+        <button id="importJsonBtn">загрузить события</button>
+        <button id="printProgramBtn">программа PDF</button>
+        <button id="printScriptBtn">сценарий PDF</button>
+        <button id="eventPackageBtn">пакет события</button>
+        <button class="dark" id="clearDraftBtn">очистить черновик</button>
+        <input type="file" id="jsonFileInput" accept="application/json" hidden />
+      </aside>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar no-print">
+        <div class="section-title">
+          <h2>События</h2>
+          <button class="small ghost" id="resetSearchBtn">сброс</button>
+        </div>
+        <div class="filters">
+          <label>поиск
+            <input id="searchInput" placeholder="слёт, спартакиада, закрытие..." />
+          </label>
+          <label>тип
+            <select id="typeFilter"><option value="">все типы</option></select>
+          </label>
+        </div>
+        <div class="subcard">
+          <div class="technical">быстрый старт</div>
+          <p style="margin:8px 0 12px; font-size:13px; font-weight:800; line-height:1.35;">Создай событие, заполни смысл, собери блоки программы, проверь риски и сгенерируй сценарий ведущего.</p>
+          <button class="primary" id="sampleEventBtn">добавить пример</button>
+        </div>
+        <div class="subcard">
+          <div class="technical">опасные места</div>
+          <div class="warning-list" id="sidebarWarnings"></div>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <div class="stats" id="stats"></div>
+
+        <nav class="tabs no-print">
+          <button class="tab active" data-tab="eventsPanel">мероприятия</button>
+          <button class="tab" data-tab="conceptPanel">концепция</button>
+          <button class="tab" data-tab="programPanel">программа</button>
+          <button class="tab" data-tab="libraryPanel">библиотека блоков</button>
+          <button class="tab" data-tab="scriptPanel">сценарий ведущего</button>
+          <button class="tab" data-tab="tablePanel">таблица</button>
+        </nav>
+
+        <section id="eventsPanel" class="tab-panel">
+          <div class="section-title">
+            <h2>Карточки событий</h2>
+            <div class="technical" id="eventCount"></div>
+          </div>
+          <div class="event-grid" id="eventGrid"></div>
+        </section>
+
+        <section id="conceptPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Заготовка события</h2>
+            <div class="technical" id="currentEventLabel">событие не выбрано</div>
+          </div>
+          <div class="form-card">
+            <form id="eventForm" class="form-grid">
+              <label class="span-2">название <input name="name" required /></label>
+              <label>тип мероприятия <select name="type"></select></label>
+              <label>дата <input name="date" type="date" /></label>
+              <label class="span-2">место <input name="place" placeholder="ДК, штаб, кампус, база..." /></label>
+              <label>аудитория <input name="audience" placeholder="командиры, бойцы, актив..." /></label>
+              <label>участников <input name="participants" type="number" min="0" /></label>
+              <label class="span-2">ответственный <input name="owner" /></label>
+              <label class="span-2">команда <input name="team" placeholder="организаторы, медиа, ведущие..." /></label>
+              <label>тональность <select name="tone"></select></label>
+              <label class="span-4">цель <textarea name="goal" placeholder="Что событие должно изменить?"></textarea></label>
+              <label class="span-4">главный смысл <textarea name="meaning" placeholder="Одна мысль, которую участник должен унести."></textarea></label>
+              <label class="span-4">обязательные блоки <textarea name="requiredBlocks" placeholder="награждение, фото, гости, интерактив, комиссарский блок..."></textarea></label>
+            </form>
+            <div class="card-actions" style="margin-top:14px;">
+              <button class="primary" id="saveEventBtn">сохранить концепцию</button>
+              <button id="deleteEventBtn">удалить событие</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="programPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Тайминг</h2>
+            <div class="technical" id="durationLabel">0 минут</div>
+          </div>
+          <div class="builder-layout">
+            <aside class="form-card no-print">
+              <h3>Добавить блок</h3>
+              <div class="form-grid" style="grid-template-columns:1fr; margin-top:12px;">
+                <label>название блока <input id="blockTitle" /></label>
+                <label>длительность, мин <input id="blockDuration" type="number" min="1" value="10" /></label>
+                <label>тип <select id="blockType"></select></label>
+                <label>ответственный <input id="blockOwner" /></label>
+                <label>комментарий <textarea id="blockComment"></textarea></label>
+                <label>сцена / что происходит <textarea id="blockStage"></textarea></label>
+                <label>кто готовится <input id="blockPrepare" /></label>
+                <label>что вынести / включить <input id="blockProps" /></label>
+                <button class="primary" id="addBlockBtn">+ добавить в программу</button>
+              </div>
+            </aside>
+            <section>
+              <div class="timeline-tools no-print">
+                <button class="tab active" data-mode="participant">для участников</button>
+                <button class="tab" data-mode="host">для ведущего</button>
+                <button class="tab" data-mode="backstage">backstage</button>
+              </div>
+              <div class="timeline" id="timeline"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="libraryPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Библиотека блоков</h2>
+            <div class="technical">готовые заготовки для программы</div>
+          </div>
+          <div class="block-library" id="blockLibrary"></div>
+        </section>
+
+        <section id="scriptPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Сценарий ведущего</h2>
+            <div class="technical">генерация по шаблонам JS</div>
+          </div>
+          <div class="card-actions no-print" style="margin-bottom:12px;">
+            <button class="primary" id="generateScriptBtn">собрать сценарий</button>
+            <button id="copyScriptBtn">скопировать текст</button>
+          </div>
+          <div class="script-box" id="scriptBox"></div>
+        </section>
+
+        <section id="tablePanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Таблица событий</h2>
+            <div class="technical">быстрый обзор базы</div>
+          </div>
+          <div class="table-wrap" id="tableWrap"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="blockModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="technical">редактирование блока</div>
+          <h2 id="modalBlockTitle">Блок</h2>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="primary" id="saveBlockBtn">сохранить</button>
+          <button id="deleteBlockBtn">удалить</button>
+          <button class="dark" id="closeBlockModalBtn">закрыть</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <label class="span-2">название блока <input id="editBlockTitle" /></label>
+        <label>длительность, мин <input id="editBlockDuration" type="number" min="1" /></label>
+        <label>тип <select id="editBlockType"></select></label>
+        <label class="span-2">ответственный <input id="editBlockOwner" /></label>
+        <label class="span-2">кто готовится <input id="editBlockPrepare" /></label>
+        <label class="span-4">комментарий <textarea id="editBlockComment"></textarea></label>
+        <label class="span-4">сцена / что происходит <textarea id="editBlockStage"></textarea></label>
+        <label class="span-4">что вынести / включить <input id="editBlockProps" /></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    /* =========================================================
+       ДАННЫЕ И НАСТРОЙКИ
+       ========================================================= */
+
+    const EVENT_TYPES = [
+      'закрытие третьего трудового семестра',
+      'городской слёт',
+      'спартакиада',
+      'фестиваль',
+      'встреча командиров',
+      'школа актива',
+      'комиссарский вечер',
+      'юбилейное событие',
+      'другое'
+    ];
+
+    const TONES = ['официально', 'молодёжно', 'комиссарски', 'торжественно', 'не душно'];
+    const BLOCK_TYPES = ['сцена', 'интерактив', 'награждение', 'перерыв', 'регистрация', 'медиа', 'служебный блок'];
+
+    const LIBRARY_BLOCKS = [
+      { title:'Регистрация', duration:30, type:'регистрация', owner:'оргкомитет', comment:'Встреча участников, списки, бейджи, навигация.', stage:'Фоновая музыка, работа стойки регистрации.', prepare:'волонтёры регистрации', props:'списки, маркеры, бейджи' },
+      { title:'Официальное открытие', duration:15, type:'сцена', owner:'ведущий', comment:'Старт, приветствие, обозначение смысла события.', stage:'Ведущий открывает событие и задаёт рамку.', prepare:'гости и штаб', props:'микрофоны, заставка' },
+      { title:'Награждение', duration:25, type:'награждение', owner:'штаб', comment:'Награды, благодарности, фото.', stage:'Вызов номинаций, вручение, короткие аплодисменты.', prepare:'награждающие, фотограф', props:'дипломы, подарки, список награждаемых' },
+      { title:'Целина без фильтра', duration:20, type:'интерактив', owner:'комиссар', comment:'Живые истории с целины без официоза.', stage:'3–4 участника рассказывают короткие истории.', prepare:'спикеры', props:'микрофон в зал' },
+      { title:'Неофициальные номинации', duration:18, type:'интерактив', owner:'ведущий', comment:'Лёгкий блок с юмором, но без токсичности.', stage:'Вручение шуточных номинаций.', prepare:'ведущие, медиа', props:'карточки номинаций' },
+      { title:'Один предмет с целины', duration:20, type:'интерактив', owner:'комиссар', comment:'Участники приносят предмет и объясняют его историю.', stage:'Короткие рассказы через предметы.', prepare:'участники с предметами', props:'стол, микрофон' },
+      { title:'Командный интерактив', duration:25, type:'интерактив', owner:'оргкомитет', comment:'Активность на смешение отрядов и командную динамику.', stage:'Участники выполняют задание командами.', prepare:'модераторы', props:'карточки, таймер, музыка' },
+      { title:'Комиссарский блок', duration:18, type:'сцена', owner:'комиссар', comment:'Смысловой блок про движение, людей и традиции.', stage:'Комиссар задаёт эмоциональную рамку.', prepare:'комиссар, медиа', props:'свет, музыка, экран' },
+      { title:'Общее фото', duration:10, type:'медиа', owner:'медиа', comment:'Собрать всех быстро и без хаоса.', stage:'Построение участников и общее фото.', prepare:'фотограф, ведущий', props:'фото-точка, свет' },
+      { title:'Анонс слёта', duration:7, type:'сцена', owner:'штаб', comment:'Коротко зажечь интерес к следующему событию.', stage:'Ведущий объявляет дату/идею следующего события.', prepare:'ответственный за слёт', props:'слайд или афиша' },
+      { title:'Финальное слово', duration:8, type:'сцена', owner:'руководитель штаба', comment:'Финальный акцент: зачем собрались и что дальше.', stage:'Короткое обращение и финальная точка.', prepare:'руководитель, ведущий', props:'микрофон, финальная музыка' },
+      { title:'Перерыв', duration:15, type:'перерыв', owner:'оргкомитет', comment:'Проветрить зал, дать людям переключиться.', stage:'Фоновая музыка, свободное общение.', prepare:'организаторы', props:'вода, навигация' }
+    ];
+
+    const DEFAULT_EVENT = {
+      name: 'Закрытие третьего трудового семестра',
+      type: 'закрытие третьего трудового семестра',
+      date: '',
+      place: 'Новокузнецк',
+      audience: 'бойцы, командиры, комиссары, партнёры',
+      participants: 120,
+      goal: 'Подвести итоги сезона, отметить вклад отрядов и собрать людей вокруг следующего этапа движения.',
+      meaning: 'Трудовой семестр заканчивается, но движение продолжается: люди, опыт и команда остаются с нами.',
+      tone: 'не душно',
+      requiredBlocks: 'открытие, награждение, живой интерактив, общее фото, финальный акцент',
+      owner: 'городской штаб',
+      team: 'ведущие, медиа, оргкомитет, ответственные за награждение',
+      blocks: [
+        LIBRARY_BLOCKS[0],
+        LIBRARY_BLOCKS[1],
+        LIBRARY_BLOCKS[2],
+        LIBRARY_BLOCKS[3],
+        LIBRARY_BLOCKS[11],
+        LIBRARY_BLOCKS[4],
+        LIBRARY_BLOCKS[8],
+        LIBRARY_BLOCKS[9],
+        LIBRARY_BLOCKS[10]
+      ].map(cloneBlock)
+    };
+
+    const state = {
+      events: loadEvents(),
+      currentId: null,
+      activeTab: 'eventsPanel',
+      timingMode: 'participant',
+      editingBlockId: null,
+      filters: { search:'', type:'' }
+    };
+
+    function cloneBlock(block) {
+      return {
+        id: crypto.randomUUID(),
+        title: block.title || '',
+        duration: Number(block.duration || 10),
+        type: block.type || 'сцена',
+        owner: block.owner || '',
+        comment: block.comment || '',
+        stage: block.stage || block.comment || '',
+        prepare: block.prepare || '',
+        props: block.props || ''
+      };
+    }
+
+    function normalizeEvent(event, index = 0) {
+      return {
+        id: event.id || crypto.randomUUID(),
+        name: event.name || 'Новое событие',
+        type: event.type || 'другое',
+        date: event.date || '',
+        place: event.place || '',
+        audience: event.audience || '',
+        participants: event.participants || '',
+        goal: event.goal || '',
+        meaning: event.meaning || '',
+        tone: event.tone || 'не душно',
+        requiredBlocks: event.requiredBlocks || '',
+        owner: event.owner || '',
+        team: event.team || '',
+        blocks: (event.blocks || []).map(cloneBlock),
+        createdAt: event.createdAt || new Date().toISOString(),
+        order: event.order ?? index
+      };
+    }
+
+    function loadEvents() {
+      const saved = localStorage.getItem('gornEventsData');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed.map(normalizeEvent);
+        } catch (error) {
+          console.warn('Не удалось прочитать localStorage', error);
+        }
+      }
+      return [normalizeEvent(DEFAULT_EVENT)];
+    }
+
+    function saveEvents() {
+      if (window.NgoSystem) window.NgoSystem.publishEvents(state.events);
+      else localStorage.setItem('gornEventsData', JSON.stringify(state.events));
+    }
+
+    function qs(selector) { return document.querySelector(selector); }
+    function qsa(selector) { return [...document.querySelectorAll(selector)]; }
+
+    function fillSelect(select, values, placeholder) {
+      select.innerHTML = placeholder ? `<option value="">${placeholder}</option>` : '';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function initControls() {
+      fillSelect(qs('#typeFilter'), EVENT_TYPES, 'все типы');
+      fillSelect(qs('#eventForm').elements.type, EVENT_TYPES);
+      fillSelect(qs('#eventForm').elements.tone, TONES);
+      fillSelect(qs('#blockType'), BLOCK_TYPES);
+      fillSelect(qs('#editBlockType'), BLOCK_TYPES);
+      qs('#touchDate');
+      const eventIdFromUrl = new URLSearchParams(location.search).get('event');
+      const activeEvent = window.NgoSystem?.getActiveEvent(state.events);
+      if (eventIdFromUrl && state.events.some(event => event.id === eventIdFromUrl)) state.currentId = eventIdFromUrl;
+      if (!state.currentId && activeEvent) state.currentId = activeEvent.id;
+      if (!state.currentId && state.events[0]) state.currentId = state.events[0].id;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(state.currentId);
+    }
+
+    function currentEvent() {
+      return state.events.find(event => event.id === state.currentId) || null;
+    }
+
+    function getFilteredEvents() {
+      return state.events.filter(event => {
+        const text = [event.name, event.type, event.place, event.audience, event.goal, event.meaning, event.owner, event.team].join(' ').toLowerCase();
+        const searchOk = !state.filters.search || text.includes(state.filters.search.toLowerCase());
+        const typeOk = !state.filters.type || event.type === state.filters.type;
+        return searchOk && typeOk;
+      }).sort((a,b) => (a.order ?? 0) - (b.order ?? 0));
+    }
+
+    function selectEvent(id) {
+      state.currentId = id;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(id);
+      renderAll();
+      setTab('conceptPanel');
+      toast('Событие выбрано. Можно править концепцию и программу.');
+    }
+
+    function createEvent() {
+      const event = normalizeEvent({
+        name:'Новое мероприятие',
+        type:'другое',
+        tone:'не душно',
+        goal:'',
+        meaning:'',
+        blocks: []
+      }, state.events.length);
+      state.events.unshift(event);
+      state.currentId = event.id;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(event.id);
+      renderAll();
+      setTab('conceptPanel');
+      toast('Создана новая заготовка события.');
+    }
+
+    function addSampleEvent() {
+      const event = normalizeEvent({ ...DEFAULT_EVENT, id: crypto.randomUUID(), name: 'Городской слёт НГО', type: 'городской слёт', order: state.events.length }, state.events.length);
+      state.events.unshift(event);
+      state.currentId = event.id;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(event.id);
+      renderAll();
+      setTab('programPanel');
+      toast('Пример добавлен. Его можно редактировать под реальное событие.');
+    }
+
+    function duplicateCurrentEvent() {
+      const event = currentEvent();
+      if (!event) return toast('Сначала выбери событие.');
+      const copy = normalizeEvent({ ...JSON.parse(JSON.stringify(event)), id: crypto.randomUUID(), name: event.name + ' / копия', createdAt: new Date().toISOString() }, 0);
+      state.events.unshift(copy);
+      state.currentId = copy.id;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(copy.id);
+      renderAll();
+      toast('Событие продублировано.');
+    }
+
+    function deleteCurrentEvent() {
+      const event = currentEvent();
+      if (!event) return;
+      if (!confirm(`Удалить событие «${event.name}»?`)) return;
+      state.events = state.events.filter(item => item.id !== event.id);
+      state.currentId = state.events[0]?.id || null;
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(state.currentId);
+      renderAll();
+      setTab('eventsPanel');
+      toast('Событие удалено.');
+    }
+
+    function saveCurrentEventFromForm() {
+      const event = currentEvent();
+      if (!event) return toast('Сначала создай событие.');
+      const data = Object.fromEntries(new FormData(qs('#eventForm')).entries());
+      Object.assign(event, data, {
+        participants: data.participants ? Number(data.participants) : ''
+      });
+      if (window.NgoSystem) window.NgoSystem.setActiveEvent(event.id);
+      renderAll();
+      toast('Концепция сохранена.');
+    }
+
+    function renderStats() {
+      const event = currentEvent();
+      const totalEvents = state.events.length;
+      const blocks = event?.blocks || [];
+      const totalDuration = getTotalDuration(blocks);
+      const warnings = analyzeProgram(event);
+      qs('#stats').innerHTML = `
+        <article class="stat"><span class="stat-value">${totalEvents}</span><div class="stat-title">событий в базе</div></article>
+        <article class="stat"><span class="stat-value">${blocks.length}</span><div class="stat-title">блоков в программе</div></article>
+        <article class="stat"><span class="stat-value">${totalDuration}</span><div class="stat-title">минут общая длительность</div></article>
+        <article class="stat"><span class="stat-value">${warnings.filter(w => w.level === 'danger').length}</span><div class="stat-title">опасных мест</div></article>
+      `;
+    }
+
+    function renderEvents() {
+      const items = getFilteredEvents();
+      qs('#eventCount').textContent = `${items.length} из ${state.events.length}`;
+      qs('#eventGrid').innerHTML = items.map(event => {
+        const total = getTotalDuration(event.blocks || []);
+        const warnings = analyzeProgram(event).filter(w => w.level === 'danger').length;
+        return `
+          <article class="event-card">
+            <div class="event-head">
+              <h3 class="event-title">${escapeHtml(event.name)}</h3>
+              <div class="badges">
+                <span class="badge red">${escapeHtml(event.type)}</span>
+                <span class="badge black">${escapeHtml(event.tone)}</span>
+                ${warnings ? `<span class="badge warn">${warnings} риска</span>` : `<span class="badge">стабильно</span>`}
+              </div>
+            </div>
+            <div class="meta-grid">
+              <div class="meta"><small>дата</small><b>${event.date || 'не указана'}</b></div>
+              <div class="meta"><small>место</small><b>${event.place || 'не указано'}</b></div>
+              <div class="meta"><small>участники</small><b>${event.participants || '—'}</b></div>
+              <div class="meta"><small>тайминг</small><b>${total} мин</b></div>
+            </div>
+            <p style="margin:0; font-size:13px; line-height:1.25; font-weight:750; color:rgba(17,17,17,.72)">${escapeHtml(event.meaning || 'Главный смысл пока не сформулирован.')}</p>
+            <div class="card-actions">
+              <button class="small primary" onclick="selectEvent('${event.id}')">открыть</button>
+              <button class="small" onclick="quickOpenProgram('${event.id}')">тайминг</button>
+            </div>
+          </article>
+        `;
+      }).join('') || `<div class="empty-state">Событий не найдено. Ослабь фильтр или создай новое мероприятие.</div>`;
+    }
+
+    function renderCurrentForm() {
+      const event = currentEvent();
+      const form = qs('#eventForm');
+      qs('#currentEventLabel').textContent = event ? event.name : 'событие не выбрано';
+      [...form.elements].forEach(el => {
+        if (!el.name) return;
+        el.value = event ? (event[el.name] ?? '') : '';
+      });
+    }
+
+    function renderTimeline() {
+      const event = currentEvent();
+      if (!event) {
+        qs('#timeline').innerHTML = `<div class="empty-state">Сначала создай или выбери событие.</div>`;
+        qs('#durationLabel').textContent = '0 минут';
+        return;
+      }
+      const blocks = event.blocks || [];
+      qs('#durationLabel').textContent = `${getTotalDuration(blocks)} минут`;
+      if (!blocks.length) {
+        qs('#timeline').innerHTML = `<div class="empty-state">Программа пока пустая. Добавь блок вручную или возьми заготовку из библиотеки.</div>`;
+        return;
+      }
+      const computed = computeTiming(blocks);
+      qs('#timeline').innerHTML = computed.map((item, index) => renderTimelineBlock(item, index, state.timingMode)).join('');
+    }
+
+    function renderTimelineBlock(item, index, mode) {
+      const block = item.block;
+      const modeContent = {
+        participant: `
+          <div class="block-note">${escapeHtml(block.comment || 'Блок программы.')}</div>
+        `,
+        host: `
+          <div class="block-note"><b>Подводка:</b> ${escapeHtml(makeTransition(block, index))}</div>
+          <div class="block-note"><b>Ответственный:</b> ${escapeHtml(block.owner || 'не указан')}</div>
+        `,
+        backstage: `
+          <div class="block-note"><b>На сцене:</b> ${escapeHtml(block.stage || block.comment || 'не заполнено')}</div>
+          <div class="block-note"><b>Готовится:</b> ${escapeHtml(block.prepare || 'не указано')}</div>
+          <div class="block-note"><b>Вынести / включить:</b> ${escapeHtml(block.props || 'не указано')}</div>
+          <div class="block-note"><b>Ответственный:</b> ${escapeHtml(block.owner || 'не указан')}</div>
+        `
+      };
+      return `
+        <article class="timeline-block">
+          <div class="time-code">
+            <strong>${item.start}–${item.end}</strong>
+            <span>${block.duration} мин · ${block.type}</span>
+          </div>
+          <div class="block-content">
+            <div class="badges"><span class="badge red">${String(index + 1).padStart(2,'0')}</span><span class="badge black">${escapeHtml(block.type)}</span></div>
+            <div class="block-title">${escapeHtml(block.title)}</div>
+            ${modeContent[mode]}
+          </div>
+          <div class="card-actions no-print">
+            <button class="small" onclick="moveBlock('${block.id}', -1)">↑</button>
+            <button class="small" onclick="moveBlock('${block.id}', 1)">↓</button>
+            <button class="small primary" onclick="openBlockModal('${block.id}')">править</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderLibrary() {
+      qs('#blockLibrary').innerHTML = LIBRARY_BLOCKS.map((block, index) => `
+        <button class="library-item" onclick="addLibraryBlock(${index})">
+          <strong>${escapeHtml(block.title)}</strong>
+          <small>${block.duration} мин · ${block.type}</small>
+          <span class="technical">добавить в программу</span>
+        </button>
+      `).join('');
+    }
+
+    function renderWarnings() {
+      const warnings = analyzeProgram(currentEvent());
+      const html = warnings.map(w => `
+        <div class="warning-item ${w.level}">
+          <strong>${escapeHtml(w.title)}</strong>
+          <span>${escapeHtml(w.text)}</span>
+        </div>
+      `).join('') || `<div class="warning-item ok"><strong>опасных мест нет</strong><span>Программа выглядит сбалансированной.</span></div>`;
+      qs('#sidebarWarnings').innerHTML = html;
+    }
+
+    function renderTable() {
+      qs('#tableWrap').innerHTML = `
+        <table>
+          <thead><tr><th>событие</th><th>тип</th><th>дата</th><th>место</th><th>участники</th><th>ответственный</th><th>блоки</th><th>длительность</th><th>риски</th></tr></thead>
+          <tbody>
+            ${state.events.map(event => `<tr onclick="selectEvent('${event.id}')">
+              <td><b>${escapeHtml(event.name)}</b></td>
+              <td>${escapeHtml(event.type)}</td>
+              <td>${event.date || ''}</td>
+              <td>${escapeHtml(event.place || '')}</td>
+              <td>${event.participants || ''}</td>
+              <td>${escapeHtml(event.owner || '')}</td>
+              <td>${(event.blocks || []).length}</td>
+              <td>${getTotalDuration(event.blocks || [])} мин</td>
+              <td>${analyzeProgram(event).filter(w => w.level === 'danger').length}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderScript() {
+      const event = currentEvent();
+      if (!event) {
+        qs('#scriptBox').innerHTML = `<div class="empty-state">Сначала выбери мероприятие.</div>`;
+        return;
+      }
+      const parts = generateScript(event);
+      qs('#scriptBox').innerHTML = parts.map(part => `
+        <section class="script-part">
+          <h3>${escapeHtml(part.title)}</h3>
+          <p>${escapeHtml(part.text)}</p>
+        </section>
+      `).join('');
+    }
+
+    function renderAll() {
+      saveEvents();
+      renderStats();
+      renderEvents();
+      renderCurrentForm();
+      renderTimeline();
+      renderLibrary();
+      renderWarnings();
+      renderTable();
+      renderScript();
+    }
+
+    /* =========================================================
+       ПРОГРАММА И АНАЛИТИКА
+       ========================================================= */
+
+    function getTotalDuration(blocks) {
+      return (blocks || []).reduce((sum, block) => sum + Number(block.duration || 0), 0);
+    }
+
+    function computeTiming(blocks) {
+      let minutes = 0;
+      return blocks.map(block => {
+        const start = minutesToTime(minutes);
+        minutes += Number(block.duration || 0);
+        const end = minutesToTime(minutes);
+        return { block, start, end };
+      });
+    }
+
+    function minutesToTime(total) {
+      const hours = Math.floor(total / 60);
+      const minutes = total % 60;
+      return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+    }
+
+    function analyzeProgram(event) {
+      if (!event) return [{ level:'danger', title:'событие не выбрано', text:'Создай или выбери мероприятие.' }];
+      const blocks = event.blocks || [];
+      const warnings = [];
+      const total = getTotalDuration(blocks);
+
+      if (!blocks.length) warnings.push({ level:'danger', title:'пустая программа', text:'Добавь хотя бы регистрацию, открытие, основной блок и финал.' });
+      if (total > 240) warnings.push({ level:'danger', title:'программа слишком длинная', text:'Общая длительность больше 4 часов. Стоит сократить блоки или добавить сильные перерывы.' });
+      if (total > 180 && total <= 240) warnings.push({ level:'danger', title:'длинная программа', text:'Больше 3 часов. Проверь динамику и усталость участников.' });
+
+      let stretch = 0;
+      blocks.forEach(block => {
+        if (block.type === 'перерыв') stretch = 0;
+        else stretch += Number(block.duration || 0);
+        if (stretch > 90) warnings.push({ level:'danger', title:'нет перерыва больше 90 минут', text:'Добавь паузу или короткий интерактив, иначе аудитория просядет.' });
+      });
+
+      const award = blocks.find(block => block.type === 'награждение' && Number(block.duration || 0) > 35);
+      if (award) warnings.push({ level:'danger', title:'слишком длинное награждение', text:`Блок «${award.title}» длится больше 35 минут. Разбей награждение или добавь динамику.` });
+
+      const finalAccent = blocks.some(block => /финал|финальное|итог|общее фото|анонс/i.test(block.title + ' ' + block.comment));
+      if (!finalAccent) warnings.push({ level:'danger', title:'нет финального акцента', text:'Добавь финальное слово, общее фото или анонс следующего события.' });
+
+      const hasOpening = blocks.some(block => /открытие|старт|приветствие/i.test(block.title));
+      if (!hasOpening) warnings.push({ level:'danger', title:'нет открытия', text:'Добавь открытие, чтобы задать смысл и правила события.' });
+
+      if (!event.meaning) warnings.push({ level:'danger', title:'не сформулирован смысл', text:'Заполни главный смысл. Без него сценарий будет рыхлым.' });
+
+      return uniqueWarnings(warnings);
+    }
+
+    function uniqueWarnings(warnings) {
+      const seen = new Set();
+      return warnings.filter(w => {
+        const key = w.title + w.text;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function addBlockFromInputs() {
+      const event = currentEvent();
+      if (!event) return toast('Сначала выбери событие.');
+      const block = cloneBlock({
+        title: qs('#blockTitle').value || 'Новый блок',
+        duration: qs('#blockDuration').value || 10,
+        type: qs('#blockType').value,
+        owner: qs('#blockOwner').value,
+        comment: qs('#blockComment').value,
+        stage: qs('#blockStage').value,
+        prepare: qs('#blockPrepare').value,
+        props: qs('#blockProps').value
+      });
+      event.blocks.push(block);
+      clearBlockInputs();
+      renderAll();
+      toast('Блок добавлен в программу.');
+    }
+
+    function clearBlockInputs() {
+      ['#blockTitle','#blockOwner','#blockComment','#blockStage','#blockPrepare','#blockProps'].forEach(id => qs(id).value = '');
+      qs('#blockDuration').value = 10;
+      qs('#blockType').value = 'сцена';
+    }
+
+    function addLibraryBlock(index) {
+      const event = currentEvent();
+      if (!event) return toast('Сначала выбери событие.');
+      event.blocks.push(cloneBlock(LIBRARY_BLOCKS[index]));
+      renderAll();
+      setTab('programPanel');
+      toast('Блок из библиотеки добавлен.');
+    }
+
+    function moveBlock(id, direction) {
+      const event = currentEvent();
+      const blocks = event?.blocks || [];
+      const index = blocks.findIndex(block => block.id === id);
+      const next = index + direction;
+      if (index < 0 || next < 0 || next >= blocks.length) return;
+      [blocks[index], blocks[next]] = [blocks[next], blocks[index]];
+      renderAll();
+    }
+
+    function openBlockModal(id) {
+      const event = currentEvent();
+      const block = event?.blocks.find(item => item.id === id);
+      if (!block) return;
+      state.editingBlockId = id;
+      qs('#modalBlockTitle').textContent = block.title;
+      qs('#editBlockTitle').value = block.title;
+      qs('#editBlockDuration').value = block.duration;
+      qs('#editBlockType').value = block.type;
+      qs('#editBlockOwner').value = block.owner;
+      qs('#editBlockComment').value = block.comment;
+      qs('#editBlockStage').value = block.stage;
+      qs('#editBlockPrepare').value = block.prepare;
+      qs('#editBlockProps').value = block.props;
+      qs('#blockModal').classList.add('open');
+    }
+
+    function saveEditedBlock() {
+      const event = currentEvent();
+      const block = event?.blocks.find(item => item.id === state.editingBlockId);
+      if (!block) return;
+      block.title = qs('#editBlockTitle').value || 'Блок';
+      block.duration = Number(qs('#editBlockDuration').value || 1);
+      block.type = qs('#editBlockType').value;
+      block.owner = qs('#editBlockOwner').value;
+      block.comment = qs('#editBlockComment').value;
+      block.stage = qs('#editBlockStage').value;
+      block.prepare = qs('#editBlockPrepare').value;
+      block.props = qs('#editBlockProps').value;
+      closeBlockModal();
+      renderAll();
+      toast('Блок сохранён.');
+    }
+
+    function deleteEditedBlock() {
+      const event = currentEvent();
+      if (!event) return;
+      event.blocks = event.blocks.filter(block => block.id !== state.editingBlockId);
+      closeBlockModal();
+      renderAll();
+      toast('Блок удалён.');
+    }
+
+    function closeBlockModal() {
+      qs('#blockModal').classList.remove('open');
+      state.editingBlockId = null;
+    }
+
+    /* =========================================================
+       СЦЕНАРИЙ ВЕДУЩЕГО
+       ========================================================= */
+
+    function toneLine(tone) {
+      const lines = {
+        'официально': 'Сегодня мы собрались, чтобы зафиксировать результат, поблагодарить людей и обозначить следующий шаг.',
+        'молодёжно': 'Сегодня без тяжёлого официоза: собираемся, вспоминаем главное, отмечаем своих и заряжаемся на следующий движ.',
+        'комиссарски': 'Сегодня важны не только итоги, но и люди, которые делают движение живым.',
+        'торжественно': 'Сегодня у нас событие, в котором есть труд, благодарность, память сезона и уважение к каждому участнику.',
+        'не душно': 'Сегодня говорим по делу, но живо: меньше отчёта, больше смысла, людей и настоящей энергии.'
+      };
+      return lines[tone] || lines['не душно'];
+    }
+
+    function generateScript(event) {
+      const blocks = event.blocks || [];
+      const opening = `Добрый день, друзья!\n\nМы начинаем «${event.name}». ${toneLine(event.tone)}\n\nГлавный смысл события: ${event.meaning || 'собрать людей вокруг общего дела и следующего шага.'}\n\nЦель: ${event.goal || 'сделать событие понятным, живым и полезным для участников.'}`;
+
+      const guests = `Отдельно приветствуем гостей, командиров, комиссаров, бойцов и всех, кто сегодня не просто пришёл посмотреть, а стал частью общего события.\n\nЕсли есть приглашённые партнёры или руководители — здесь удобно вставить их имена и должности.`;
+
+      const transitions = blocks.map((block, index) => {
+        const next = blocks[index + 1];
+        return `${String(index + 1).padStart(2,'0')}. ${block.title}\n${makeTransition(block, index)}${next ? `\nПосле этого переходим к блоку «${next.title}».` : ''}`;
+      }).join('\n\n');
+
+      const awards = blocks.filter(block => block.type === 'награждение').map(block => {
+        return `Блок «${block.title}».\nСейчас важный момент: мы отмечаем людей, за которыми стоит труд, ответственность и вклад в общее дело. Просим выходить быстро, держим темп, но не теряем уважение к каждому.`;
+      }).join('\n\n') || 'Если в программе появится награждение, здесь будет автоматически собрана подводка.';
+
+      const final = `Друзья, мы подошли к финалу события.\n\nСегодняшний итог простой: ${event.meaning || 'событие собрало людей, опыт и движение в одну точку.'}\n\nСпасибо всем, кто готовил, участвовал, помогал, снимал, встречал, держал сцену и backstage. Событие заканчивается, но работа штаба и отрядов продолжается.`;
+
+      const nextEvent = `Следующий шаг — не терять этот импульс. Следите за анонсами городского штаба, включайтесь в ближайшие встречи, события и проекты.\n\nНГО — это не просто календарь мероприятий. Это кузница людей, которые делают движение сильнее.`;
+
+      return [
+        { title:'Открытие', text: opening },
+        { title:'Представление гостей', text: guests },
+        { title:'Переходы между блоками', text: transitions || 'Программа пока пустая. Добавь блоки, чтобы собрать переходы.' },
+        { title:'Подводки к награждениям', text: awards },
+        { title:'Финал', text: final },
+        { title:'Анонс следующего события', text: nextEvent }
+      ];
+    }
+
+    function makeTransition(block, index) {
+      const byType = {
+        'регистрация': `Начинаем с точки входа: участники собираются, получают информацию и постепенно входят в атмосферу события.`,
+        'сцена': `Этот блок нужен, чтобы собрать внимание зала и дать событию ясную рамку.`,
+        'интерактив': `Переходим от просмотра к участию. Сейчас важна энергия зала и включённость каждого.`,
+        'награждение': `Сейчас блок признания. За каждой фамилией — труд, время, ответственность и вклад в движение.`,
+        'перерыв': `Делаем короткую паузу: можно выдохнуть, пообщаться и вернуться в зал вовремя.`,
+        'медиа': `Фиксируем момент. Такие кадры потом становятся памятью события и лицом движения.`,
+        'служебный блок': `Небольшой организационный блок, чтобы дальше всё шло чётко и без лишнего хаоса.`
+      };
+      return byType[block.type] || `Переходим к следующей части программы.`;
+    }
+
+    function copyScript() {
+      const event = currentEvent();
+      if (!event) return;
+      const text = generateScript(event).map(part => `${part.title.toUpperCase()}\n${part.text}`).join('\n\n---\n\n');
+      navigator.clipboard.writeText(text).then(() => toast('Сценарий скопирован.'));
+    }
+
+    /* =========================================================
+       ЭКСПОРТ / ИМПОРТ / ПЕЧАТЬ
+       ========================================================= */
+
+    function exportJson() {
+      downloadFile('gorn-sobytiy-data.json', JSON.stringify(state.events, null, 2), 'application/json');
+    }
+
+    function exportEventPackage() {
+      const event = currentEvent();
+      if (!event) return toast('Сначала выбери событие.');
+      const budget = window.NgoSystem?.budgetForEvent(event);
+      const warnings = analyzeProgram(event);
+      const script = generateScript(event);
+      const expenses = budget
+        ? Object.values(budget.modes?.[budget.activeMode]?.expenses || []).map(expense => `
+            <tr><td>${escapeHtml(expense.name)}</td><td>${escapeHtml(expense.category)}</td><td>${expense.qty}</td><td>${expense.price}</td><td>${escapeHtml(expense.payer)}</td></tr>
+          `).join('')
+        : '';
+      const html = `<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Пакет события — ${escapeHtml(event.name)}</title>
+<style>
+body{font-family:Arial,sans-serif;margin:32px;color:#111;line-height:1.45}h1,h2{line-height:1.05;text-transform:uppercase}h1{font-size:42px}h2{margin-top:32px;border-top:3px solid #111;padding-top:12px}table{border-collapse:collapse;width:100%;margin-top:12px}td,th{border:1px solid #111;padding:8px;text-align:left}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.meta div{border:2px solid #111;padding:10px}.warn{background:#ffe8e4}.ok{background:#e8f4ee}pre{white-space:pre-wrap;background:#f6f1e8;border:2px solid #111;padding:12px}
+</style></head><body>
+<h1>${escapeHtml(event.name)}</h1>
+<div class="meta">
+<div><b>Дата</b><br>${escapeHtml(event.date || 'не указана')}</div>
+<div><b>Место</b><br>${escapeHtml(event.place || 'не указано')}</div>
+<div><b>Участники</b><br>${escapeHtml(event.participants || 'не указаны')}</div>
+<div><b>Ответственный</b><br>${escapeHtml(event.owner || 'не указан')}</div>
+</div>
+<h2>Смысл</h2><p>${escapeHtml(event.meaning || event.goal || 'не заполнено')}</p>
+<h2>Программа</h2><table><thead><tr><th>Время</th><th>Блок</th><th>Тип</th><th>Ответственный</th></tr></thead><tbody>
+${computeTiming(event.blocks || []).map(item => `<tr><td>${item.start}-${item.end}</td><td>${escapeHtml(item.block.title)}</td><td>${escapeHtml(item.block.type)}</td><td>${escapeHtml(item.block.owner || '')}</td></tr>`).join('')}
+</tbody></table>
+<h2>Риски</h2>${warnings.map(w => `<p class="${w.level === 'danger' ? 'warn' : 'ok'}"><b>${escapeHtml(w.title)}</b><br>${escapeHtml(w.text)}</p>`).join('') || '<p class="ok">Критичных рисков нет.</p>'}
+<h2>Смета</h2>${budget ? `<p><b>${escapeHtml(budget.name)}</b> · режим: ${escapeHtml(budget.activeMode)}</p><table><thead><tr><th>Расход</th><th>Категория</th><th>Кол-во</th><th>Цена</th><th>Кто оплачивает</th></tr></thead><tbody>${expenses}</tbody></table>` : '<p>Смета ещё не создана. Открой “Смету Горна”, она подтянет событие автоматически.</p>'}
+<h2>Сценарий ведущего</h2>${script.map(part => `<h3>${escapeHtml(part.title)}</h3><pre>${escapeHtml(part.text)}</pre>`).join('')}
+</body></html>`;
+      downloadFile(`paket-${slugify(event.name)}.html`, html, 'text/html;charset=utf-8');
+      toast('Пакет события собран.');
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error('JSON должен быть массивом мероприятий');
+          state.events = parsed.map(normalizeEvent);
+          state.currentId = state.events[0]?.id || null;
+          renderAll();
+          toast('JSON импортирован.');
+        } catch (error) {
+          toast('Ошибка импорта: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function slugify(text) {
+      return String(text).toLowerCase().replace(/[^a-zа-я0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'event';
+    }
+
+    function printPanel(panelId, printClass) {
+      setTab(panelId);
+      document.body.classList.add(printClass);
+      window.print();
+      setTimeout(() => document.body.classList.remove(printClass), 300);
+    }
+
+    function clearDraft() {
+      if (!confirm('Очистить все сохранённые мероприятия в этом браузере?')) return;
+      localStorage.removeItem('gornEventsData');
+      state.events = [normalizeEvent(DEFAULT_EVENT)];
+      state.currentId = state.events[0].id;
+      renderAll();
+      toast('Черновик очищен. Загружен пример по умолчанию.');
+    }
+
+    /* =========================================================
+       UI-СОБЫТИЯ
+       ========================================================= */
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tabs .tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+    }
+
+    function setTimingMode(mode) {
+      state.timingMode = mode;
+      qsa('[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+      renderTimeline();
+    }
+
+    function quickOpenProgram(id) {
+      state.currentId = id;
+      renderAll();
+      setTab('programPanel');
+    }
+
+    function resetSearch() {
+      state.filters = { search:'', type:'' };
+      qs('#searchInput').value = '';
+      qs('#typeFilter').value = '';
+      renderAll();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function bindEvents() {
+      qs('#createEventBtn').addEventListener('click', createEvent);
+      qs('#duplicateEventBtn').addEventListener('click', duplicateCurrentEvent);
+      qs('#sampleEventBtn').addEventListener('click', addSampleEvent);
+      qs('#saveEventBtn').addEventListener('click', saveCurrentEventFromForm);
+      qs('#deleteEventBtn').addEventListener('click', deleteCurrentEvent);
+      qs('#addBlockBtn').addEventListener('click', addBlockFromInputs);
+      qs('#generateScriptBtn').addEventListener('click', () => { renderScript(); toast('Сценарий пересобран.'); });
+      qs('#copyScriptBtn').addEventListener('click', copyScript);
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());
+      qs('#jsonFileInput').addEventListener('change', event => event.target.files[0] && importJson(event.target.files[0]));
+      qs('#printProgramBtn').addEventListener('click', () => printPanel('programPanel', 'print-program'));
+      qs('#printScriptBtn').addEventListener('click', () => printPanel('scriptPanel', 'print-script'));
+      qs('#eventPackageBtn').addEventListener('click', exportEventPackage);
+      qs('#clearDraftBtn').addEventListener('click', clearDraft);
+      qs('#resetSearchBtn').addEventListener('click', resetSearch);
+
+      qsa('.tabs .tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+      qsa('[data-mode]').forEach(btn => btn.addEventListener('click', () => setTimingMode(btn.dataset.mode)));
+
+      qs('#searchInput').addEventListener('input', event => { state.filters.search = event.target.value; renderAll(); });
+      qs('#typeFilter').addEventListener('input', event => { state.filters.type = event.target.value; renderAll(); });
+
+      qs('#saveBlockBtn').addEventListener('click', saveEditedBlock);
+      qs('#deleteBlockBtn').addEventListener('click', deleteEditedBlock);
+      qs('#closeBlockModalBtn').addEventListener('click', closeBlockModal);
+      qs('#blockModal').addEventListener('click', event => { if (event.target.id === 'blockModal') closeBlockModal(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeBlockModal(); });
+    }
+
+    window.selectEvent = selectEvent;
+    window.quickOpenProgram = quickOpenProgram;
+    window.addLibraryBlock = addLibraryBlock;
+    window.moveBlock = moveBlock;
+    window.openBlockModal = openBlockModal;
+
+    initControls();
+    bindEvents();
+    renderAll();
+  </script>
+</body>
+</html>

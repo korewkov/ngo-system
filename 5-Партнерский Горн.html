@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Партнёрский горн — предложения НГО</title>
+  <style>
+    /* =========================================================
+       ПАРТНЁРСКИЙ ГОРН — машина сборки партнёрств НГО
+       Стиль: кузница кадров, красный/чёрный/молочный,
+       постерная сетка, технические плашки, крупная типографика.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --warning: #B87333;
+      --green: #34785C;
+      --shadow-hard: 7px 7px 0 #111111;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .26), transparent 18%),
+        radial-gradient(circle at 82% 4%, rgba(255, 59, 47, .12), transparent 20%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 rgba(255,59,47,.22);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17,17,17,.66);
+    }
+
+    .app { width: min(1500px, calc(100vw - 28px)); margin: 0 auto; padding: 22px 0 72px; }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.15fr 330px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 3px solid var(--black);
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.78) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.24) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.65) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "ПАРТНЁРСКИЙ\\A ГОРН";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233,228,218,.075);
+      font-size: clamp(54px, 9vw, 132px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row { position: relative; z-index: 2; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+
+    .kicker {
+      display:inline-flex; align-items:center; gap:9px;
+      border:1px solid rgba(255,255,255,.32);
+      background:rgba(255,255,255,.07);
+      padding:8px 10px;
+      font-size:10px; font-weight:950; letter-spacing:.14em; text-transform:uppercase;
+    }
+
+    .spark { width:10px; height:10px; background:var(--red); border-radius:50%; box-shadow:0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red); display:inline-block; }
+
+    .logo-drop {
+      width:86px; height:86px; flex:0 0 auto;
+      border:2px dashed rgba(255,255,255,.62);
+      display:grid; place-items:center;
+      color:rgba(255,255,255,.78);
+      text-align:center; font-size:9px; line-height:1.1; font-weight:950; letter-spacing:.08em; text-transform:uppercase;
+      background:rgba(255,255,255,.06);
+    }
+
+    h1 { position:relative; z-index:2; margin:0; max-width:1120px; font-size:clamp(52px, 9vw, 136px); line-height:.78; letter-spacing:-.09em; text-transform:uppercase; font-weight:1000; }
+    .subtitle { position:relative; z-index:2; margin:16px 0 0; max-width:860px; color:rgba(233,228,218,.84); font-size:clamp(17px,2.2vw,30px); line-height:1.02; font-weight:900; text-transform:uppercase; letter-spacing:-.035em; }
+    .red-thread { position:relative; z-index:2; margin-top:18px; height:8px; background:var(--red); width:min(560px,82%); box-shadow:0 0 24px rgba(255,59,47,.5); }
+
+    .panel-actions {
+      min-width:310px; border:3px solid var(--black); background:linear-gradient(180deg, var(--white), var(--paper));
+      padding:16px; display:grid; gap:9px; box-shadow:var(--shadow-hard); position:relative; overflow:hidden;
+    }
+
+    .panel-actions::before {
+      content:"ПАРТНЁРСКИЙ ПУЛЬТ";
+      position:absolute; right:-66px; top:31px; transform:rotate(35deg);
+      background:var(--black); color:var(--white); padding:5px 60px; font-size:9px; font-weight:1000; letter-spacing:.08em;
+    }
+
+    .technical { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.115em; color:rgba(17,17,17,.56); }
+
+    .workspace { display:grid; grid-template-columns:420px 1fr; gap:16px; align-items:start; }
+    .sidebar, .main-section, .modal-card { border:3px solid var(--black); background:rgba(248,244,236,.92); box-shadow:var(--shadow-hard); }
+    .sidebar { position:sticky; top:14px; padding:16px; display:grid; gap:14px; background:linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%), rgba(248,244,236,.94); }
+    .main-section { padding:16px; overflow:hidden; background:linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%), rgba(248,244,236,.94); }
+
+    .section-title { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:14px; border-bottom:3px solid var(--black); padding-bottom:10px; }
+    h2 { margin:0; font-size:36px; line-height:.82; letter-spacing:-.07em; text-transform:uppercase; font-weight:1000; }
+    h3 { margin:0; font-size:24px; line-height:.88; letter-spacing:-.055em; text-transform:uppercase; font-weight:1000; }
+
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .tab.active { background:var(--black); color:var(--white); }
+
+    .stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:14px; }
+    .stat { border:3px solid var(--black); background:var(--white); min-height:112px; padding:13px; position:relative; overflow:hidden; box-shadow:5px 5px 0 rgba(17,17,17,.15); }
+    .stat::before { content:""; position:absolute; inset:0 auto 0 0; width:7px; background:var(--red); }
+    .stat::after { content:"PRT"; position:absolute; right:8px; top:9px; color:rgba(17,17,17,.08); font-size:40px; font-weight:1000; letter-spacing:-.08em; }
+    .stat-value { display:block; font-size:clamp(34px,4vw,58px); line-height:.82; font-weight:1000; color:var(--red); letter-spacing:-.08em; }
+    .stat-title { margin-top:9px; font-size:11px; line-height:.95; font-weight:950; text-transform:uppercase; }
+
+    .form-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+    .form-grid .span-2 { grid-column:span 2; }
+
+    .subcard, .output-card, .partner-card, .slide-card { border:3px solid var(--black); background:rgba(255,255,255,.74); padding:14px; }
+    .output-list, .partners-grid, .slides-preview { display:grid; gap:10px; }
+
+    .output-card { background:var(--white); position:relative; overflow:hidden; display:grid; gap:10px; }
+    .output-card::before { content:""; position:absolute; inset:0 auto 0 0; width:8px; background:var(--red); }
+    .output-card h3, .output-text { padding-left:8px; }
+    .output-text { white-space:pre-line; font-size:15px; line-height:1.42; font-weight:650; color:rgba(17,17,17,.88); }
+
+    .badge { display:inline-flex; width:fit-content; border:2px solid var(--black); padding:5px 8px; background:rgba(17,17,17,.045); font-size:9px; font-weight:1000; text-transform:uppercase; letter-spacing:.06em; }
+    .badge.red { background:var(--red); color:var(--white); }
+    .badge.black { background:var(--black); color:var(--white); }
+    .badge.green { background:var(--green); color:var(--white); }
+    .badge.warn { background:var(--warning); color:var(--white); }
+    .badges { display:flex; flex-wrap:wrap; gap:6px; }
+
+    .partners-grid { grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); }
+    .partner-card { background:var(--white); display:grid; gap:10px; position:relative; overflow:hidden; }
+    .partner-card::before { content:""; position:absolute; inset:0 0 auto 0; height:11px; background:var(--red); }
+    .partner-card h3 { padding-top:10px; }
+
+    .meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .meta { border-left:4px solid var(--black); padding-left:8px; min-height:42px; }
+    .meta small { display:block; color:rgba(17,17,17,.52); font-size:9px; font-weight:950; text-transform:uppercase; letter-spacing:.07em; }
+    .meta b { display:block; font-size:14px; line-height:1.05; }
+
+    .slides-preview { grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); }
+    .slide-card {
+      aspect-ratio: 16 / 9;
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.82) 0 8px, transparent 8px 22px),
+        linear-gradient(135deg, var(--black), var(--graphite));
+      color:var(--white);
+      padding:22px;
+      display:grid;
+      align-content:space-between;
+      position:relative;
+      overflow:hidden;
+      break-inside: avoid;
+    }
+    .slide-card.light { background:var(--white); color:var(--black); }
+    .slide-card::after { content:"НГО"; position:absolute; right:10px; bottom:0; color:rgba(255,255,255,.08); font-size:82px; font-weight:1000; letter-spacing:-.08em; }
+    .slide-card.light::after { color:rgba(17,17,17,.06); }
+    .slide-card h3 { font-size:clamp(26px,4vw,48px); line-height:.82; max-width:88%; position:relative; z-index:2; }
+    .slide-card p { margin:0; font-size:15px; line-height:1.28; font-weight:800; position:relative; z-index:2; white-space:pre-line; }
+
+    .empty-state { border:3px dashed var(--black); padding:22px; background:rgba(255,255,255,.5); font-size:13px; font-weight:850; line-height:1.35; }
+
+    .modal { position:fixed; inset:0; background:rgba(17,17,17,.74); display:none; align-items:start; justify-content:center; padding:24px 14px; overflow-y:auto; z-index:50; }
+    .modal.open { display:flex; }
+    .modal-card { width:min(980px,100%); padding:16px; background:var(--milk); }
+    .modal-head { display:flex; justify-content:space-between; gap:12px; align-items:start; margin-bottom:16px; border-bottom:4px solid var(--black); padding-bottom:12px; }
+
+    .toast { position:fixed; right:18px; bottom:18px; background:var(--black); color:var(--white); border:2px solid var(--white); padding:12px 14px; font-weight:900; z-index:80; transform:translateY(120px); opacity:0; transition:.2s ease; max-width:360px; box-shadow:6px 6px 0 var(--red); }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .hidden { display:none !important; }
+
+    @media print {
+      body { background:white; }
+      body::before, body::after, .panel-actions, .sidebar, .tabs, .toast, .modal, .no-print, .card-actions { display:none !important; }
+      .app { width:100%; padding:0; }
+      .topbar, .workspace { grid-template-columns:1fr; }
+      .hero, .main-section, .slide-card, .output-card { box-shadow:none; break-inside:avoid; }
+      .print-deck #deckPanel { display:block !important; }
+      .print-deck .tab-panel:not(#deckPanel) { display:none !important; }
+      .slides-preview { grid-template-columns:1fr; }
+      .slide-card { page-break-after:always; min-height:95vh; }
+    }
+
+    @media (max-width: 1100px) { .topbar, .workspace { grid-template-columns:1fr; } .sidebar { position:static; } .stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width: 720px) { .app { width:min(100% - 18px,1500px); padding-top:10px; } .hero { padding:16px; min-height:250px; } .brand-row { align-items:start; } .logo-drop { width:68px; height:68px; } .stats { grid-template-columns:1fr 1fr; } .form-grid { grid-template-columns:1fr; } .form-grid .span-2 { grid-column:span 1; } h2 { font-size:30px; } }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / ПАРТНЁРСТВО / СБОРКА</div>
+          <div class="logo-drop">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Партнёрский горн</h1>
+        <p class="subtitle">Объясни ценность штаба без долгих созвонов</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions no-print">
+        <div class="technical">операции партнёрства</div>
+        <button class="primary" id="generateBtn">собрать предложение</button>
+        <button id="copyAllBtn">скопировать всё</button>
+        <button id="printDeckBtn">презентация PDF</button>
+        <button id="exportJsonBtn">сохранить базу</button>
+        <button class="dark" id="clearPartnersBtn">очистить базу</button>
+      </aside>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar no-print">
+        <div class="section-title"><h2>Проект</h2></div>
+        <form id="partnerForm" class="form-grid">
+          <label class="span-2">тип партнёра <select name="partnerType"></select></label>
+          <label class="span-2">цель обращения <select name="goal"></select></label>
+          <label class="span-2">название проекта / мероприятия <input name="projectName" /></label>
+          <label>дата <input name="date" /></label>
+          <label>место <input name="place" /></label>
+          <label>аудитория <input name="audience" /></label>
+          <label>участников <input name="participants" type="number" min="0" /></label>
+          <label>организатор <input name="organizer" /></label>
+          <label class="span-2">социальная значимость <textarea name="socialValue"></textarea></label>
+          <label class="span-2">что просим <textarea name="ask"></textarea></label>
+          <label class="span-2">что предлагаем партнёру <textarea name="offer"></textarea></label>
+          <label class="span-2">где будет упоминание <textarea name="mentions"></textarea></label>
+          <label>контакты <input name="contacts" /></label>
+          <label>дедлайн ответа <input name="deadline" /></label>
+        </form>
+        <div class="subcard">
+          <div class="technical">контекст</div>
+          <p style="margin:8px 0 0; font-size:13px; font-weight:800; line-height:1.35;">Инструмент собирает письмо, сообщение, звонок, структуру презентации, слайды и тезисы встречи без API — только шаблоны и ваши вводные.</p>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <div class="stats" id="stats"></div>
+        <nav class="tabs no-print">
+          <button class="tab active" data-tab="outputsPanel">тексты</button>
+          <button class="tab" data-tab="deckPanel">мини-презентация</button>
+          <button class="tab" data-tab="partnersPanel">база партнёров</button>
+          <button class="tab" data-tab="addPartnerPanel">добавить партнёра</button>
+        </nav>
+
+        <section id="outputsPanel" class="tab-panel">
+          <div class="section-title"><h2>Пакет обращения</h2><div class="technical">письмо / мессенджер / звонок / встреча</div></div>
+          <div class="output-list" id="outputList"></div>
+        </section>
+
+        <section id="deckPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>Мини-презентация</h2><div class="technical">5–7 слайдов в HTML</div></div>
+          <div class="slides-preview" id="slidesPreview"></div>
+        </section>
+
+        <section id="partnersPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>База партнёров</h2><div class="technical" id="partnersCount">0 контактов</div></div>
+          <div class="partners-grid" id="partnersGrid"></div>
+        </section>
+
+        <section id="addPartnerPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>Новый партнёр</h2><div class="technical">локальная база</div></div>
+          <div class="subcard">
+            <form id="partnerBaseForm" class="form-grid">
+              <label class="span-2">название <input name="name" /></label>
+              <label>тип <select name="type"></select></label>
+              <label>статус <select name="status"></select></label>
+              <label class="span-2">контакт <input name="contact" /></label>
+              <label>кто знаком <input name="knownBy" /></label>
+              <label>последний контакт <input name="lastContact" type="date" /></label>
+              <label class="span-2">что просили <textarea name="asked"></textarea></label>
+              <label class="span-2">что дали <textarea name="given"></textarea></label>
+              <label class="span-2">следующий шаг <textarea name="nextStep"></textarea></label>
+            </form>
+            <div class="card-actions" style="margin-top:14px;"><button class="primary" id="savePartnerBtn">сохранить партнёра</button></div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="partnerModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><div class="technical">редактирование партнёра</div><h2 id="modalPartnerTitle">Партнёр</h2></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="primary" id="updatePartnerBtn">сохранить</button>
+          <button id="deletePartnerBtn">удалить</button>
+          <button class="dark" id="closePartnerModalBtn">закрыть</button>
+        </div>
+      </div>
+      <form id="editPartnerForm" class="form-grid">
+        <label class="span-2">название <input name="name" /></label>
+        <label>тип <select name="type"></select></label>
+        <label>статус <select name="status"></select></label>
+        <label class="span-2">контакт <input name="contact" /></label>
+        <label>кто знаком <input name="knownBy" /></label>
+        <label>последний контакт <input name="lastContact" type="date" /></label>
+        <label class="span-2">что просили <textarea name="asked"></textarea></label>
+        <label class="span-2">что дали <textarea name="given"></textarea></label>
+        <label class="span-2">следующий шаг <textarea name="nextStep"></textarea></label>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    const PARTNER_TYPES = ['администрация города','вуз','колледж','молодёжный центр','бизнес','типография','база отдыха','транспорт','кафе/питание','медиа','потенциальный спонсор'];
+    const GOALS = ['попросить помещение','попросить технику','попросить призы','попросить печать','попросить транспорт','предложить информационное партнёрство','пригласить на мероприятие','попросить финансовую поддержку','предложить долгосрочное сотрудничество'];
+    const STATUSES = ['новый контакт','написали','ждём ответ','согласились','отказали','нужно вернуться позже','партнёр активен'];
+
+    const state = { outputs: [], slides: [], partners: loadPartners(), activeTab: 'outputsPanel', editingPartnerId: null };
+
+    function loadPartners() {
+      try { return JSON.parse(localStorage.getItem('partnerskiyGornBase')) || []; } catch { return []; }
+    }
+    function savePartners() { localStorage.setItem('partnerskiyGornBase', JSON.stringify(state.partners)); }
+    function qs(s) { return document.querySelector(s); }
+    function qsa(s) { return [...document.querySelectorAll(s)]; }
+
+    function fillSelect(select, values) {
+      select.innerHTML = '';
+      values.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; select.appendChild(o); });
+    }
+
+    function initControls() {
+      const form = qs('#partnerForm');
+      fillSelect(form.elements.partnerType, PARTNER_TYPES);
+      fillSelect(form.elements.goal, GOALS);
+      form.elements.partnerType.value = 'потенциальный спонсор';
+      form.elements.goal.value = 'попросить финансовую поддержку';
+      form.elements.projectName.value = 'Городской слёт студенческих отрядов';
+      form.elements.place.value = 'Новокузнецк / ДОЛ «Бунгурский»';
+      form.elements.audience.value = 'студенты, командиры, комиссары и актив Новокузнецка';
+      form.elements.participants.value = 220;
+      form.elements.organizer.value = 'Новокузнецкое городское отделение студенческих отрядов';
+      form.elements.socialValue.value = 'Проект помогает студентам развивать ответственность, командность, лидерство и включаться в полезные городские инициативы.';
+      form.elements.ask.value = 'Поддержать мероприятие ресурсами, услугами или финансовым вкладом.';
+      form.elements.offer.value = 'Публичное упоминание партнёра, размещение логотипа, благодарность на площадке, публикации в соцсетях и включение в партнёрский контур НГО.';
+      form.elements.mentions.value = 'социальные сети, афиши, печатные материалы, сцена мероприятия, благодарственное письмо';
+      form.elements.contacts.value = 'контакт ответственного НГО';
+      const activeEvent = window.NgoSystem?.getActiveEvent();
+      if (activeEvent) {
+        form.elements.projectName.value = activeEvent.name || form.elements.projectName.value;
+        form.elements.date.value = activeEvent.date || form.elements.date.value;
+        form.elements.place.value = activeEvent.place || form.elements.place.value;
+        form.elements.audience.value = activeEvent.audience || form.elements.audience.value;
+        form.elements.participants.value = activeEvent.participants || form.elements.participants.value;
+        form.elements.socialValue.value = activeEvent.goal || activeEvent.meaning || form.elements.socialValue.value;
+      }
+
+      fillSelect(qs('#partnerBaseForm').elements.type, PARTNER_TYPES);
+      fillSelect(qs('#partnerBaseForm').elements.status, STATUSES);
+      fillSelect(qs('#editPartnerForm').elements.type, PARTNER_TYPES);
+      fillSelect(qs('#editPartnerForm').elements.status, STATUSES);
+    }
+
+    function formData() { return Object.fromEntries(new FormData(qs('#partnerForm')).entries()); }
+
+    function partnerValue(d) {
+      const byType = {
+        'администрация города':'вклад в молодёжную политику, развитие студенческой занятости и поддержку городских инициатив',
+        'вуз':'усиление студенческой активности, карьерных траекторий и имиджа образовательной организации',
+        'колледж':'вовлечение студентов в движение, профориентацию и городские события',
+        'молодёжный центр':'совместная работа с активной молодёжной аудиторией и усиление городской повестки',
+        'бизнес':'выход к активной студенческой аудитории и социально значимое присутствие бренда',
+        'типография':'видимое участие в городском молодёжном событии через печатные материалы',
+        'база отдыха':'заполнение площадки сильным молодёжным событием и долгосрочное сотрудничество',
+        'транспорт':'поддержка мобильности участников и видимое участие в социальном проекте',
+        'кафе/питание':'выход к молодой аудитории и участие в событии с понятным социальным эффектом',
+        'медиа':'живой городской инфоповод с молодёжью, трудом и командой',
+        'потенциальный спонсор':'социальный эффект, публичное упоминание и связь бренда с молодёжной командой города'
+      };
+      return byType[d.partnerType] || 'социально значимое партнёрство с городской молодёжной командой';
+    }
+
+    function generate() {
+      const d = formData();
+      const value = partnerValue(d);
+      const project = d.projectName || 'проект НГО';
+      const ask = d.ask || 'поддержать проект';
+      const offer = d.offer || 'публичное упоминание и благодарность партнёру';
+      const mention = d.mentions || 'социальные сети и материалы мероприятия';
+      const deadline = d.deadline ? `Просим дать обратную связь до ${d.deadline}.` : 'Будем признательны за обратную связь в удобный для вас срок.';
+
+      const letter = `Уважаемые коллеги!\n\nНовокузнецкое городское отделение студенческих отрядов обращается к вам с предложением о сотрудничестве в рамках проекта «${project}».\n\n${d.date ? `Дата проведения: ${d.date}.\n` : ''}${d.place ? `Место проведения: ${d.place}.\n` : ''}${d.participants ? `Ожидаемое количество участников: ${d.participants}.\n` : ''}\nАудитория проекта: ${d.audience || 'активная молодёжь Новокузнецка'}.\n\nСоциальная значимость:\n${d.socialValue || 'Проект помогает развивать ответственность, командность и практический опыт студентов.'}\n\nМы обращаемся с просьбой: ${ask}.\n\nСо своей стороны мы готовы предложить: ${offer}. Упоминание партнёра возможно в следующих точках: ${mention}.\n\nДля вас это возможность усилить ${value}.\n\n${deadline}\n\nКонтакты для связи: ${d.contacts || 'контакт ответственного НГО'}.\n\nС уважением,\n${d.organizer || 'Новокузнецкое городское отделение студенческих отрядов'}`;
+
+      const messenger = `Здравствуйте! Это ${d.organizer || 'НГО студенческих отрядов'}.\n\nГотовим проект «${project}»${d.date ? ` (${d.date})` : ''}${d.place ? `, площадка: ${d.place}` : ''}. Участники: ${d.audience || 'активная молодёжь города'}${d.participants ? `, около ${d.participants} человек` : ''}.\n\nХотим обсудить партнёрство: ${ask}.\n\nСо своей стороны можем дать: ${offer}.\n\nМожем коротко созвониться или отправить мини-презентацию?`;
+
+      const call = `1. Представиться: ${d.organizer || 'Новокузнецкое городское отделение студенческих отрядов'}.\n2. Коротко назвать проект: «${project}».\n3. Объяснить смысл: ${d.socialValue || 'это молодёжный проект с практической пользой для города и студентов'}.\n4. Сказать запрос: ${ask}.\n5. Сразу назвать выгоду партнёра: ${offer}.\n6. Предложить следующий шаг: отправить письмо / презентацию / назначить короткую встречу.\n7. Зафиксировать срок ответа: ${d.deadline || 'в удобный ближайший срок'}.`;
+
+      const structure = `1. Кто мы\n2. Что за проект «${project}»\n3. Какая аудитория и масштаб\n4. Зачем это городу и молодёжи\n5. Что нужно от партнёра\n6. Что получает партнёр\n7. Контакты и следующий шаг`;
+
+      const slidesText = `Слайд 1. ${project}\nКоротко: проект НГО, который собирает активную молодёжь города.\n\nСлайд 2. Кто мы\n${d.organizer || 'НГО студенческих отрядов'} — городская команда, которая развивает трудовые, образовательные и событийные проекты.\n\nСлайд 3. Аудитория\n${d.audience || 'студенты и молодёжь'}${d.participants ? `, около ${d.participants} участников` : ''}.\n\nСлайд 4. Социальная значимость\n${d.socialValue || 'Проект развивает ответственность, командность и лидерство.'}\n\nСлайд 5. Что нужно\n${ask}.\n\nСлайд 6. Что получает партнёр\n${offer}.\n\nСлайд 7. Контакты\n${d.contacts || 'контакт ответственного НГО'}.`;
+
+      const meeting = `Главный тезис: мы приходим не “просить ради просьбы”, а предлагаем понятное партнёрство с молодёжной командой города.\n\nАргументы:\n— проект имеет социальную значимость: ${d.socialValue || 'развитие студентов и городской активности'};\n— аудитория понятная: ${d.audience || 'молодёжь Новокузнецка'};\n— масштаб измеримый: ${d.participants || 'участники проекта'};\n— запрос конкретный: ${ask};\n— отдача партнёру ясная: ${offer};\n— упоминание будет здесь: ${mention}.`;
+
+      state.outputs = [
+        { id: crypto.randomUUID(), type:'официальное письмо', text: letter },
+        { id: crypto.randomUUID(), type:'сообщение в мессенджер', text: messenger },
+        { id: crypto.randomUUID(), type:'текст для звонка', text: call },
+        { id: crypto.randomUUID(), type:'структура презентации', text: structure },
+        { id: crypto.randomUUID(), type:'текст слайдов', text: slidesText },
+        { id: crypto.randomUUID(), type:'тезисы для встречи', text: meeting }
+      ];
+
+      state.slides = buildSlides(d);
+      renderAll();
+      toast('Пакет партнёрства собран.');
+    }
+
+    function buildSlides(d) {
+      return [
+        { title:d.projectName || 'Проект НГО', text:'Партнёрское предложение\nНовокузнецкого городского отделения студенческих отрядов', dark:true },
+        { title:'Кто мы', text:`${d.organizer || 'НГО студенческих отрядов'} — городская команда, которая собирает студентов вокруг труда, событий, обучения и полезных инициатив.`, dark:false },
+        { title:'Что за проект', text:`${d.projectName || 'Проект'}${d.date ? `\nДата: ${d.date}` : ''}${d.place ? `\nМесто: ${d.place}` : ''}`, dark:true },
+        { title:'Аудитория', text:`${d.audience || 'активная молодёжь Новокузнецка'}${d.participants ? `\nОколо ${d.participants} участников` : ''}`, dark:false },
+        { title:'Зачем это городу', text:d.socialValue || 'Проект развивает ответственность, командность, лидерство и участие молодёжи в городской жизни.', dark:true },
+        { title:'Что нужно', text:d.ask || 'Поддержка ресурсами, услугами или финансовым вкладом.', dark:false },
+        { title:'Что получает партнёр', text:`${d.offer || 'Публичное упоминание и благодарность'}\n\nУпоминание: ${d.mentions || 'соцсети, афиши, сцена, материалы'}`, dark:true },
+        { title:'Контакты', text:`${d.contacts || 'контакт ответственного НГО'}${d.deadline ? `\nОтвет до: ${d.deadline}` : ''}`, dark:false }
+      ];
+    }
+
+    function renderStats() {
+      qs('#stats').innerHTML = `
+        <article class="stat"><span class="stat-value">${PARTNER_TYPES.length}</span><div class="stat-title">типов партнёров</div></article>
+        <article class="stat"><span class="stat-value">${GOALS.length}</span><div class="stat-title">целей обращения</div></article>
+        <article class="stat"><span class="stat-value">${state.partners.length}</span><div class="stat-title">контактов в базе</div></article>
+        <article class="stat"><span class="stat-value">${state.partners.filter(p => p.status === 'партнёр активен' || p.status === 'согласились').length}</span><div class="stat-title">тёплых партнёров</div></article>`;
+    }
+
+    function renderOutputs() {
+      qs('#outputList').innerHTML = state.outputs.map(o => `
+        <article class="output-card">
+          <h3>${escapeHtml(o.type)}</h3>
+          <div class="output-text">${escapeHtml(o.text)}</div>
+          <div class="card-actions"><button class="small primary" onclick="copyOutput('${o.id}')">скопировать</button></div>
+        </article>`).join('') || `<div class="empty-state">Нажми “собрать предложение”, чтобы получить письмо, сообщение, звонок, структуру презентации и тезисы встречи.</div>`;
+    }
+
+    function renderSlides() {
+      qs('#slidesPreview').innerHTML = state.slides.map((s, i) => `
+        <article class="slide-card ${s.dark ? '' : 'light'}">
+          <div class="badges"><span class="badge red">слайд ${String(i+1).padStart(2,'0')}</span><span class="badge ${s.dark ? '' : 'black'}">НГО</span></div>
+          <h3>${escapeHtml(s.title)}</h3>
+          <p>${escapeHtml(s.text)}</p>
+        </article>`).join('') || `<div class="empty-state">Сначала собери предложение — здесь появится мини-презентация.</div>`;
+    }
+
+    function renderPartners() {
+      qs('#partnersCount').textContent = `${state.partners.length} контактов`;
+      qs('#partnersGrid').innerHTML = state.partners.map(p => `
+        <article class="partner-card">
+          <h3>${escapeHtml(p.name)}</h3>
+          <div class="badges"><span class="badge red">${escapeHtml(p.type)}</span><span class="badge black">${escapeHtml(p.status)}</span></div>
+          <div class="meta-grid">
+            <div class="meta"><small>контакт</small><b>${escapeHtml(p.contact || '—')}</b></div>
+            <div class="meta"><small>кто знаком</small><b>${escapeHtml(p.knownBy || '—')}</b></div>
+            <div class="meta"><small>последний контакт</small><b>${p.lastContact || '—'}</b></div>
+            <div class="meta"><small>следующий шаг</small><b>${escapeHtml(p.nextStep || '—')}</b></div>
+          </div>
+          <p style="margin:0; font-size:13px; line-height:1.35; font-weight:750; color:rgba(17,17,17,.72)"><b>Просили:</b> ${escapeHtml(p.asked || '—')}<br><b>Дали:</b> ${escapeHtml(p.given || '—')}</p>
+          <div class="card-actions"><button class="small primary" onclick="openPartner('${p.id}')">править</button></div>
+        </article>`).join('') || `<div class="empty-state">База партнёров пустая. Добавь первый контакт: администрация, вуз, типография, база отдыха, транспорт или бизнес.</div>`;
+    }
+
+    function renderAll() { savePartners(); renderStats(); renderOutputs(); renderSlides(); renderPartners(); }
+
+    function savePartnerFromForm() {
+      const data = Object.fromEntries(new FormData(qs('#partnerBaseForm')).entries());
+      state.partners.unshift({ id: crypto.randomUUID(), ...data });
+      qs('#partnerBaseForm').reset();
+      renderAll();
+      setTab('partnersPanel');
+      toast('Партнёр добавлен в базу.');
+    }
+
+    function openPartner(id) {
+      const p = state.partners.find(x => x.id === id);
+      if (!p) return;
+      state.editingPartnerId = id;
+      qs('#modalPartnerTitle').textContent = p.name;
+      const form = qs('#editPartnerForm');
+      Object.keys(p).forEach(k => { if (form.elements[k]) form.elements[k].value = p[k] || ''; });
+      qs('#partnerModal').classList.add('open');
+    }
+
+    function updatePartner() {
+      const p = state.partners.find(x => x.id === state.editingPartnerId);
+      if (!p) return;
+      Object.assign(p, Object.fromEntries(new FormData(qs('#editPartnerForm')).entries()));
+      closePartnerModal();
+      renderAll();
+      toast('Партнёр обновлён.');
+    }
+
+    function deletePartner() {
+      state.partners = state.partners.filter(x => x.id !== state.editingPartnerId);
+      closePartnerModal();
+      renderAll();
+      toast('Партнёр удалён.');
+    }
+
+    function closePartnerModal() { qs('#partnerModal').classList.remove('open'); state.editingPartnerId = null; }
+
+    function copyOutput(id) {
+      const o = state.outputs.find(x => x.id === id);
+      if (o) copyRaw(o.text);
+    }
+
+    function copyAll() {
+      if (!state.outputs.length) return toast('Сначала собери предложение.');
+      copyRaw(state.outputs.map(o => `${o.type.toUpperCase()}\n${o.text}`).join('\n\n---\n\n'));
+    }
+
+    function copyRaw(text) { navigator.clipboard.writeText(text).then(() => toast('Скопировано.')); }
+
+    function exportJson() {
+      const data = { savedAt: new Date().toISOString(), form: formData(), outputs: state.outputs, slides: state.slides, partners: state.partners };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'partnerskiy-gorn-data.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearPartners() {
+      if (!confirm('Очистить базу партнёров в этом браузере?')) return;
+      state.partners = [];
+      renderAll();
+      toast('База очищена.');
+    }
+
+    function printDeck() {
+      setTab('deckPanel');
+      document.body.classList.add('print-deck');
+      window.print();
+      setTimeout(() => document.body.classList.remove('print-deck'), 300);
+    }
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tabs .tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function bindEvents() {
+      qs('#generateBtn').addEventListener('click', generate);
+      qs('#copyAllBtn').addEventListener('click', copyAll);
+      qs('#printDeckBtn').addEventListener('click', printDeck);
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#clearPartnersBtn').addEventListener('click', clearPartners);
+      qs('#savePartnerBtn').addEventListener('click', savePartnerFromForm);
+      qs('#updatePartnerBtn').addEventListener('click', updatePartner);
+      qs('#deletePartnerBtn').addEventListener('click', deletePartner);
+      qs('#closePartnerModalBtn').addEventListener('click', closePartnerModal);
+      qs('#partnerModal').addEventListener('click', e => { if (e.target.id === 'partnerModal') closePartnerModal(); });
+      qsa('.tabs .tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closePartnerModal(); });
+    }
+
+    window.copyOutput = copyOutput;
+    window.openPartner = openPartner;
+
+    initControls();
+    bindEvents();
+    generate();
+  </script>
+</body>
+</html>

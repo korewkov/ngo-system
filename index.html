@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Пульт НГО — цифровая кузница штаба</title>
+  <style>
+    /* =========================================================
+       ПУЛЬТ НГО — главная страница цифровой системы штаба
+       Идея: одна стартовая точка для всех суперсервисов НГО.
+       Визуал: кузница кадров, красный/чёрный/молочный,
+       дорогой poster-web, motion, backstage-интерфейс.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-2: #D72A22;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --green: #34785C;
+      --amber: #B87333;
+      --shadow-hard: 8px 8px 0 #111111;
+      --soft: 0 24px 80px rgba(17,17,17,.24);
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 10% 8%, rgba(255,59,47,.34), transparent 18%),
+        radial-gradient(circle at 92% 3%, rgba(255,59,47,.14), transparent 22%),
+        radial-gradient(circle at 55% 82%, rgba(17,17,17,.22), transparent 32%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 48%, #bdb2a3 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(to bottom, black, transparent 96%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: .16;
+      mix-blend-mode: multiply;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.09) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 24% 18%, rgba(255,255,255,.9) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 75% 26%, rgba(255,59,47,.85) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 86% 74%, rgba(17,17,17,.65) 0 1px, transparent 1.8px);
+      background-size: auto, 110px 110px, 150px 150px, 180px 180px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .app {
+      width: min(1600px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 18px 0 76px;
+    }
+
+    .forge-glow {
+      position: fixed;
+      width: 36vw;
+      height: 36vw;
+      right: -12vw;
+      top: 18vh;
+      background: radial-gradient(circle, rgba(255,59,47,.34), transparent 62%);
+      filter: blur(14px);
+      pointer-events: none;
+      z-index: -1;
+      animation: pulseGlow 5s var(--ease) infinite alternate;
+    }
+
+    .spark-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .spark-dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--red);
+      box-shadow: 0 0 18px rgba(255,59,47,.95);
+      opacity: .55;
+      animation: floatSpark linear infinite;
+    }
+
+    .nav {
+      position: sticky;
+      top: 12px;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 3px solid var(--black);
+      background: rgba(248,244,236,.86);
+      backdrop-filter: blur(18px);
+      padding: 10px;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.16);
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--black);
+      color: var(--white);
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 1000;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .brand-spark {
+      width: 12px;
+      height: 12px;
+      background: var(--red);
+      transform: rotate(45deg);
+      box-shadow: 0 0 0 4px rgba(255,59,47,.16), 0 0 22px rgba(255,59,47,.9);
+      animation: sparkBreath 1.8s var(--ease) infinite alternate;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a,
+    .nav-action {
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.55);
+      padding: 9px 11px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: .18s var(--ease);
+    }
+
+    .nav-links a:hover,
+    .nav-action:hover {
+      background: var(--black);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .nav-action {
+      cursor: pointer;
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 3px 3px 0 var(--black);
+    }
+
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 92px);
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 16px;
+    }
+
+    .hero-main {
+      position: relative;
+      overflow: hidden;
+      border: 3px solid var(--black);
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.82) 0 7px, transparent 7px 21px),
+        linear-gradient(120deg, rgba(17,17,17,.94), rgba(42,42,42,.76) 48%, rgba(17,17,17,.9)),
+        url("assets/ngo-command-center-hero.jpg") center / cover,
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.22) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: clamp(22px, 4vw, 52px);
+      box-shadow: var(--shadow-hard);
+      display: grid;
+      align-content: space-between;
+    }
+
+    .hero-main > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-main .lead {
+      max-width: 760px;
+      text-shadow: 0 2px 24px rgba(0,0,0,.72);
+    }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      right: 8%;
+      top: 8%;
+      width: min(24vw, 280px);
+      height: min(24vw, 280px);
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.66) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.14) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      animation: rotateSteel 18s linear infinite;
+    }
+
+    .hero-main::after {
+      content: "ПУЛЬТ\\A УПРАВЛЕНИЯ";
+      white-space: pre;
+      position: absolute;
+      right: -8px;
+      bottom: -16px;
+      color: rgba(233,228,218,.07);
+      font-size: clamp(78px, 12vw, 190px);
+      font-weight: 1000;
+      letter-spacing: -.095em;
+      line-height: .72;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .hero-kicker {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      width: fit-content;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.07);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid rgba(255,255,255,.34);
+      padding: 8px 10px;
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.84);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 1000px;
+      font-size: clamp(72px, 12vw, 190px);
+      line-height: .75;
+      letter-spacing: -.105em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .lead {
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+      margin: 22px 0 0;
+      color: rgba(233,228,218,.86);
+      font-size: clamp(18px, 2.3vw, 32px);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: -.045em;
+      text-transform: uppercase;
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 3px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 14px 16px;
+      font-size: 12px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.45);
+      transition: .18s var(--ease);
+    }
+
+    .button:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 8px 8px 0 var(--black);
+    }
+
+    .button.primary { background: var(--red); color: var(--white); }
+    .button.dark { background: var(--black); color: var(--white); border-color: var(--white); }
+
+    .hero-side {
+      display: grid;
+      gap: 14px;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .mission-card,
+    .signal-card,
+    .mini-map {
+      border: 3px solid var(--black);
+      background: rgba(248,244,236,.86);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-hard);
+      overflow: hidden;
+    }
+
+    .mission-card {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .mission-number {
+      font-size: clamp(54px, 7vw, 112px);
+      font-weight: 1000;
+      line-height: .74;
+      letter-spacing: -.09em;
+      color: var(--red);
+    }
+
+    .mission-card h2,
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(34px, 4.5vw, 68px);
+      line-height: .8;
+      letter-spacing: -.075em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .mission-card p,
+    .section-heading p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.32;
+      font-weight: 780;
+      color: rgba(17,17,17,.66);
+    }
+
+    .mini-map {
+      position: relative;
+      min-height: 350px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(255,59,47,.18), transparent 36%),
+        rgba(248,244,236,.9);
+    }
+
+    .map-title {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      border-bottom: 3px solid var(--black);
+      padding-bottom: 10px;
+    }
+
+    .map-title h3 {
+      margin: 0;
+      font-size: 30px;
+      line-height: .82;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .orbit {
+      position: absolute;
+      inset: 74px 24px 22px;
+      border: 2px dashed rgba(17,17,17,.22);
+      border-radius: 50%;
+      animation: rotateSteel 32s linear infinite;
+    }
+
+    .orbit.orbit-2 {
+      inset: 112px 76px 56px;
+      animation-duration: 22s;
+      animation-direction: reverse;
+      opacity: .75;
+    }
+
+    .core {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%);
+      width: 126px;
+      height: 126px;
+      border: 3px solid var(--black);
+      background:
+        radial-gradient(circle, rgba(255,59,47,.92), rgba(181,27,22,.9) 54%, rgba(17,17,17,.94) 55%);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 0 0 48px rgba(255,59,47,.32), 6px 6px 0 var(--black);
+      z-index: 4;
+    }
+
+    .node {
+      position: absolute;
+      width: 78px;
+      min-height: 54px;
+      border: 2px solid var(--black);
+      background: var(--white);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 7px;
+      font-size: 9px;
+      line-height: .98;
+      font-weight: 1000;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 0 rgba(17,17,17,.22);
+      z-index: 5;
+      transition: .18s var(--ease);
+    }
+
+    .node:hover { transform: translate(-2px, -2px) rotate(-2deg); box-shadow: 7px 7px 0 var(--black); background: var(--red); color: var(--white); }
+    .n1 { left: 8%; top: 34%; }
+    .n2 { right: 10%; top: 28%; }
+    .n3 { left: 17%; bottom: 12%; }
+    .n4 { right: 14%; bottom: 16%; }
+    .n5 { left: 43%; top: 18%; }
+    .n6 { left: 43%; bottom: 4%; }
+    .n7 { right: 4%; top: 54%; }
+
+    .signal-card {
+      padding: 16px;
+      background: var(--black);
+      color: var(--white);
+      display: grid;
+      gap: 10px;
+    }
+
+    .signal-row {
+      display: grid;
+      grid-template-columns: 92px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .signal-line {
+      height: 12px;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+
+    .signal-line span {
+      display: block;
+      height: 100%;
+      background: var(--red);
+      transform-origin: left;
+      animation: loadSignal 1.4s var(--ease) both;
+    }
+
+    .section {
+      margin-top: 68px;
+    }
+
+    .section-heading {
+      display: grid;
+      grid-template-columns: 1fr minmax(240px, 420px);
+      gap: 18px;
+      align-items: end;
+      border-top: 4px solid var(--black);
+      padding-top: 16px;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid var(--black);
+      padding: 5px 8px;
+      background: rgba(17,17,17,.045);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge.red { background: var(--red); color: var(--white); }
+    .badge.black { background: var(--black); color: var(--white); }
+    .badge.green { background: var(--green); color: var(--white); }
+    .badge.warn { background: var(--amber); color: var(--white); }
+
+    .tool-actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .open-link {
+      border: 3px solid var(--black);
+      background: var(--red);
+      color: var(--white);
+      padding: 11px 13px;
+      font-size: 11px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 4px 4px 0 var(--black);
+      transition: .18s var(--ease);
+    }
+
+    .open-link:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--black); }
+
+    .system-map {
+      display: grid;
+      grid-template-columns: minmax(320px, .8fr) minmax(0, 1.2fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .map-brief {
+      border: 3px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      padding: 18px;
+      min-height: 520px;
+      box-shadow: var(--shadow-hard);
+      display: grid;
+      align-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-brief::after {
+      content: "MAP";
+      position: absolute;
+      right: -10px;
+      bottom: -14px;
+      color: rgba(255,255,255,.055);
+      font-size: clamp(86px, 12vw, 190px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .75;
+    }
+
+    .map-brief h2 {
+      margin: 14px 0 0;
+      color: var(--white);
+      max-width: 760px;
+    }
+
+    .map-brief p {
+      position: relative;
+      z-index: 2;
+      margin: 14px 0 0;
+      color: rgba(255,255,255,.72);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 780;
+    }
+
+    .map-shortcuts {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .map-shortcuts a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 2px solid rgba(255,255,255,.26);
+      background: rgba(255,255,255,.07);
+      color: var(--white);
+      padding: 11px 12px;
+      font-size: 11px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: .18s var(--ease);
+    }
+
+    .map-shortcuts a:hover {
+      border-color: var(--white);
+      background: var(--red);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 rgba(255,255,255,.22);
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .map-module {
+      position: relative;
+      min-height: 252px;
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 16px;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.14);
+      display: grid;
+      align-content: space-between;
+      overflow: hidden;
+      transition: .2s var(--ease);
+    }
+
+    .map-module::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 12px;
+      background: var(--red);
+    }
+
+    .map-module::after {
+      content: attr(data-code);
+      position: absolute;
+      right: 10px;
+      bottom: -8px;
+      color: rgba(17,17,17,.045);
+      font-size: clamp(50px, 7vw, 96px);
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      line-height: .8;
+    }
+
+    .map-module:hover {
+      transform: translate(-4px, -4px);
+      box-shadow: 10px 10px 0 var(--black), var(--soft);
+      background: #fffdf8;
+    }
+
+    .map-module h3 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 90%;
+      font-size: clamp(28px, 3vw, 48px);
+      line-height: .82;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .map-module p {
+      position: relative;
+      z-index: 2;
+      margin: 12px 0 0;
+      max-width: 88%;
+      color: rgba(17,17,17,.68);
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 780;
+    }
+
+    .module-action {
+      position: relative;
+      z-index: 2;
+      width: fit-content;
+      border: 3px solid var(--black);
+      background: var(--red);
+      color: var(--white);
+      padding: 11px 13px;
+      font-size: 11px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 4px 4px 0 var(--black);
+      transition: .18s var(--ease);
+    }
+
+    .module-action:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--black); }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .flow-card {
+      border: 3px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      padding: 18px;
+      min-height: 380px;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-card::after {
+      content: "СИСТЕМА";
+      position: absolute;
+      right: -8px;
+      bottom: -8px;
+      color: rgba(255,255,255,.055);
+      font-size: clamp(70px, 10vw, 150px);
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      line-height: .8;
+    }
+
+    .flow-steps {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 12px;
+      align-items: start;
+      border: 2px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+      padding: 12px;
+    }
+
+    .flow-step b {
+      color: var(--red);
+      font-size: 34px;
+      line-height: .8;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+    }
+
+    .flow-step strong {
+      display: block;
+      font-size: 16px;
+      line-height: .9;
+      text-transform: uppercase;
+      font-weight: 1000;
+      margin-bottom: 6px;
+    }
+
+    .flow-step span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.32;
+      font-weight: 760;
+      color: rgba(255,255,255,.72);
+    }
+
+    .launch-card {
+      border: 3px solid var(--black);
+      background:
+        radial-gradient(circle at 74% 16%, rgba(255,59,47,.24), transparent 28%),
+        var(--paper);
+      padding: 18px;
+      box-shadow: var(--shadow-hard);
+      display: grid;
+      align-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .launch-card::after {
+      content: "01";
+      position: absolute;
+      right: -12px;
+      bottom: -20px;
+      font-size: 210px;
+      line-height: .8;
+      letter-spacing: -.12em;
+      font-weight: 1000;
+      color: rgba(17,17,17,.06);
+    }
+
+    .launch-card h3 {
+      margin: 0;
+      font-size: clamp(42px, 5vw, 80px);
+      line-height: .78;
+      letter-spacing: -.08em;
+      text-transform: uppercase;
+      font-weight: 1000;
+      position: relative;
+      z-index: 2;
+    }
+
+    .launch-card p {
+      position: relative;
+      z-index: 2;
+      margin: 14px 0 0;
+      font-size: 15px;
+      line-height: 1.32;
+      font-weight: 800;
+      color: rgba(17,17,17,.68);
+    }
+
+    .duty-board {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .duty-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 2px solid rgba(17,17,17,.2);
+      background: rgba(255,255,255,.58);
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 850;
+    }
+
+    .duty-row b {
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .duty-row span {
+      color: rgba(17,17,17,.62);
+      text-align: right;
+    }
+
+    .footer {
+      margin-top: 68px;
+      border: 3px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: end;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .footer h2 {
+      color: var(--white);
+      max-width: 900px;
+    }
+
+    .footer p {
+      margin: 12px 0 0;
+      color: rgba(255,255,255,.68);
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 760;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 80;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: .22s var(--ease);
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--white);
+      padding: 12px 14px;
+      font-weight: 900;
+      box-shadow: 6px 6px 0 var(--red);
+      max-width: 360px;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s var(--ease), transform .7s var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes pulseGlow {
+      from { opacity: .55; transform: scale(.92); }
+      to { opacity: 1; transform: scale(1.08); }
+    }
+
+    @keyframes sparkBreath {
+      from { transform: rotate(45deg) scale(.9); }
+      to { transform: rotate(45deg) scale(1.14); }
+    }
+
+    @keyframes rotateSteel {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes floatSpark {
+      from { transform: translate3d(0, 110vh, 0) rotate(0deg); opacity: 0; }
+      12% { opacity: .7; }
+      78% { opacity: .55; }
+      to { transform: translate3d(var(--drift), -20vh, 0) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes loadSignal {
+      from { transform: scaleX(.12); }
+      to { transform: scaleX(1); }
+    }
+
+    @media (max-width: 1180px) {
+      .hero,
+      .workflow,
+      .system-map,
+      .section-heading,
+      .footer { grid-template-columns: 1fr; }
+      .nav { grid-template-columns: 1fr; }
+      .nav-links { justify-content: start; }
+    }
+
+    @media (max-width: 760px) {
+      .app { width: min(100% - 18px, 1600px); padding-top: 10px; }
+      .hero-main { padding: 18px; min-height: 620px; }
+      .hero-kicker { display: grid; }
+      .mini-map { min-height: 420px; }
+      .node { width: 74px; }
+      .n1 { left: 4%; top: 35%; }
+      .n2 { right: 3%; top: 31%; }
+      .n3 { left: 7%; bottom: 15%; }
+      .n4 { right: 6%; bottom: 18%; }
+      .n5 { left: 39%; top: 18%; }
+      .n6 { left: 39%; bottom: 5%; }
+      .n7 { right: 5%; top: 52%; }
+      .system-map { grid-template-columns: 1fr; }
+      .map-grid { grid-template-columns: 1fr; }
+      .footer { align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="forge-glow" aria-hidden="true"></div>
+  <div class="spark-field" id="sparkField" aria-hidden="true"></div>
+
+  <div class="app">
+    <nav class="nav">
+      <a class="brand-mark" href="#top"><span class="brand-spark"></span> Пульт НГО</a>
+      <div class="nav-links">
+        <a href="#system-map">карта</a>
+        <a href="#workflow">маршрут</a>
+        <a href="#duty">дежурный старт</a>
+      </div>
+      <a class="nav-action" href="2-Горн событий.html">создать событие</a>
+    </nav>
+
+    <header class="hero" id="top">
+      <section class="hero-main reveal">
+        <div>
+          <div class="hero-kicker">
+            <div class="tag"><span class="brand-spark"></span> НГО / КУЗНИЦА КАДРОВ / ЦИФРОВОЙ ШТАБ</div>
+            <div class="status-pill">8 сервисов · 1 пульт</div>
+          </div>
+          <h1>Пульт<br>НГО</h1>
+          <p class="lead">Рабочий вход для сотрудников штаба: увидеть отряды, собрать событие, посчитать смету, подготовить тексты и закрыть срочные задачи.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#system-map">открыть карту</a>
+            <a class="button dark" href="6-Штабной аварийник.html">дежурный режим</a>
+          </div>
+        </div>
+        <div class="tag">одна папка · один пульт · общие данные</div>
+      </section>
+
+      <aside class="hero-side">
+        <article class="mission-card reveal">
+          <div class="mission-number">01</div>
+          <h2>Рабочее место штаба.</h2>
+          <p>Главная не продаёт систему, а помогает быстро выбрать действие: событие, смета, текст, письмо, партнёр, аварийный сценарий или состояние отрядов.</p>
+        </article>
+
+        <article class="mini-map reveal">
+          <div class="map-title">
+            <h3>Карта<br>системы</h3>
+            <span class="badge red">live</span>
+          </div>
+          <div class="orbit"></div>
+          <div class="orbit orbit-2"></div>
+          <div class="core">НГО<br>пульт</div>
+          <a class="node n1" href="1-Пульс НГО.html">отряды</a>
+          <a class="node n2" href="2-Горн событий.html">события</a>
+          <a class="node n3" href="4-Голос НГО.html">медиа</a>
+          <a class="node n4" href="5-Партнерский Горн.html">партнёры</a>
+          <a class="node n5" href="7-Письменный горн.html">письма</a>
+          <a class="node n6" href="6-Штабной аварийник.html">аварийник</a>
+          <a class="node n7" href="3-Смета Горна.html">смета</a>
+        </article>
+
+        <article class="signal-card reveal">
+          <div class="signal-row"><span>событие</span><div class="signal-line"><span style="width:100%"></span></div><b>→</b></div>
+          <div class="signal-row"><span>смета</span><div class="signal-line"><span style="width:100%"></span></div><b>auto</b></div>
+          <div class="signal-row"><span>письма</span><div class="signal-line"><span style="width:82%"></span></div><b>doc</b></div>
+          <div class="signal-row"><span>кризис</span><div class="signal-line"><span style="width:64%"></span></div><b>sos</b></div>
+        </article>
+      </aside>
+    </header>
+
+    <section class="section" id="system-map">
+      <div class="section-heading reveal">
+        <h2>Карта<br>системы</h2>
+        <p>Не каталог страниц, а рабочая схема: выбери, что сейчас делает штаб, и открой нужный модуль без лишних технических кнопок.</p>
+      </div>
+
+      <div class="system-map">
+        <article class="map-brief reveal">
+          <div>
+            <div class="tag"><span class="brand-spark"></span> рабочая навигация</div>
+            <h2>Открывай не страницу, а задачу.</h2>
+            <p>Главная карта оставляет только действия, которые реально нужны сотруднику: проверить отряды, спланировать событие, посчитать деньги, подготовить коммуникацию или включить аварийный сценарий.</p>
+          </div>
+          <div class="map-shortcuts">
+            <a href="2-Горн событий.html"><span>начать с события</span><b>01</b></a>
+            <a href="3-Смета Горна.html"><span>проверить смету</span><b>02</b></a>
+            <a href="6-Штабной аварийник.html"><span>открыть SOS</span><b>03</b></a>
+          </div>
+        </article>
+
+        <div class="map-grid">
+          <article class="map-module reveal" id="pulse" data-code="01">
+            <div>
+              <h3>Пульс НГО</h3>
+              <p>К кому пора вернуться: отряды, связи, касания, риски и точки роста.</p>
+            </div>
+            <a class="module-action" href="1-Пульс НГО.html">проверить отряды</a>
+          </article>
+
+          <article class="map-module reveal" id="events" data-code="02">
+            <div>
+              <h3>Горн событий</h3>
+              <p>Создать мероприятие: смысл, программа, роли, тайминг и сценарий ведущего.</p>
+            </div>
+            <a class="module-action" href="2-Горн событий.html">собрать событие</a>
+          </article>
+
+          <article class="map-module reveal" id="budget" data-code="03">
+            <div>
+              <h3>Смета Горна</h3>
+              <p>Посчитать оргвзнос, поддержку, резерв и автоматически увидеть события из Горна.</p>
+            </div>
+            <a class="module-action" href="3-Смета Горна.html">посчитать бюджет</a>
+          </article>
+
+          <article class="map-module reveal" id="voice" data-code="04">
+            <div>
+              <h3>Голос НГО</h3>
+              <p>Быстро подготовить анонс, итог, пост, сообщение в чат или текст для клипа.</p>
+            </div>
+            <a class="module-action" href="4-Голос НГО.html">написать текст</a>
+          </article>
+
+          <article class="map-module reveal" id="partners" data-code="05">
+            <div>
+              <h3>Партнёрский горн</h3>
+              <p>Собрать предложение, письмо, скрипт звонка и базу контактов для поддержки проекта.</p>
+            </div>
+            <a class="module-action" href="5-Партнерский Горн.html">готовить партнёра</a>
+          </article>
+
+          <article class="map-module reveal" id="letters" data-code="06">
+            <div>
+              <h3>Письменный горн</h3>
+              <p>Официальные письма, обращения и благодарности с предпросмотром и печатью.</p>
+            </div>
+            <a class="module-action" href="7-Письменный горн.html">собрать письмо</a>
+          </article>
+
+          <article class="map-module reveal" id="sos" data-code="07">
+            <div>
+              <h3>Штабной аварийник</h3>
+              <p>Когда нужно действовать сразу: сообщения, чек-листы, роли и порядок реакции.</p>
+            </div>
+            <a class="module-action" href="6-Штабной аварийник.html">включить SOS</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-heading reveal">
+        <h2>Как это<br>работает</h2>
+        <p>Логика не “набор сайтов”, а цифровая экосистема штаба. Каждый инструмент закрывает конкретную ситуацию и передаёт результат дальше.</p>
+      </div>
+      <div class="workflow">
+        <article class="flow-card reveal">
+          <div class="tag"><span class="brand-spark"></span> маршрут штаба</div>
+          <div class="flow-steps">
+            <div class="flow-step"><b>01</b><div><strong>Сначала видим систему</strong><span>Пульс НГО показывает отряды, связи, риски и людей, с которыми нужно работать.</span></div></div>
+            <div class="flow-step"><b>02</b><div><strong>Потом собираем событие</strong><span>Горн событий формирует смысл, программу, тайминг и сценарий.</span></div></div>
+            <div class="flow-step"><b>03</b><div><strong>Считаем деньги</strong><span>Смета Горна проверяет оргвзнос, поддержку, резерв и безубыточность.</span></div></div>
+            <div class="flow-step"><b>04</b><div><strong>Упаковываем коммуникацию</strong><span>Голос НГО, Партнёрский горн и Письменный горн собирают тексты, письма и предложения.</span></div></div>
+            <div class="flow-step"><b>05</b><div><strong>Если всё горит</strong><span>Штабной аварийник даёт готовые сообщения, инструкции и алгоритм действий.</span></div></div>
+          </div>
+        </article>
+        <article class="launch-card reveal" id="duty">
+          <div>
+            <div class="tag" style="color:var(--black); border-color:rgba(17,17,17,.28); background:rgba(255,255,255,.45)">дежурный старт</div>
+            <h3>Что делаем первым?</h3>
+            <p>Если задача только появилась, начни с события: оно автоматически попадёт в смету. Если ситуация срочная, сразу открывай аварийник и распределяй роли.</p>
+            <div class="duty-board" id="dutyBoard"></div>
+          </div>
+          <div class="tool-actions">
+            <a class="open-link" href="2-Горн событий.html">создать событие</a>
+            <a class="open-link" href="6-Штабной аварийник.html">открыть SOS</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer reveal" id="duty-cta">
+      <div>
+        <div class="tag"><span class="brand-spark"></span> НГО / цифровая кузница</div>
+        <h2>Открой пульт, выбери задачу, оставь след в системе.</h2>
+        <p>Для сотрудника штаба главный результат простой: событие не теряется, смета подтягивается, тексты и документы собираются там же, где идёт работа.</p>
+      </div>
+      <a class="button primary" href="#system-map">к карте задач</a>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    function qs(selector) { return document.querySelector(selector); }
+    function qsa(selector) { return [...document.querySelectorAll(selector)]; }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function initSparks() {
+      const field = qs('#sparkField');
+      const count = window.innerWidth < 760 ? 18 : 34;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'spark-dot';
+        dot.style.left = Math.random() * 100 + 'vw';
+        dot.style.animationDuration = 5 + Math.random() * 7 + 's';
+        dot.style.animationDelay = -Math.random() * 8 + 's';
+        dot.style.setProperty('--drift', (Math.random() * 180 - 90) + 'px');
+        field.appendChild(dot);
+      }
+    }
+
+    function initReveal() {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: .12 });
+      qsa('.reveal').forEach(el => observer.observe(el));
+    }
+
+    function initTilt() {
+      qsa('.map-module').forEach(card => {
+        card.addEventListener('mousemove', event => {
+          const rect = card.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width - .5;
+          const y = (event.clientY - rect.top) / rect.height - .5;
+          card.style.transform = `translate(-5px, -5px) rotateX(${y * -4}deg) rotateY(${x * 5}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
+    }
+
+    function renderDutyBoard() {
+      const board = qs('#dutyBoard');
+      if (!board || !window.NgoSystem) return;
+      const duty = window.NgoSystem.dutyState();
+      const rows = [
+        ['активное событие', duty.activeEvent?.name || 'ещё не выбрано'],
+        ['заполненность', duty.activeEvent ? `${duty.completion.done}/${duty.completion.total}` : 'создай событие'],
+        ['смета', duty.activeBudget ? 'связана с событием' : 'нужно открыть смету'],
+        ['следующий шаг', duty.actions[2]]
+      ];
+      board.innerHTML = rows.map(([label, value]) => `
+        <div class="duty-row"><b>${escapeHtml(label)}</b><span>${escapeHtml(value)}</span></div>
+      `).join('');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    initSparks();
+    initReveal();
+    initTilt();
+    renderDutyBoard();
+  </script>
+</body>
+</html>

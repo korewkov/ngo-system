@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Штабной аварийник — оперативные тексты НГО</title>
+  <style>
+    /* =========================================================
+       ШТАБНОЙ АВАРИЙНИК — оперативная панель НГО
+       Идея: когда всё горит — текст уже готов.
+       Стиль: кузница кадров, красный/чёрный/молочный,
+       постерная сетка, технические плашки, ощущение контроля.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --warning: #B87333;
+      --green: #34785C;
+      --line: rgba(17,17,17,.18);
+      --shadow-hard: 7px 7px 0 #111111;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .28), transparent 18%),
+        radial-gradient(circle at 84% 5%, rgba(255, 59, 47, .14), transparent 22%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+    button.active { background: var(--black); color: var(--white); }
+    button.danger { background: var(--red); color: var(--white); border-width: 3px; box-shadow: 6px 6px 0 var(--black); }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: var(--red); box-shadow: 4px 4px 0 rgba(255,59,47,.22); }
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17,17,17,.66);
+    }
+
+    .app { width: min(1500px, calc(100vw - 28px)); margin: 0 auto; padding: 22px 0 72px; }
+
+    .topbar { display: grid; grid-template-columns: 1.15fr 330px; gap: 16px; align-items: stretch; margin-bottom: 16px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 3px solid var(--black);
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.86) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.25) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.72) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "АВАРИЙНЫЙ\\A ШТАБ";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233,228,218,.075);
+      font-size: clamp(54px, 9vw, 132px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row { position: relative; z-index: 2; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .kicker { display:inline-flex; align-items:center; gap:9px; border:1px solid rgba(255,255,255,.32); background:rgba(255,255,255,.07); padding:8px 10px; font-size:10px; font-weight:950; letter-spacing:.14em; text-transform:uppercase; }
+    .spark { width:10px; height:10px; background:var(--red); border-radius:50%; box-shadow:0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red); display:inline-block; }
+    .logo-drop { width:86px; height:86px; flex:0 0 auto; border:2px dashed rgba(255,255,255,.62); display:grid; place-items:center; color:rgba(255,255,255,.78); text-align:center; font-size:9px; line-height:1.1; font-weight:950; letter-spacing:.08em; text-transform:uppercase; background:rgba(255,255,255,.06); }
+
+    h1 { position:relative; z-index:2; margin:0; max-width:1120px; font-size:clamp(52px, 9vw, 136px); line-height:.78; letter-spacing:-.09em; text-transform:uppercase; font-weight:1000; }
+    .subtitle { position:relative; z-index:2; margin:16px 0 0; max-width:860px; color:rgba(233,228,218,.84); font-size:clamp(17px,2.2vw,30px); line-height:1.02; font-weight:900; text-transform:uppercase; letter-spacing:-.035em; }
+    .red-thread { position:relative; z-index:2; margin-top:18px; height:8px; background:var(--red); width:min(560px,82%); box-shadow:0 0 24px rgba(255,59,47,.5); }
+
+    .panel-actions { min-width:310px; border:3px solid var(--black); background:linear-gradient(180deg, var(--white), var(--paper)); padding:16px; display:grid; gap:9px; box-shadow:var(--shadow-hard); position:relative; overflow:hidden; }
+    .panel-actions::before { content:"ОПЕРАТИВНЫЙ ПУЛЬТ"; position:absolute; right:-66px; top:31px; transform:rotate(35deg); background:var(--black); color:var(--white); padding:5px 60px; font-size:9px; font-weight:1000; letter-spacing:.08em; }
+
+    .technical { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.115em; color:rgba(17,17,17,.56); }
+
+    .workspace { display:grid; grid-template-columns:420px 1fr; gap:16px; align-items:start; }
+    .sidebar, .main-section, .modal-card { border:3px solid var(--black); background:rgba(248,244,236,.92); box-shadow:var(--shadow-hard); }
+    .sidebar { position:sticky; top:14px; padding:16px; display:grid; gap:14px; background:linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%), rgba(248,244,236,.94); }
+    .main-section { padding:16px; overflow:hidden; background:linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%), rgba(248,244,236,.94); }
+
+    .section-title { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:14px; border-bottom:3px solid var(--black); padding-bottom:10px; }
+    h2 { margin:0; font-size:36px; line-height:.82; letter-spacing:-.07em; text-transform:uppercase; font-weight:1000; }
+    h3 { margin:0; font-size:24px; line-height:.88; letter-spacing:-.055em; text-transform:uppercase; font-weight:1000; }
+
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .tab.active { background:var(--black); color:var(--white); }
+
+    .stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:14px; }
+    .stat { border:3px solid var(--black); background:var(--white); min-height:112px; padding:13px; position:relative; overflow:hidden; box-shadow:5px 5px 0 rgba(17,17,17,.15); }
+    .stat::before { content:""; position:absolute; inset:0 auto 0 0; width:7px; background:var(--red); }
+    .stat::after { content:"SOS"; position:absolute; right:8px; top:9px; color:rgba(17,17,17,.08); font-size:40px; font-weight:1000; letter-spacing:-.08em; }
+    .stat-value { display:block; font-size:clamp(34px,4vw,58px); line-height:.82; font-weight:1000; color:var(--red); letter-spacing:-.08em; }
+    .stat-title { margin-top:9px; font-size:11px; line-height:.95; font-weight:950; text-transform:uppercase; }
+
+    .form-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+    .form-grid .span-2 { grid-column:span 2; }
+
+    .subcard, .output-card, .scenario-card, .check-card, .history-card, .template-card { border:3px solid var(--black); background:rgba(255,255,255,.74); padding:14px; }
+    .output-list, .scenario-grid, .checklist-list, .history-list, .template-grid, .crisis-grid { display:grid; gap:10px; }
+
+    .output-card { background:var(--white); position:relative; overflow:hidden; display:grid; gap:10px; }
+    .output-card::before { content:""; position:absolute; inset:0 auto 0 0; width:8px; background:var(--red); }
+    .output-card h3, .output-text { padding-left:8px; }
+    .output-text { white-space:pre-line; font-size:15px; line-height:1.42; font-weight:650; color:rgba(17,17,17,.88); }
+
+    .scenario-grid, .crisis-grid { grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); }
+    .scenario-card, .template-card { min-height:118px; display:grid; gap:8px; align-content:start; background:var(--white); position:relative; overflow:hidden; text-align:left; }
+    .scenario-card::after, .template-card::after { content:"ШТАБ"; position:absolute; right:8px; bottom:4px; font-size:36px; font-weight:1000; letter-spacing:-.08em; color:rgba(17,17,17,.045); pointer-events:none; }
+    .scenario-card.danger-zone { border-color:var(--red); box-shadow: inset 0 0 0 5px rgba(255,59,47,.10); }
+    .scenario-card strong, .template-card strong { font-size:16px; line-height:.95; text-transform:uppercase; position:relative; z-index:2; }
+    .scenario-card small, .template-card small { font-size:11px; font-weight:800; color:rgba(17,17,17,.62); position:relative; z-index:2; }
+
+    .badge { display:inline-flex; width:fit-content; border:2px solid var(--black); padding:5px 8px; background:rgba(17,17,17,.045); font-size:9px; font-weight:1000; text-transform:uppercase; letter-spacing:.06em; }
+    .badge.red { background:var(--red); color:var(--white); }
+    .badge.black { background:var(--black); color:var(--white); }
+    .badge.green { background:var(--green); color:var(--white); }
+    .badge.warn { background:var(--warning); color:var(--white); }
+    .badges { display:flex; flex-wrap:wrap; gap:6px; }
+
+    .crisis-shell { border:4px solid var(--red); background:linear-gradient(135deg, rgba(255,59,47,.10), rgba(255,255,255,.72)); padding:14px; box-shadow:6px 6px 0 var(--black); }
+
+    .check-card { background:var(--white); display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:10px; }
+    .check-card input { width:22px; height:22px; accent-color:var(--red); box-shadow:none; }
+    .check-card.done { opacity:.62; background:rgba(255,255,255,.55); }
+    .check-card.done .check-title { text-decoration:line-through; }
+    .check-title { font-size:16px; line-height:1.05; font-weight:950; text-transform:uppercase; }
+    .check-note { font-size:12px; font-weight:750; color:rgba(17,17,17,.68); margin-top:4px; }
+
+    .history-card { background:var(--white); display:grid; gap:10px; }
+    .history-text { white-space:pre-line; font-size:14px; line-height:1.4; font-weight:700; }
+
+    .empty-state { border:3px dashed var(--black); padding:22px; background:rgba(255,255,255,.5); font-size:13px; font-weight:850; line-height:1.35; }
+
+    .toast { position:fixed; right:18px; bottom:18px; background:var(--black); color:var(--white); border:2px solid var(--white); padding:12px 14px; font-weight:900; z-index:80; transform:translateY(120px); opacity:0; transition:.2s ease; max-width:360px; box-shadow:6px 6px 0 var(--red); }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .hidden { display:none !important; }
+
+    @media print {
+      body { background:white; }
+      body::before, body::after, .panel-actions, .sidebar, .tabs, .toast, .no-print, .card-actions { display:none !important; }
+      .app { width:100%; padding:0; }
+      .topbar, .workspace { grid-template-columns:1fr; }
+      .hero, .main-section, .output-card, .check-card, .subcard { box-shadow:none; break-inside:avoid; }
+      .print-instruction #instructionPanel, .print-checklist #checklistPanel { display:block !important; }
+      .print-instruction .tab-panel:not(#instructionPanel), .print-checklist .tab-panel:not(#checklistPanel) { display:none !important; }
+    }
+
+    @media (max-width:1100px) { .topbar, .workspace { grid-template-columns:1fr; } .sidebar { position:static; } .stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:720px) { .app { width:min(100% - 18px,1500px); padding-top:10px; } .hero { padding:16px; min-height:260px; } .brand-row { align-items:start; } .logo-drop { width:68px; height:68px; } .stats { grid-template-columns:1fr 1fr; } .form-grid { grid-template-columns:1fr; } .form-grid .span-2 { grid-column:span 1; } .check-card { grid-template-columns:1fr; } h2 { font-size:30px; } }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / ОПЕРАТИВНЫЙ ШТАБ / SOS</div>
+          <div class="logo-drop">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Штабной аварийник</h1>
+        <p class="subtitle">Когда всё горит — текст уже готов</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions no-print">
+        <div class="technical">операции аварийника</div>
+        <button class="primary" id="generateBtn">собрать текст</button>
+        <button id="saveOutputBtn">сохранить текст</button>
+        <button id="printInstructionBtn">инструкция PDF</button>
+        <button id="exportJsonBtn">сохранить чек-листы</button>
+        <button id="importJsonBtn">загрузить чек-листы</button>
+        <button class="dark" id="clearStorageBtn">очистить базу</button>
+        <input type="file" id="jsonFileInput" accept="application/json" hidden />
+      </aside>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar no-print">
+        <div class="section-title"><h2>Ситуация</h2></div>
+        <form id="mainForm" class="form-grid">
+          <label class="span-2">кому пишем <select name="audience"></select></label>
+          <label class="span-2">событие <input name="event" placeholder="слёт, закрытие ТТС, выезд..." /></label>
+          <label>дата <input name="date" placeholder="сегодня / 25 мая / 18:00" /></label>
+          <label>место <input name="place" placeholder="штаб, ДК, база..." /></label>
+          <label>дедлайн <input name="deadline" placeholder="до 18:00 / до пятницы" /></label>
+          <label>ссылка <input name="link" placeholder="https://..." /></label>
+          <label class="span-2">тональность <select name="tone"></select></label>
+        </form>
+
+        <div class="subcard">
+          <div class="technical">выбранный режим</div>
+          <p id="modeHint" style="margin:8px 0 0; font-size:13px; font-weight:800; line-height:1.35;">Выбери раздел сверху и ситуацию — сервис соберёт текст и действия.</p>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <div class="stats" id="stats"></div>
+
+        <nav class="tabs no-print">
+          <button class="tab active" data-tab="chatPanel">сообщение в чат</button>
+          <button class="tab" data-tab="instructionPanel">инструкция</button>
+          <button class="tab" data-tab="checklistPanel">чек-лист</button>
+          <button class="tab danger" data-tab="crisisPanel">красная кнопка</button>
+          <button class="tab" data-tab="historyPanel">сохранённое</button>
+        </nav>
+
+        <section id="chatPanel" class="tab-panel">
+          <div class="section-title"><h2>Сообщение в чат</h2><div class="technical">коротко / расширенно / очень коротко</div></div>
+          <div class="scenario-grid" id="chatTypes"></div>
+          <div style="height:14px"></div>
+          <div class="output-list" id="chatOutput"></div>
+        </section>
+
+        <section id="instructionPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>Инструкция</h2><div class="technical">чат / печать / памятка</div></div>
+          <div class="template-grid" id="instructionTypes"></div>
+          <div style="height:14px"></div>
+          <div class="output-list" id="instructionOutput"></div>
+        </section>
+
+        <section id="checklistPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>Чек-лист события</h2><div class="technical" id="checkProgress">0%</div></div>
+          <div class="form-grid no-print" style="margin-bottom:14px;">
+            <label>тип события <select id="eventTypeSelect"></select></label>
+            <label>название чек-листа <input id="checklistName" placeholder="Городской слёт / фестиваль" /></label>
+          </div>
+          <div class="card-actions no-print" style="margin-bottom:14px;">
+            <button class="primary" id="buildChecklistBtn">собрать чек-лист</button>
+            <button id="printChecklistBtn">печать чек-листа</button>
+            <button id="clearChecklistBtn">сбросить галочки</button>
+          </div>
+          <div class="checklist-list" id="checklistList"></div>
+        </section>
+
+        <section id="crisisPanel" class="tab-panel hidden">
+          <div class="crisis-shell">
+            <div class="section-title"><h2>Красная кнопка</h2><div class="technical">спокойно, по шагам, без паники</div></div>
+            <div class="crisis-grid" id="crisisTypes"></div>
+            <div style="height:14px"></div>
+            <div class="output-list" id="crisisOutput"></div>
+          </div>
+        </section>
+
+        <section id="historyPanel" class="tab-panel hidden">
+          <div class="section-title"><h2>Сохранённое</h2><div class="technical" id="savedCount">0 записей</div></div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    const AUDIENCES = ['бойцам','командирам','оргкомитету','участникам','родителям','партнёрам'];
+    const TONES = ['коротко','мягко','строго','официально','не душно'];
+
+    const CHAT_TYPES = [
+      'напомнить о дедлайне','собрать заявки','попросить оплатить оргвзнос','объявить перенос','дать инструкцию','попросить командиров скинуть списки','мягко поторопить','строго поторопить','извиниться за изменение','объявить сбор','напомнить что взять с собой'
+    ];
+
+    const INSTRUCTION_TYPES = ['что взять на слёт','как добраться','как оплатить','как заселиться','правила проживания','техника безопасности','распорядок','дресс-код','что запрещено','к кому обращаться'];
+    const EVENT_TYPES = ['слёт','закрытие ТТС','фестиваль','спартакиада','встреча командиров','школа актива','выезд'];
+    const CRISIS_TYPES = ['мероприятие переносится','автобус задерживается','участник заболел','нет техники','база изменила условия','гость не приехал','проблема с оплатой','конфликт на мероприятии','потерялся участник','срочно нужна замена ответственного'];
+
+    const CHECKLIST_BASE = {
+      'за месяц':['утвердить цель и формат события','собрать оргкомитет и зоны ответственности','забронировать площадку','составить первичную смету','согласовать дату с ключевыми участниками','запустить черновой медиаплан'],
+      'за 2 недели':['зафиксировать программу','подтвердить гостей и партнёров','собрать списки участников','проверить договорённости по технике','заказать печать и раздатку','назначить ответственных за регистрацию'],
+      'за неделю':['проверить оплату и оргвзносы','разослать участникам первую инструкцию','подготовить сценарий ведущего','собрать презентации и медиа','проверить транспорт и логистику','сделать финальный созвон оргкомитета'],
+      'за 3 дня':['отправить финальную памятку','проверить списки и контакты','собрать аптечку и расходники','проверить тайминг по минутам','подтвердить питание/воду','назначить ответственного за форс-мажоры'],
+      'за день':['распечатать списки и таблички','проверить технику и зарядки','разложить материалы по зонам','отправить напоминание в чат','создать экстренный чат оргкомитета','сверить время прибытия всех ответственных'],
+      'в день события':['открыть регистрацию заранее','проверить связь с ответственными','держать тайминг и backstage','фиксировать проблемы в заметках','сделать общие фото и медиа','не выпускать участников без финальной информации'],
+      'после события':['собрать обратную связь','поблагодарить партнёров и участников','опубликовать итоги','закрыть финансовые вопросы','собрать фото/видео архив','провести разбор с оргкомитетом']
+    };
+
+    const state = {
+      activeTab:'chatPanel',
+      chatType: CHAT_TYPES[0],
+      instructionType: INSTRUCTION_TYPES[0],
+      crisisType: CRISIS_TYPES[0],
+      outputs: { chat:[], instruction:[], crisis:[] },
+      saved: loadSaved(),
+      checklists: loadChecklists(),
+      currentChecklistId: null
+    };
+
+    function loadSaved() { try { return JSON.parse(localStorage.getItem('avariynikSaved')) || []; } catch { return []; } }
+    function loadChecklists() { try { return JSON.parse(localStorage.getItem('avariynikChecklists')) || []; } catch { return []; } }
+    function saveAll() { localStorage.setItem('avariynikSaved', JSON.stringify(state.saved)); localStorage.setItem('avariynikChecklists', JSON.stringify(state.checklists)); }
+
+    function qs(s) { return document.querySelector(s); }
+    function qsa(s) { return [...document.querySelectorAll(s)]; }
+    function fillSelect(select, values) { select.innerHTML = ''; values.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; select.appendChild(o); }); }
+    function formData() { return Object.fromEntries(new FormData(qs('#mainForm')).entries()); }
+
+    function initControls() {
+      const form = qs('#mainForm');
+      fillSelect(form.elements.audience, AUDIENCES);
+      fillSelect(form.elements.tone, TONES);
+      form.elements.audience.value = 'участникам';
+      form.elements.tone.value = 'не душно';
+      form.elements.event.value = 'городское событие НГО';
+      fillSelect(qs('#eventTypeSelect'), EVENT_TYPES);
+      qs('#eventTypeSelect').value = 'слёт';
+      qs('#checklistName').value = 'Чек-лист события НГО';
+      if (state.checklists[0]) state.currentChecklistId = state.checklists[0].id;
+    }
+
+    function toneStart(tone) {
+      const map = {
+        'коротко':'Коротко.',
+        'мягко':'Друзья, мягко напоминаем.',
+        'строго':'Коллеги, важно выполнить без переноса сроков.',
+        'официально':'Уважаемые участники, информируем вас.',
+        'не душно':'Команда, быстро и по делу.'
+      };
+      return map[tone] || map['не душно'];
+    }
+
+    function generateChat() {
+      const d = formData();
+      const base = `${d.event || 'событие'}${d.date ? ` · ${d.date}` : ''}${d.place ? ` · ${d.place}` : ''}`;
+      const deadline = d.deadline ? `Дедлайн: ${d.deadline}.` : 'Дедлайн уточним отдельно.';
+      const link = d.link ? `\nСсылка: ${d.link}` : '';
+      const action = chatAction(state.chatType, d);
+
+      const short = `${toneStart(d.tone)}\n${base}.\n${action}\n${deadline}${link}`;
+      const long = `${toneStart(d.tone)}\n\nПишем ${d.audience || 'участникам'} по ситуации: ${state.chatType}.\n\nСобытие: ${base}.\n\nЧто нужно сделать:\n${action}\n\n${deadline}\n\nПроверьте, пожалуйста, что информация дошла до своих людей. Если есть вопросы — пишите ответственному в штабе.${link}`;
+      const tiny = `${state.chatType.toUpperCase()}: ${d.event || 'событие'}. ${deadline}${d.link ? ' Ссылка в сообщении.' : ''}`;
+      state.outputs.chat = [
+        { id: crypto.randomUUID(), type:'короткий текст', text: short },
+        { id: crypto.randomUUID(), type:'расширенный текст', text: long },
+        { id: crypto.randomUUID(), type:'очень коротко', text: tiny }
+      ];
+      renderAll();
+      toast('Сообщение в чат собрано.');
+    }
+
+    function chatAction(type, d) {
+      const map = {
+        'напомнить о дедлайне':`Нужно закрыть задачу по дедлайну. Проверьте свои пункты и отпишитесь о статусе.`,
+        'собрать заявки':`Нужно заполнить заявку и передать информацию тем, кто ещё не видел сообщение.`,
+        'попросить оплатить оргвзнос':`Просьба оплатить оргвзнос и прислать подтверждение ответственному.`,
+        'объявить перенос':`Есть изменение: событие переносится. Новые вводные сообщим дополнительно, текущую информацию зафиксируйте.`,
+        'дать инструкцию':`Ниже инструкция. Сохраняйте сообщение и сверяйтесь с ним перед событием.`,
+        'попросить командиров скинуть списки':`Командирам нужно прислать актуальные списки людей в установленном формате.`,
+        'мягко поторопить':`Пожалуйста, не откладывайте. Нам нужно собрать данные, чтобы всё прошло спокойно.`,
+        'строго поторопить':`Это обязательная задача. Без выполнения в срок команда не сможет нормально подготовить событие.`,
+        'извиниться за изменение':`Извиняемся за изменение вводных. Корректируем план, чтобы сохранить качество и безопасность события.`,
+        'объявить сбор':`Объявляем сбор. Приходите вовремя, без опозданий, с готовностью включиться в работу.`,
+        'напомнить что взять с собой':`Проверьте вещи заранее: документы, зарядку, воду, одежду по погоде и всё, что указано в памятке.`
+      };
+      return map[type] || 'Нужно выполнить задачу и отписаться ответственному.';
+    }
+
+    function generateInstruction() {
+      const d = formData();
+      const title = state.instructionType;
+      const points = instructionPoints(title, d);
+      const chat = `${toneStart(d.tone)}\nИнструкция: ${title}.\n\n${points.map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\n${d.link ? `Ссылка: ${d.link}\n` : ''}Сохраните сообщение, чтобы не искать информацию в последний момент.`;
+      const print = `ИНСТРУКЦИЯ ДЛЯ УЧАСТНИКОВ\n${(d.event || 'событие НГО').toUpperCase()}\n\nТема: ${title}\nДата: ${d.date || 'уточняется'}\nМесто: ${d.place || 'уточняется'}\n\n${points.map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\nК кому обращаться: ответственный штаба / оргкомитет.\n${d.link ? `Ссылка: ${d.link}` : ''}`;
+      const memo = `${title.toUpperCase()}\n${points.slice(0,5).map(p=>'— '+p).join('\n')}`;
+      state.outputs.instruction = [
+        { id: crypto.randomUUID(), type:'текст в чат', text: chat },
+        { id: crypto.randomUUID(), type:'версия для печати', text: print },
+        { id: crypto.randomUUID(), type:'короткая памятка', text: memo }
+      ];
+      renderAll();
+      toast('Инструкция собрана.');
+    }
+
+    function instructionPoints(type, d) {
+      const event = d.event || 'событие';
+      const place = d.place || 'место будет уточнено';
+      const map = {
+        'что взять на слёт':['документы и медицинские/организационные справки, если требуются','сменную одежду и удобную обувь','зарядку, пауэрбанк, средства личной гигиены','бутылку воды и личные лекарства','отрядную форму или элементы дресс-кода'],
+        'как добраться':[`точка сбора: ${place}`,'приходить заранее, не в последнюю минуту','если опаздываете — сразу написать ответственному','держать телефон заряженным','не уходить с точки сбора без команды организаторов'],
+        'как оплатить':['проверьте сумму и реквизиты у ответственного','после оплаты отправьте подтверждение','подпишите перевод понятным комментарием','если не получается оплатить вовремя — предупредите заранее','не передавайте деньги без фиксации'],
+        'как заселиться':['держите документы под рукой','следуйте указаниям ответственного за размещение','не меняйтесь комнатами без согласования','после заселения проверьте место и сообщите о проблемах','соблюдайте правила площадки'],
+        'правила проживания':['уважать соседей и режим площадки','соблюдать чистоту в комнатах и общих зонах','не шуметь после отбоя','не портить имущество','о любых проблемах сразу сообщать оргкомитету'],
+        'техника безопасности':['не уходить с территории без согласования','соблюдать инструкции организаторов','при плохом самочувствии сразу сообщить ответственному','не трогать технику и оборудование без разрешения','в экстренной ситуации действовать по команде штаба'],
+        'распорядок':[`событие: ${event}`,'точное расписание будет в общем чате','приходить на блоки вовремя','перерывы не растягивать','после финала дождаться общей информации'],
+        'дресс-код':['одежда должна соответствовать формату события','если указана форма — приходить в форме','удобная обувь обязательна для активных блоков','для официальной части избегать случайного внешнего вида','если сомневаетесь — уточните у командира'],
+        'что запрещено':['самовольно уходить с площадки','мешать работе организаторов','нарушать правила безопасности','портить имущество площадки','игнорировать сообщения штаба'],
+        'к кому обращаться':['по организационным вопросам — к ответственному события','по спискам — к командиру','по медиа — к пресс-службе','по самочувствию — к ответственному за безопасность','если не знаете кому писать — пишите в оргчат']
+      };
+      return map[type] || ['следуйте инструкции штаба','проверяйте актуальные сообщения','вопросы задавайте ответственному'];
+    }
+
+    function generateCrisis() {
+      const d = formData();
+      const s = state.crisisType;
+      const cause = crisisCause(s);
+      state.outputs.crisis = [
+        { id: crypto.randomUUID(), type:'сообщение участникам', text:`Команда, важное обновление по событию «${d.event || 'мероприятие'}».\n\nСитуация: ${cause}.\n\nСохраняем спокойствие. Сейчас штаб уточняет вводные и даст финальную информацию. Не принимайте самостоятельных решений, следите за сообщениями в этом чате.${d.link ? `\n\nСсылка: ${d.link}` : ''}` },
+        { id: crypto.randomUUID(), type:'сообщение командирам', text:`Командиры, нужна оперативная сверка.\n\nСитуация: ${s}.\nСобытие: ${d.event || 'мероприятие'}.\n\nЧто сделать сейчас:\n1. Проверьте своих людей.\n2. Зафиксируйте, кто уже в курсе.\n3. Не распространяйте неподтверждённые версии.\n4. Передайте вопросы ответственному штаба.\n5. Дождитесь финального текста для участников.` },
+        { id: crypto.randomUUID(), type:'сообщение партнёру / администрации', text:`Уважаемые коллеги!\n\nИнформируем о внештатной ситуации по проекту «${d.event || 'мероприятие'}»: ${cause}.\n\nСо стороны штаба уже назначен ответственный, информация уточняется. Мы держим ситуацию под контролем и оперативно сообщим финальное решение.\n\nКонтакт для связи: ответственный НГО.` },
+        { id: crypto.randomUUID(), type:'внутренний алгоритм действий', text: crisisAlgorithm(s).map((p,i)=>`${i+1}. ${p}`).join('\n') },
+        { id: crypto.randomUUID(), type:'кому написать', text:['руководителю городского штаба','ответственному за событие','командирам отрядов / участникам','площадке или партнёру','медиа/пресс-службе для единого текста','ответственному за безопасность'].map(p=>'— '+p).join('\n') }
+      ];
+      renderAll();
+      toast('Красная кнопка отработала: тексты и алгоритм готовы.');
+    }
+
+    function crisisCause(s) {
+      const map = {
+        'мероприятие переносится':'мероприятие переносится по организационным причинам',
+        'автобус задерживается':'транспорт задерживается, время прибытия уточняется',
+        'участник заболел':'одному из участников стало плохо / требуется внимание ответственных',
+        'нет техники':'возникла проблема с техникой или оборудованием',
+        'база изменила условия':'площадка изменила часть условий, штаб уточняет решение',
+        'гость не приехал':'приглашённый гость не сможет прибыть вовремя',
+        'проблема с оплатой':'возникла проблема с оплатой или подтверждением платежей',
+        'конфликт на мероприятии':'возник конфликт, который нужно решить спокойно и без публичного разгона',
+        'потерялся участник':'участник не выходит на связь / не найден на точке',
+        'срочно нужна замена ответственного':'ответственный не может выполнить задачу, нужна быстрая замена'
+      };
+      return map[s] || s;
+    }
+
+    function crisisAlgorithm(s) {
+      const common = ['назначить одного ответственного за ситуацию','собрать факты: что произошло, где, кто рядом, что уже сделано','остановить хаотичные сообщения и договориться об одном официальном тексте','уведомить ключевых людей','зафиксировать решение и следующий контрольный срок'];
+      const extra = {
+        'потерялся участник':['позвонить участнику','проверить последнюю точку контакта','опросить командира и соседей','не отпускать группу до прояснения','при необходимости подключить площадку/охрану'],
+        'участник заболел':['оценить состояние без паники','найти ответственного за медицину/безопасность','сообщить командиру','изолировать от нагрузки','при необходимости вызвать медпомощь'],
+        'конфликт на мероприятии':['развести стороны','убрать обсуждение из общего чата','назначить спокойного медиатора','зафиксировать позиции','дать единое решение без публичного обвинения'],
+        'нет техники':['найти резервную технику','упростить программу','предупредить ведущего','убрать зависимые блоки','проверить звук/экран вручную'],
+        'автобус задерживается':['получить точное время у перевозчика','предупредить участников','пересобрать тайминг','держать людей в одной точке','обновлять информацию каждые 15–20 минут']
+      };
+      return extra[s] ? [...extra[s], ...common] : common;
+    }
+
+    function buildChecklist() {
+      const type = qs('#eventTypeSelect').value;
+      const name = qs('#checklistName').value || `Чек-лист: ${type}`;
+      const items = [];
+      Object.entries(CHECKLIST_BASE).forEach(([stage, tasks]) => {
+        tasks.forEach(task => items.push({ id: crypto.randomUUID(), stage, text: adaptTask(task, type), done:false, note:'' }));
+      });
+      const checklist = { id: crypto.randomUUID(), name, type, createdAt: new Date().toISOString(), items };
+      state.checklists.unshift(checklist);
+      state.currentChecklistId = checklist.id;
+      renderAll();
+      toast('Чек-лист собран. Галочки сохраняются.');
+    }
+
+    function adaptTask(task, type) {
+      if (type === 'спартакиада' && task.includes('площадку')) return 'забронировать спортплощадку и проверить инвентарь';
+      if (type === 'фестиваль' && task.includes('сценарий')) return 'подготовить сценарий, заявки участников и порядок выступлений';
+      if (type === 'выезд' && task.includes('транспорт')) return 'подтвердить транспорт, маршрут и ответственного за посадку';
+      return task;
+    }
+
+    function currentChecklist() { return state.checklists.find(c => c.id === state.currentChecklistId) || null; }
+
+    function toggleCheck(id) {
+      const c = currentChecklist();
+      const item = c?.items.find(i => i.id === id);
+      if (!item) return;
+      item.done = !item.done;
+      renderAll();
+    }
+
+    function resetChecklist() {
+      const c = currentChecklist();
+      if (!c) return;
+      c.items.forEach(i => i.done = false);
+      renderAll();
+      toast('Галочки сброшены.');
+    }
+
+    function renderStats() {
+      const c = currentChecklist();
+      const done = c ? c.items.filter(i => i.done).length : 0;
+      qs('#stats').innerHTML = `
+        <article class="stat"><span class="stat-value">${CHAT_TYPES.length}</span><div class="stat-title">чат-сценариев</div></article>
+        <article class="stat"><span class="stat-value">${INSTRUCTION_TYPES.length}</span><div class="stat-title">инструкций</div></article>
+        <article class="stat"><span class="stat-value">${CRISIS_TYPES.length}</span><div class="stat-title">красных кнопок</div></article>
+        <article class="stat"><span class="stat-value">${done}</span><div class="stat-title">пунктов закрыто</div></article>`;
+    }
+
+    function renderScenarioButtons() {
+      qs('#chatTypes').innerHTML = CHAT_TYPES.map(t => `<button class="scenario-card ${state.chatType === t ? 'active' : ''}" onclick="selectChatType('${escapeAttr(t)}')"><strong>${escapeHtml(t)}</strong><small>собрать сообщение</small></button>`).join('');
+      qs('#instructionTypes').innerHTML = INSTRUCTION_TYPES.map(t => `<button class="template-card ${state.instructionType === t ? 'active' : ''}" onclick="selectInstructionType('${escapeAttr(t)}')"><strong>${escapeHtml(t)}</strong><small>чат / печать / памятка</small></button>`).join('');
+      qs('#crisisTypes').innerHTML = CRISIS_TYPES.map(t => `<button class="scenario-card danger-zone ${state.crisisType === t ? 'active' : ''}" onclick="selectCrisisType('${escapeAttr(t)}')"><strong>${escapeHtml(t)}</strong><small>алгоритм и тексты</small></button>`).join('');
+    }
+
+    function renderOutputs() {
+      renderOutputList('#chatOutput', state.outputs.chat);
+      renderOutputList('#instructionOutput', state.outputs.instruction);
+      renderOutputList('#crisisOutput', state.outputs.crisis);
+    }
+
+    function renderOutputList(selector, list) {
+      qs(selector).innerHTML = list.map(o => `
+        <article class="output-card">
+          <h3>${escapeHtml(o.type)}</h3>
+          <div class="output-text">${escapeHtml(o.text)}</div>
+          <div class="card-actions no-print"><button class="small primary" onclick="copyOutput('${o.id}')">скопировать</button><button class="small" onclick="saveOneOutput('${o.id}')">сохранить</button></div>
+        </article>`).join('') || `<div class="empty-state">Выбери ситуацию и нажми “собрать текст”. Результат появится здесь.</div>`;
+    }
+
+    function renderChecklist() {
+      const c = currentChecklist();
+      if (!c) {
+        qs('#checklistList').innerHTML = `<div class="empty-state">Чек-лист пока не собран. Выбери тип события и нажми “собрать чек-лист”.</div>`;
+        qs('#checkProgress').textContent = '0%';
+        return;
+      }
+      const done = c.items.filter(i => i.done).length;
+      const progress = c.items.length ? Math.round(done / c.items.length * 100) : 0;
+      qs('#checkProgress').textContent = `${progress}% · ${c.name}`;
+      const grouped = groupBy(c.items, 'stage');
+      qs('#checklistList').innerHTML = Object.entries(grouped).map(([stage, items]) => `
+        <section class="subcard">
+          <div class="section-title"><h3>${escapeHtml(stage)}</h3><div class="technical">${items.filter(i=>i.done).length}/${items.length}</div></div>
+          <div class="checklist-list">
+            ${items.map(item => `<article class="check-card ${item.done ? 'done' : ''}">
+              <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck('${item.id}')" />
+              <div><div class="check-title">${escapeHtml(item.text)}</div><div class="check-note">${escapeHtml(c.type)} · сохраняется автоматически</div></div>
+              <button class="small no-print" onclick="deleteCheckItem('${item.id}')">удалить</button>
+            </article>`).join('')}
+          </div>
+        </section>`).join('');
+    }
+
+    function renderHistory() {
+      qs('#savedCount').textContent = `${state.saved.length} записей`;
+      qs('#historyList').innerHTML = state.saved.map(item => `
+        <article class="history-card">
+          <div class="badges"><span class="badge red">${escapeHtml(item.kind)}</span><span class="badge black">${escapeHtml(item.date)}</span></div>
+          <div class="history-text">${escapeHtml(item.text)}</div>
+          <div class="card-actions"><button class="small primary" onclick="copyRaw(${JSON.stringify(item.text)})">скопировать</button><button class="small" onclick="deleteSaved('${item.id}')">удалить</button></div>
+        </article>`).join('') || `<div class="empty-state">Сохранённых текстов пока нет. Сохраняй удачные сообщения, инструкции и кризисные шаблоны.</div>`;
+    }
+
+    function renderAll() { saveAll(); renderStats(); renderScenarioButtons(); renderOutputs(); renderChecklist(); renderHistory(); }
+
+    function groupBy(items, key) { return items.reduce((acc, item) => { acc[item[key]] = acc[item[key]] || []; acc[item[key]].push(item); return acc; }, {}); }
+
+    function selectChatType(type) { state.chatType = type; generateChat(); }
+    function selectInstructionType(type) { state.instructionType = type; generateInstruction(); }
+    function selectCrisisType(type) { state.crisisType = type; generateCrisis(); }
+
+    function generateByActiveTab() {
+      if (state.activeTab === 'chatPanel') generateChat();
+      else if (state.activeTab === 'instructionPanel') generateInstruction();
+      else if (state.activeTab === 'crisisPanel') generateCrisis();
+      else if (state.activeTab === 'checklistPanel') buildChecklist();
+      else generateChat();
+    }
+
+    function allOutputs() { return [...state.outputs.chat, ...state.outputs.instruction, ...state.outputs.crisis]; }
+    function findOutput(id) { return allOutputs().find(o => o.id === id); }
+
+    function copyOutput(id) { const o = findOutput(id); if (o) copyRaw(o.text); }
+    function copyRaw(text) { navigator.clipboard.writeText(text).then(() => toast('Скопировано.')); }
+
+    function saveOneOutput(id) {
+      const o = findOutput(id);
+      if (!o) return;
+      state.saved.unshift({ id: crypto.randomUUID(), kind: o.type, text: o.text, date: new Date().toLocaleDateString('ru-RU') });
+      renderAll();
+      toast('Текст сохранён.');
+    }
+
+    function saveCurrentOutputs() {
+      const pool = state.activeTab === 'chatPanel' ? state.outputs.chat : state.activeTab === 'instructionPanel' ? state.outputs.instruction : state.activeTab === 'crisisPanel' ? state.outputs.crisis : [];
+      if (!pool.length) return toast('Сначала собери текст.');
+      pool.forEach(o => state.saved.unshift({ id: crypto.randomUUID(), kind: o.type, text: o.text, date: new Date().toLocaleDateString('ru-RU') }));
+      renderAll();
+      toast('Тексты сохранены.');
+    }
+
+    function deleteSaved(id) { state.saved = state.saved.filter(i => i.id !== id); renderAll(); toast('Удалено.'); }
+    function deleteCheckItem(id) { const c = currentChecklist(); if (!c) return; c.items = c.items.filter(i => i.id !== id); renderAll(); }
+
+    function exportJson() { downloadFile('shtabnoy-avariynik-checklists.json', JSON.stringify({ saved:state.saved, checklists:state.checklists }, null, 2), 'application/json'); }
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          state.saved = Array.isArray(data.saved) ? data.saved : state.saved;
+          state.checklists = Array.isArray(data.checklists) ? data.checklists : Array.isArray(data) ? data : state.checklists;
+          state.currentChecklistId = state.checklists[0]?.id || null;
+          renderAll();
+          toast('JSON импортирован.');
+        } catch(e) { toast('Ошибка импорта: ' + e.message); }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    }
+
+    function printPanel(panelId, className) { setTab(panelId); document.body.classList.add(className); window.print(); setTimeout(()=>document.body.classList.remove(className), 300); }
+
+    function clearStorage() {
+      if (!confirm('Очистить сохранённые тексты и чек-листы в этом браузере?')) return;
+      state.saved = []; state.checklists = []; state.currentChecklistId = null;
+      localStorage.removeItem('avariynikSaved'); localStorage.removeItem('avariynikChecklists');
+      renderAll(); toast('База очищена.');
+    }
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tabs .tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+      const hints = {
+        chatPanel:'Выбери тип сообщения и заполни базовые поля: кому, событие, дату, дедлайн и ссылку.',
+        instructionPanel:'Выбери шаблон инструкции. Можно печатать как памятку через браузер.',
+        checklistPanel:'Выбери тип события и собери интерактивный чек-лист с сохранением галочек.',
+        crisisPanel:'Красная кнопка даёт тексты для участников, командиров, партнёров и алгоритм действий.',
+        historyPanel:'Здесь лежат сохранённые тексты и шаблоны.'
+      };
+      qs('#modeHint').textContent = hints[tabId] || '';
+    }
+
+    function escapeHtml(value) { return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+    function escapeAttr(value) { return String(value ?? '').replaceAll('\\','\\\\').replaceAll("'","\\'"); }
+    function toast(message) { const node = qs('#toast'); node.textContent = message; node.classList.add('show'); setTimeout(()=>node.classList.remove('show'), 2400); }
+
+    function bindEvents() {
+      qs('#generateBtn').addEventListener('click', generateByActiveTab);
+      qs('#saveOutputBtn').addEventListener('click', saveCurrentOutputs);
+      qs('#printInstructionBtn').addEventListener('click', () => printPanel('instructionPanel', 'print-instruction'));
+      qs('#printChecklistBtn').addEventListener('click', () => printPanel('checklistPanel', 'print-checklist'));
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());
+      qs('#jsonFileInput').addEventListener('change', e => e.target.files[0] && importJson(e.target.files[0]));
+      qs('#clearStorageBtn').addEventListener('click', clearStorage);
+      qs('#buildChecklistBtn').addEventListener('click', buildChecklist);
+      qs('#clearChecklistBtn').addEventListener('click', resetChecklist);
+      qsa('.tabs .tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+      qs('#mainForm').addEventListener('input', () => { if (state.activeTab === 'chatPanel') generateChat(); if (state.activeTab === 'instructionPanel') generateInstruction(); if (state.activeTab === 'crisisPanel') generateCrisis(); });
+    }
+
+    window.selectChatType = selectChatType;
+    window.selectInstructionType = selectInstructionType;
+    window.selectCrisisType = selectCrisisType;
+    window.copyOutput = copyOutput;
+    window.copyRaw = copyRaw;
+    window.saveOneOutput = saveOneOutput;
+    window.deleteSaved = deleteSaved;
+    window.toggleCheck = toggleCheck;
+    window.deleteCheckItem = deleteCheckItem;
+
+    initControls();
+    bindEvents();
+    generateChat();
+    generateInstruction();
+    generateCrisis();
+    if (!state.currentChecklistId) buildChecklist();
+    renderAll();
+  </script>
+</body>
+</html>

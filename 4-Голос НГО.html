@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Голос НГО — генератор текстов пресс-службы</title>
+  <style>
+    /* =========================================================
+       ГОЛОС НГО — медиа-инструмент пресс-службы
+       Стиль: кузница кадров, красный/чёрный/молочный,
+       постерная брутальная сетка, штабная digital-эстетика.
+       ========================================================= */
+
+    :root {
+      --red: #FF3B2F;
+      --red-deep: #B51B16;
+      --black: #111111;
+      --graphite: #2A2A2A;
+      --milk: #E9E4DA;
+      --paper: #F8F4EC;
+      --white: #FFFFFF;
+      --steel: #6F7478;
+      --ash: #B9B1A5;
+      --warning: #B87333;
+      --green: #34785C;
+      --line: rgba(17,17,17,.18);
+      --shadow-hard: 7px 7px 0 #111111;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--black);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 59, 47, .26), transparent 18%),
+        radial-gradient(circle at 82% 4%, rgba(255, 59, 47, .12), transparent 20%),
+        linear-gradient(135deg, var(--milk) 0%, #d8d0c4 52%, #c8beb0 100%);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 95%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(0deg, rgba(17,17,17,.08) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 22% 28%, rgba(255,255,255,.8) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 74% 18%, rgba(255,59,47,.7) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 88% 72%, rgba(17,17,17,.5) 0 1px, transparent 1.8px);
+      background-size: auto, 120px 120px, 160px 160px, 180px 180px;
+      mix-blend-mode: multiply;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 2px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 14px;
+      border-radius: 0;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.14);
+    }
+
+    button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+    button.primary { background: var(--red); color: var(--white); }
+    button.dark { background: var(--black); color: var(--white); }
+    button.ghost { background: transparent; box-shadow: none; }
+    button.small { padding: 8px 10px; font-size: 12px; }
+    button.active { background: var(--black); color: var(--white); }
+
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid var(--black);
+      background: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 0;
+      color: var(--black);
+      outline: none;
+      box-shadow: inset 3px 3px 0 rgba(17,17,17,.05);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 rgba(255,59,47,.22);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(17,17,17,.66);
+    }
+
+    .app {
+      width: min(1500px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 22px 0 72px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.15fr 330px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 3px solid var(--black);
+      background:
+        linear-gradient(90deg, rgba(255,59,47,.78) 0 6px, transparent 6px 18px),
+        linear-gradient(120deg, rgba(17,17,17,.98), rgba(42,42,42,.94) 62%, rgba(17,17,17,.98)),
+        repeating-linear-gradient(-22deg, rgba(255,59,47,.24) 0 12px, transparent 12px 25px);
+      color: var(--white);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 26px;
+      width: 170px;
+      height: 170px;
+      border: 3px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.65) 44% 56%, transparent 57%),
+        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.16) 44% 56%, transparent 57%);
+      transform: rotate(8deg);
+      opacity: .9;
+    }
+
+    .hero::after {
+      content: "ГОЛОС\\A НГО";
+      white-space: pre;
+      position: absolute;
+      right: -6px;
+      bottom: -12px;
+      color: rgba(233,228,218,.075);
+      font-size: clamp(62px, 10vw, 150px);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .74;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .brand-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.07);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .spark {
+      width: 10px;
+      height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(255,59,47,.22), 0 0 22px var(--red);
+      display: inline-block;
+    }
+
+    .logo-drop {
+      width: 86px;
+      height: 86px;
+      flex: 0 0 auto;
+      border: 2px dashed rgba(255,255,255,.62);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.78);
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.06);
+    }
+
+    h1 {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      max-width: 1080px;
+      font-size: clamp(58px, 10vw, 150px);
+      line-height: .78;
+      letter-spacing: -.09em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .subtitle {
+      position: relative;
+      z-index: 2;
+      margin: 16px 0 0;
+      max-width: 830px;
+      color: rgba(233,228,218,.84);
+      font-size: clamp(17px, 2.2vw, 30px);
+      line-height: 1.02;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -.035em;
+    }
+
+    .red-thread {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      height: 8px;
+      background: var(--red);
+      width: min(560px, 82%);
+      box-shadow: 0 0 24px rgba(255,59,47,.5);
+    }
+
+    .panel-actions {
+      min-width: 310px;
+      border: 3px solid var(--black);
+      background: linear-gradient(180deg, var(--white), var(--paper));
+      padding: 16px;
+      display: grid;
+      gap: 9px;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-actions::before {
+      content: "МЕДИА-ПУЛЬТ";
+      position: absolute;
+      right: -42px;
+      top: 28px;
+      transform: rotate(35deg);
+      background: var(--black);
+      color: var(--white);
+      padding: 5px 52px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+    }
+
+    .technical {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .115em;
+      color: rgba(17,17,17,.56);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar, .main-section, .modal-card {
+      border: 3px solid var(--black);
+      background: rgba(248,244,236,.92);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background: linear-gradient(90deg, rgba(255,59,47,.07), transparent 28%), rgba(248,244,236,.94);
+    }
+
+    .main-section {
+      padding: 16px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,59,47,.05), transparent 30%), rgba(248,244,236,.94);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--black);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 36px;
+      line-height: .82;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: .88;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tab.active { background: var(--black); color: var(--white); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      border: 3px solid var(--black);
+      background: var(--white);
+      min-height: 112px;
+      padding: 13px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+    }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--red);
+    }
+
+    .stat::after {
+      content: "TXT";
+      position: absolute;
+      right: 8px;
+      top: 9px;
+      color: rgba(17,17,17,.08);
+      font-size: 40px;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: .82;
+      font-weight: 1000;
+      color: var(--red);
+      letter-spacing: -.08em;
+    }
+
+    .stat-title {
+      margin-top: 9px;
+      font-size: 11px;
+      line-height: .95;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .form-grid .span-2 { grid-column: span 2; }
+
+    .subcard, .output-card, .hook-card, .rubric-card, .favorite-card {
+      border: 3px solid var(--black);
+      background: rgba(255,255,255,.74);
+      padding: 14px;
+    }
+
+    .generator-layout {
+      display: grid;
+      grid-template-columns: minmax(330px, 460px) 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .output-list, .check-list, .favorites-list, .hook-wall, .rubric-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .output-card {
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 10px;
+    }
+
+    .output-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 8px;
+      background: var(--red);
+    }
+
+    .output-card h3 { padding-left: 8px; }
+
+    .output-text {
+      padding-left: 8px;
+      white-space: pre-line;
+      font-size: 15px;
+      line-height: 1.42;
+      font-weight: 650;
+      color: rgba(17,17,17,.88);
+    }
+
+    .check-item {
+      border: 3px solid var(--black);
+      background: var(--white);
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .check-item.ok { border-left: 9px solid var(--green); }
+    .check-item.bad { border-left: 9px solid var(--red); }
+    .check-item.warn { border-left: 9px solid var(--warning); }
+    .check-item strong { text-transform: uppercase; font-size: 13px; }
+    .check-item span { font-size: 12px; font-weight: 800; color: rgba(17,17,17,.66); }
+
+    .hook-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+    .hook-wall {
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+
+    .hook-card {
+      min-height: 150px;
+      display: grid;
+      gap: 10px;
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hook-card::after {
+      content: "HOOK";
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      font-size: 42px;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      color: rgba(17,17,17,.045);
+    }
+
+    .hook-text {
+      font-size: 22px;
+      line-height: .95;
+      font-weight: 1000;
+      letter-spacing: -.045em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+    }
+
+    .rubric-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .rubric-card {
+      background: var(--white);
+      display: grid;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rubric-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 11px;
+      background: var(--red);
+    }
+
+    .rubric-card h3 { padding-top: 10px; }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 2px solid var(--black);
+      padding: 5px 8px;
+      background: rgba(17,17,17,.045);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .badge.red { background: var(--red); color: var(--white); }
+    .badge.black { background: var(--black); color: var(--white); }
+    .badge.green { background: var(--green); color: var(--white); }
+    .badge.warn { background: var(--warning); color: var(--white); }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .favorite-card {
+      background: var(--white);
+      display: grid;
+      gap: 10px;
+    }
+
+    .favorite-text {
+      white-space: pre-line;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      border: 3px dashed var(--black);
+      padding: 22px;
+      background: rgba(255,255,255,.5);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--white);
+      padding: 12px 14px;
+      font-weight: 900;
+      z-index: 80;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: .2s ease;
+      max-width: 360px;
+      box-shadow: 6px 6px 0 var(--red);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1100px) {
+      .topbar, .workspace, .generator-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .app { width: min(100% - 18px, 1500px); padding-top: 10px; }
+      .hero { padding: 16px; min-height: 240px; }
+      .brand-row { align-items: start; }
+      .logo-drop { width: 68px; height: 68px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .span-2 { grid-column: span 1; }
+      h2 { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <section class="hero">
+        <div class="brand-row">
+          <div class="kicker"><span class="spark"></span> НГО / ПРЕСС-СЛУЖБА / МЕДИА</div>
+          <div class="logo-drop" title="Сюда можно вставить SVG/PNG логотип через тег img">место<br>для<br>логотипа</div>
+        </div>
+        <h1>Голос НГО</h1>
+        <p class="subtitle">Пиши так, чтобы город узнавал себя</p>
+        <div class="red-thread" aria-hidden="true"></div>
+      </section>
+
+      <aside class="panel-actions">
+        <div class="technical">операции с текстами</div>
+        <button class="primary" id="generateBtn">сгенерировать тексты</button>
+        <button id="saveAllBtn">сохранить варианты</button>
+        <button id="exportJsonBtn">сохранить банк</button>
+        <button class="dark" id="clearFavoritesBtn">очистить избранное</button>
+      </aside>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <div class="section-title">
+          <h2>Генератор</h2>
+        </div>
+        <form id="textForm" class="form-grid">
+          <label class="span-2">тип текста
+            <select name="type"></select>
+          </label>
+          <label class="span-2">название события <input name="eventName" placeholder="Закрытие ТТС, слёт, школа актива..." /></label>
+          <label>дата <input name="date" placeholder="25 мая / завтра / 18:00" /></label>
+          <label>место <input name="place" placeholder="штаб, ДК, СибГИУ..." /></label>
+          <label class="span-2">аудитория <input name="audience" placeholder="бойцы, командиры, первокурсники..." /></label>
+          <label class="span-2">главная мысль <textarea name="mainIdea" placeholder="Что человек должен понять после текста?"></textarea></label>
+          <label class="span-2">факты <textarea name="facts" placeholder="3–5 фактов: кто, что, зачем, сколько, результат"></textarea></label>
+          <label class="span-2">ссылка <input name="link" placeholder="https://..." /></label>
+          <label>тональность
+            <select name="tone"></select>
+          </label>
+          <label>обязательные слова <input name="requiredWords" placeholder="РСО, НГО, труд крут..." /></label>
+          <label class="span-2">хэштеги <input name="hashtags" value="#СОКузбасс #РСО #ТрудКрут" /></label>
+        </form>
+        <div class="subcard">
+          <div class="technical">контекст штаба</div>
+          <p style="margin:8px 0 0; font-size:13px; font-weight:800; line-height:1.35;">VK ≈ 5000 подписчиков, средние реакции ≈ 50 лайков. Цель — не витрина отчётов, а медиа городской команды.</p>
+        </div>
+      </aside>
+
+      <section class="main-section">
+        <div class="stats" id="stats"></div>
+
+        <nav class="tabs">
+          <button class="tab active" data-tab="outputPanel">варианты</button>
+          <button class="tab" data-tab="checkPanel">проверка</button>
+          <button class="tab" data-tab="hooksPanel">банк хуков</button>
+          <button class="tab" data-tab="rubricsPanel">рубрикатор</button>
+          <button class="tab" data-tab="favoritesPanel">избранное</button>
+        </nav>
+
+        <section id="outputPanel" class="tab-panel">
+          <div class="section-title">
+            <h2>Выходные тексты</h2>
+            <div class="technical">VK / TG-MAX / клип / чат / плашки</div>
+          </div>
+          <div class="output-list" id="outputList"></div>
+        </section>
+
+        <section id="checkPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Проверка поста</h2>
+            <div class="technical">анти-канцелярит и CTA</div>
+          </div>
+          <div class="check-list" id="checkList"></div>
+        </section>
+
+        <section id="hooksPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Банк хуков</h2>
+            <div class="technical">постерная стена заходов</div>
+          </div>
+          <div class="hook-filters" id="hookFilters"></div>
+          <div class="hook-wall" id="hookWall"></div>
+        </section>
+
+        <section id="rubricsPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Рубрикатор</h2>
+            <div class="technical">серии, которые делают медиа живым</div>
+          </div>
+          <div class="rubric-grid" id="rubricGrid"></div>
+        </section>
+
+        <section id="favoritesPanel" class="tab-panel hidden">
+          <div class="section-title">
+            <h2>Избранное</h2>
+            <div class="technical" id="favoritesCount">0 сохранено</div>
+          </div>
+          <div class="favorites-list" id="favoritesList"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/ngo-system.js"></script>
+  <script>
+    /* =========================================================
+       ДАННЫЕ
+       ========================================================= */
+
+    const TEXT_TYPES = ['анонс', 'итог', 'напоминание', 'клип', 'срочное сообщение', 'поздравление', 'пост про человека', 'пост про отряд', 'пост для партнёров'];
+    const TONES = ['официально', 'не душно', 'зумерски', 'комиссарски', 'торжественно', 'коротко'];
+    const OUTPUT_TYPES = ['VK-пост', 'Telegram/MAX', 'подпись для VK-клипа', 'сообщение в чат', 'сторис/клип-плашки'];
+
+    const HOOKS = [
+      { tag:'анонс', text:'Город снова собирается.' },
+      { tag:'итоги', text:'Это не отчёт. Это момент, где мы стали командой.' },
+      { tag:'рекрутинг', text:'Если ты думал, что отряды — это только лето, у нас новости.' },
+      { tag:'закрытие ТТС', text:'Целина закончилась. Но движ — нет.' },
+      { tag:'человек', text:'Есть люди, которые не кричат со сцены, но держат весь отряд.' },
+      { tag:'отряд', text:'У каждого отряда есть свой характер. Сегодня — про один из них.' },
+      { tag:'срочное сообщение', text:'Важное изменение. Сохраняем спокойствие и действуем по плану.' },
+      { tag:'слёт', text:'Слёт — это когда город на несколько дней становится одним штабом.' },
+      { tag:'анонс', text:'Не просто встреча. Точка, где начинается следующий этап.' },
+      { tag:'итоги', text:'Фотографии покажут лица. Мы расскажем, что за ними стояло.' },
+      { tag:'рекрутинг', text:'Работа, команда, дорога и опыт, который не помещается в резюме.' },
+      { tag:'человек', text:'Он не делает шум. Он делает результат.' },
+      { tag:'отряд', text:'Они не ждут идеального момента. Они собирают его сами.' },
+      { tag:'срочное сообщение', text:'Коротко и по делу: изменились вводные.' },
+      { tag:'закрытие ТТС', text:'Сезон закрываем. Истории — нет.' }
+    ];
+
+    const RUBRICS = [
+      { name:'Свои люди', goal:'Показывать лица движения, а не только события.', format:'мини-портрет + цитата + факт', title:'Свои люди: человек, который держит темп', frequency:'1 раз в неделю', example:'Есть люди, после которых в штабе становится спокойнее. Сегодня рассказываем про того, кто не всегда в кадре, но всегда в деле.' },
+      { name:'Отряд на связи', goal:'Дать каждому отряду голос и узнаваемость.', format:'пост-визитка / короткое интервью', title:'Отряд на связи: кто такие «Сибирский путь»', frequency:'2 раза в месяц', example:'У каждого отряда свой характер. У этих — дорога, дисциплина и умение собраться, когда нужно.' },
+      { name:'Целина без фильтра', goal:'Собирать живые истории с работы и выездов.', format:'история бойца / предмет / ситуация', title:'Целина без фильтра: одна смена, которую не забыли', frequency:'1 раз в неделю в сезон', example:'Не всё на целине попадает в отчёты. Но именно из таких моментов и собирается отрядная память.' },
+      { name:'Кто тащит', goal:'Отмечать людей, которые делают процессы.', format:'короткий shout-out', title:'Кто тащит: человек недели', frequency:'каждую неделю', example:'Этот пост — не награда. Это способ сказать: мы видим твою работу.' },
+      { name:'Кузница кадров', goal:'Показывать рост, обучение, роли и карьеру в РСО.', format:'объясняющий пост / карточки', title:'Кузница кадров: как новичок становится командиром', frequency:'2 раза в месяц', example:'В отрядах не выдают характер. Его закаляют через задачи, ответственность и людей рядом.' },
+      { name:'Город закаляется', goal:'Связать движение с Новокузнецком.', format:'городской репортаж', title:'Город закаляется: где НГО было на этой неделе', frequency:'1 раз в неделю', example:'Новокузнецк — не фон. Это город, в котором отряды работают, встречаются и собирают команду.' },
+      { name:'До слёта', goal:'Разогревать аудиторию перед крупным событием.', format:'обратный отсчёт / тизер', title:'До слёта: осталось 7 дней', frequency:'серия перед событием', example:'До слёта остаётся неделя. Самое время проверить форму, команду и настроение.' },
+      { name:'Не отчёт — движ', goal:'Перепрошить язык итоговых постов.', format:'итог с акцентом на людей', title:'Не отчёт — движ: как прошёл вечер', frequency:'после событий', example:'Можно было бы написать “состоялось мероприятие”. Но мы лучше расскажем, почему люди не хотели расходиться.' },
+      { name:'Спросили у бойцов', goal:'Добавить живой голос аудитории.', format:'опрос / цитаты / блиц', title:'Спросили у бойцов: зачем тебе отряды?', frequency:'1–2 раза в месяц', example:'Один вопрос. Несколько ответов. И в каждом — причина, почему движение работает.' },
+      { name:'Архив штаба', goal:'Поднимать историю и преемственность.', format:'архивное фото + контекст', title:'Архив штаба: как это было', frequency:'1 раз в месяц', example:'Кажется, это просто старое фото. На деле — часть истории, из которой вырос сегодняшний НГО.' }
+    ];
+
+    const state = {
+      outputs: [],
+      favorites: loadFavorites(),
+      hookTag: 'все',
+      activeTab: 'outputPanel'
+    };
+
+    function loadFavorites() {
+      try { return JSON.parse(localStorage.getItem('golosNgoFavorites')) || []; }
+      catch { return []; }
+    }
+
+    function saveFavorites() {
+      localStorage.setItem('golosNgoFavorites', JSON.stringify(state.favorites));
+    }
+
+    function qs(selector) { return document.querySelector(selector); }
+    function qsa(selector) { return [...document.querySelectorAll(selector)]; }
+
+    function fillSelect(select, values) {
+      select.innerHTML = '';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function initControls() {
+      const form = qs('#textForm');
+      fillSelect(form.elements.type, TEXT_TYPES);
+      fillSelect(form.elements.tone, TONES);
+      form.elements.type.value = 'анонс';
+      form.elements.tone.value = 'не душно';
+      form.elements.eventName.value = 'Городское событие НГО';
+      form.elements.mainIdea.value = 'Собираем людей, чтобы усилить команду и движение в городе.';
+      const activeEvent = window.NgoSystem?.getActiveEvent();
+      if (activeEvent) {
+        form.elements.eventName.value = activeEvent.name || form.elements.eventName.value;
+        form.elements.date.value = activeEvent.date || form.elements.date.value;
+        form.elements.place.value = activeEvent.place || form.elements.place.value;
+        form.elements.audience.value = activeEvent.audience || form.elements.audience.value;
+        form.elements.mainIdea.value = activeEvent.meaning || activeEvent.goal || form.elements.mainIdea.value;
+        form.elements.facts.value = [
+          activeEvent.type ? `Тип: ${activeEvent.type}` : '',
+          activeEvent.participants ? `План участников: ${activeEvent.participants}` : '',
+          activeEvent.requiredBlocks ? `В программе: ${activeEvent.requiredBlocks}` : ''
+        ].filter(Boolean).join('\n');
+      }
+    }
+
+    function formData() {
+      return Object.fromEntries(new FormData(qs('#textForm')).entries());
+    }
+
+    function pickHook(type) {
+      const map = {
+        'анонс':'анонс', 'итог':'итоги', 'напоминание':'анонс', 'клип':'итоги', 'срочное сообщение':'срочное сообщение',
+        'поздравление':'человек', 'пост про человека':'человек', 'пост про отряд':'отряд', 'пост для партнёров':'итоги'
+      };
+      const tag = map[type] || 'анонс';
+      return (HOOKS.find(h => h.tag === tag) || HOOKS[0]).text;
+    }
+
+    function tonePhrase(tone) {
+      const dict = {
+        'официально':'коротко, понятно и по делу',
+        'не душно':'без тяжёлого официоза, но с нормальным смыслом',
+        'зумерски':'живее, быстрее и без музейной пыли',
+        'комиссарски':'с теплом, традициями и вниманием к людям',
+        'торжественно':'с уважением к моменту и людям',
+        'коротко':'максимально кратко и без лишних кругов'
+      };
+      return dict[tone] || dict['не душно'];
+    }
+
+    function generateOutputs() {
+      const d = formData();
+      const hook = pickHook(d.type);
+      const facts = d.facts ? d.facts.trim() : 'Подробности появятся в новостях штаба.';
+      const link = d.link ? `\n\nСсылка: ${d.link}` : '';
+      const hashtags = d.hashtags ? `\n\n${d.hashtags}` : '';
+      const required = d.requiredWords ? `\n\nВажно: ${d.requiredWords}` : '';
+
+      const vk = `${hook}\n\n${d.eventName || 'Событие НГО'} — это не просто пункт в плане. Это точка, где городская команда собирается, чтобы стать сильнее.\n\n${d.mainIdea || 'Главная мысль пока не указана.'}\n\nЧто важно знать:\n${facts}\n\n${d.date ? `Когда: ${d.date}\n` : ''}${d.place ? `Где: ${d.place}\n` : ''}${d.audience ? `Для кого: ${d.audience}\n` : ''}\nСохраняй, приходи, передай своим.${link}${required}${hashtags}`;
+
+      const tg = `${hook}\n\n${d.eventName || 'Событие НГО'}\n${d.date ? `Дата: ${d.date}\n` : ''}${d.place ? `Место: ${d.place}\n` : ''}${d.mainIdea || 'Собираемся, чтобы усилить движение и команду.'}${link}${hashtags}`;
+
+      const clip = `${hook}\n\n${d.eventName || 'НГО в кадре'} — ${tonePhrase(d.tone)}.\n\nСмотри до конца: там не отчёт, там люди.${hashtags}`;
+
+      const chat = `${d.type === 'срочное сообщение' ? 'Важное сообщение.' : 'Коллеги, коротко.'}\n${d.eventName || 'Событие'}${d.date ? ` — ${d.date}` : ''}${d.place ? `, ${d.place}` : ''}.\n${d.mainIdea || 'Просьба обратить внимание и передать информацию своим.'}${link}`;
+
+      const stories = [
+        hook,
+        d.eventName || 'Событие НГО',
+        d.date || 'Дата скоро',
+        d.place || 'Место скоро',
+        d.mainIdea || 'Городская команда собирается.',
+        d.link ? 'Ссылка — в описании' : 'Следи за новостями штаба'
+      ].join('\n---\n');
+
+      state.outputs = [
+        { id: crypto.randomUUID(), type:'VK-пост', text: vk },
+        { id: crypto.randomUUID(), type:'Telegram/MAX', text: tg },
+        { id: crypto.randomUUID(), type:'подпись для VK-клипа', text: clip },
+        { id: crypto.randomUUID(), type:'сообщение в чат', text: chat },
+        { id: crypto.randomUUID(), type:'сторис/клип-плашки', text: stories }
+      ];
+      renderAll();
+      toast('Тексты собраны на шаблонах.');
+    }
+
+    function checklist() {
+      const d = formData();
+      const vk = state.outputs.find(o => o.type === 'VK-пост')?.text || '';
+      return [
+        { ok: Boolean(d.date), title:'есть дата', text: d.date ? 'Дата указана.' : 'Добавь дату, иначе пост не доведёт до действия.' },
+        { ok: Boolean(d.place), title:'есть место', text: d.place ? 'Место указано.' : 'Добавь место или объясни, где искать информацию.' },
+        { ok: /приходи|сохраняй|переходи|пиши|заполняй|передай|следи/i.test(vk), title:'есть призыв к действию', text:'Пост должен объяснять, что сделать дальше.' },
+        { ok: Boolean(d.link), title:'есть ссылка', text: d.link ? 'Ссылка есть.' : 'Если нужна регистрация — добавь ссылку.' },
+        { ok: vk.length < 1400, title:'не слишком длинно', text: vk.length < 1400 ? 'Длина нормальная для VK.' : 'Пост длинный. Сократи факты или разбей на карточки.' },
+        { ok: !/^состоялось мероприятие/i.test(vk.trim()), title:'нет канцелярита в начале', text:'Первое предложение не начинается с “состоялось мероприятие”.' },
+        { ok: Boolean(pickHook(d.type)), title:'есть человеческий хук', text:'Текст начинается с захода, а не с отчётной формулы.' }
+      ];
+    }
+
+    function renderStats() {
+      qs('#stats').innerHTML = `
+        <article class="stat"><span class="stat-value">5K</span><div class="stat-title">подписчиков VK</div></article>
+        <article class="stat"><span class="stat-value">50</span><div class="stat-title">средние реакции</div></article>
+        <article class="stat"><span class="stat-value">${HOOKS.length}</span><div class="stat-title">хуков в банке</div></article>
+        <article class="stat"><span class="stat-value">${state.favorites.length}</span><div class="stat-title">сохранено в избранное</div></article>
+      `;
+    }
+
+    function renderOutputs() {
+      qs('#outputList').innerHTML = state.outputs.map(output => `
+        <article class="output-card">
+          <h3>${escapeHtml(output.type)}</h3>
+          <div class="output-text">${escapeHtml(output.text)}</div>
+          <div class="card-actions">
+            <button class="small primary" onclick="copyText('${output.id}')">скопировать</button>
+            <button class="small" onclick="saveFavorite('text','${output.id}')">в избранное</button>
+          </div>
+        </article>
+      `).join('') || `<div class="empty-state">Заполни форму слева и нажми “сгенерировать тексты”. Здесь появятся варианты для VK, Telegram/MAX, клипов, чата и сторис.</div>`;
+    }
+
+    function renderCheck() {
+      const items = checklist();
+      qs('#checkList').innerHTML = items.map(item => `
+        <div class="check-item ${item.ok ? 'ok' : 'bad'}">
+          <strong>${item.ok ? '✓' : '×'} ${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.text)}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderHooks() {
+      const tags = ['все', ...new Set(HOOKS.map(h => h.tag))];
+      qs('#hookFilters').innerHTML = tags.map(tag => `<button class="small ${state.hookTag === tag ? 'active' : ''}" onclick="setHookTag('${tag}')">${tag}</button>`).join('');
+      const hooks = state.hookTag === 'все' ? HOOKS : HOOKS.filter(h => h.tag === state.hookTag);
+      qs('#hookWall').innerHTML = hooks.map((hook, index) => `
+        <article class="hook-card">
+          <div class="badges"><span class="badge red">${escapeHtml(hook.tag)}</span><span class="badge black">№${String(index + 1).padStart(2,'0')}</span></div>
+          <div class="hook-text">${escapeHtml(hook.text)}</div>
+          <div class="card-actions">
+            <button class="small primary" onclick="copyRaw(${JSON.stringify(hook.text)})">скопировать</button>
+            <button class="small" onclick="saveHook(${HOOKS.indexOf(hook)})">в избранное</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderRubrics() {
+      qs('#rubricGrid').innerHTML = RUBRICS.map(r => `
+        <article class="rubric-card">
+          <h3>${escapeHtml(r.name)}</h3>
+          <div class="badges"><span class="badge red">${escapeHtml(r.frequency)}</span><span class="badge black">${escapeHtml(r.format)}</span></div>
+          <p style="margin:0; font-size:13px; line-height:1.35; font-weight:800;"><b>Цель:</b> ${escapeHtml(r.goal)}</p>
+          <p style="margin:0; font-size:13px; line-height:1.35; font-weight:800;"><b>Заголовок:</b> ${escapeHtml(r.title)}</p>
+          <p style="margin:0; font-size:13px; line-height:1.35; font-weight:700; color:rgba(17,17,17,.72)">${escapeHtml(r.example)}</p>
+          <div class="card-actions"><button class="small primary" onclick="copyRaw(${JSON.stringify(r.example)})">скопировать пример</button></div>
+        </article>
+      `).join('');
+    }
+
+    function renderFavorites() {
+      qs('#favoritesCount').textContent = `${state.favorites.length} сохранено`;
+      qs('#favoritesList').innerHTML = state.favorites.map(item => `
+        <article class="favorite-card">
+          <div class="badges"><span class="badge red">${escapeHtml(item.kind)}</span><span class="badge black">${escapeHtml(item.date)}</span></div>
+          <div class="favorite-text">${escapeHtml(item.text)}</div>
+          <div class="card-actions">
+            <button class="small primary" onclick="copyRaw(${JSON.stringify(item.text)})">скопировать</button>
+            <button class="small" onclick="deleteFavorite('${item.id}')">удалить</button>
+          </div>
+        </article>
+      `).join('') || `<div class="empty-state">Избранное пустое. Сохраняй сильные хуки и тексты, чтобы собрать локальный банк пресс-службы.</div>`;
+    }
+
+    function renderAll() {
+      saveFavorites();
+      renderStats();
+      renderOutputs();
+      renderCheck();
+      renderHooks();
+      renderRubrics();
+      renderFavorites();
+    }
+
+    function copyText(id) {
+      const output = state.outputs.find(o => o.id === id);
+      if (output) copyRaw(output.text);
+    }
+
+    function copyRaw(text) {
+      navigator.clipboard.writeText(text).then(() => toast('Скопировано.'));
+    }
+
+    function saveFavorite(kind, id) {
+      const output = state.outputs.find(o => o.id === id);
+      if (!output) return;
+      state.favorites.unshift({ id: crypto.randomUUID(), kind: output.type, text: output.text, date: new Date().toLocaleDateString('ru-RU') });
+      renderAll();
+      toast('Сохранено в избранное.');
+    }
+
+    function saveHook(index) {
+      const hook = HOOKS[index];
+      state.favorites.unshift({ id: crypto.randomUUID(), kind: 'хук / ' + hook.tag, text: hook.text, date: new Date().toLocaleDateString('ru-RU') });
+      renderAll();
+      toast('Хук сохранён.');
+    }
+
+    function saveAllOutputs() {
+      if (!state.outputs.length) return toast('Сначала сгенерируй тексты.');
+      state.outputs.forEach(output => state.favorites.unshift({ id: crypto.randomUUID(), kind: output.type, text: output.text, date: new Date().toLocaleDateString('ru-RU') }));
+      renderAll();
+      toast('Все варианты сохранены.');
+    }
+
+    function deleteFavorite(id) {
+      state.favorites = state.favorites.filter(item => item.id !== id);
+      renderAll();
+      toast('Удалено из избранного.');
+    }
+
+    function clearFavorites() {
+      if (!confirm('Очистить избранное в этом браузере?')) return;
+      state.favorites = [];
+      renderAll();
+      toast('Избранное очищено.');
+    }
+
+    function exportJson() {
+      const data = {
+        savedAt: new Date().toISOString(),
+        outputs: state.outputs,
+        favorites: state.favorites,
+        hooks: HOOKS,
+        rubrics: RUBRICS
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'golos-ngo-data.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function setHookTag(tag) {
+      state.hookTag = tag;
+      renderHooks();
+    }
+
+    function setTab(tabId) {
+      state.activeTab = tabId;
+      qsa('.tabs .tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+      qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function toast(message) {
+      const node = qs('#toast');
+      node.textContent = message;
+      node.classList.add('show');
+      setTimeout(() => node.classList.remove('show'), 2400);
+    }
+
+    function bindEvents() {
+      qs('#generateBtn').addEventListener('click', generateOutputs);
+      qs('#saveAllBtn').addEventListener('click', saveAllOutputs);
+      qs('#exportJsonBtn').addEventListener('click', exportJson);
+      qs('#clearFavoritesBtn').addEventListener('click', clearFavorites);
+      qsa('.tabs .tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+      qs('#textForm').addEventListener('input', () => renderCheck());
+    }
+
+    window.copyText = copyText;
+    window.copyRaw = copyRaw;
+    window.saveFavorite = saveFavorite;
+    window.saveHook = saveHook;
+    window.deleteFavorite = deleteFavorite;
+    window.setHookTag = setHookTag;
+
+    initControls();
+    bindEvents();
+    generateOutputs();
+  </script>
+</body>
+</html>
