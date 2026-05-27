@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Пульт НГО — цифровая кузница штаба</title>
+  <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
   <style>
     /* =========================================================
        ПУЛЬТ НГО — главная страница цифровой системы штаба
@@ -133,13 +135,21 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: var(--black);
-      color: var(--white);
-      padding: 10px 12px;
+      background: var(--paper);
+      color: var(--black);
+      border: 2px solid var(--black);
+      padding: 6px 10px;
       font-size: 11px;
       font-weight: 1000;
       letter-spacing: .11em;
       text-transform: uppercase;
+      box-shadow: 3px 3px 0 rgba(17,17,17,.18);
+    }
+
+    .brand-logo {
+      display: block;
+      width: auto;
+      height: 34px;
     }
 
     .brand-spark {
@@ -1360,13 +1370,15 @@
 
   <div class="app">
     <nav class="nav">
-      <a class="brand-mark" href="#top"><span class="brand-spark"></span> Пульт НГО</a>
+      <a class="brand-mark" href="#top" aria-label="Пульт НГО">
+        <img class="brand-logo" src="assets/ngo-logo.svg" alt="НГО / Кузница кадров" />
+      </a>
       <div class="nav-links">
         <a href="#system-map">карта</a>
         <a href="#workflow">маршрут</a>
         <a href="#duty">дежурный старт</a>
       </div>
-      <a class="nav-action" href="2-Горн событий.html">создать событие</a>
+      <a class="nav-action" href="events.html">создать событие</a>
     </nav>
 
     <header class="hero" id="top">
@@ -1449,13 +1461,13 @@
           <div class="orbit"></div>
           <div class="orbit orbit-2"></div>
           <div class="core">НГО<br>пульт</div>
-          <a class="node n1" href="1-Пульс НГО.html">отряды</a>
-          <a class="node n2" href="2-Горн событий.html">события</a>
-          <a class="node n3" href="4-Голос НГО.html">медиа</a>
-          <a class="node n4" href="5-Партнерский Горн.html">партнёры</a>
-          <a class="node n5" href="7-Письменный горн.html">письма</a>
-          <a class="node n6" href="6-Штабной аварийник.html">аварийник</a>
-          <a class="node n7" href="3-Смета Горна.html">смета</a>
+          <a class="node n1" href="pulse.html">отряды</a>
+          <a class="node n2" href="events.html">события</a>
+          <a class="node n3" href="voice.html">медиа</a>
+          <a class="node n4" href="partners.html">партнёры</a>
+          <a class="node n5" href="letters.html">письма</a>
+          <a class="node n6" href="emergency.html">аварийник</a>
+          <a class="node n7" href="budget.html">смета</a>
         </article>
 
         <div class="map-grid">
@@ -1464,7 +1476,7 @@
               <h3>Пульс НГО</h3>
               <p>К кому пора вернуться: отряды, связи, касания, риски и точки роста.</p>
             </div>
-            <a class="module-action" href="1-Пульс НГО.html">проверить отряды</a>
+            <a class="module-action" href="pulse.html">проверить отряды</a>
           </article>
 
           <article class="map-module reveal" id="events" data-code="02">
@@ -1472,7 +1484,7 @@
               <h3>Горн событий</h3>
               <p>Создать мероприятие: смысл, программа, роли, тайминг и сценарий ведущего.</p>
             </div>
-            <a class="module-action" href="2-Горн событий.html">собрать событие</a>
+            <a class="module-action" href="events.html">собрать событие</a>
           </article>
 
           <article class="map-module reveal" id="budget" data-code="03">
@@ -1480,7 +1492,7 @@
               <h3>Смета Горна</h3>
               <p>Посчитать оргвзнос, поддержку, резерв и автоматически увидеть события из Горна.</p>
             </div>
-            <a class="module-action" href="3-Смета Горна.html">посчитать бюджет</a>
+            <a class="module-action" href="budget.html">посчитать бюджет</a>
           </article>
 
           <article class="map-module reveal" id="voice" data-code="04">
@@ -1488,7 +1500,7 @@
               <h3>Голос НГО</h3>
               <p>Быстро подготовить анонс, итог, пост, сообщение в чат или текст для клипа.</p>
             </div>
-            <a class="module-action" href="4-Голос НГО.html">написать текст</a>
+            <a class="module-action" href="voice.html">написать текст</a>
           </article>
 
           <article class="map-module reveal" id="partners" data-code="05">
@@ -1496,7 +1508,7 @@
               <h3>Партнёрский горн</h3>
               <p>Собрать предложение, письмо, скрипт звонка и базу контактов для поддержки проекта.</p>
             </div>
-            <a class="module-action" href="5-Партнерский Горн.html">готовить партнёра</a>
+            <a class="module-action" href="partners.html">готовить партнёра</a>
           </article>
 
           <article class="map-module reveal" id="letters" data-code="06">
@@ -1504,7 +1516,7 @@
               <h3>Письменный горн</h3>
               <p>Официальные письма, обращения и благодарности с предпросмотром и печатью.</p>
             </div>
-            <a class="module-action" href="7-Письменный горн.html">собрать письмо</a>
+            <a class="module-action" href="letters.html">собрать письмо</a>
           </article>
 
           <article class="map-module reveal" id="sos" data-code="07">
@@ -1512,7 +1524,7 @@
               <h3>Штабной аварийник</h3>
               <p>Когда нужно действовать сразу: сообщения, чек-листы, роли и порядок реакции.</p>
             </div>
-            <a class="module-action" href="6-Штабной аварийник.html">включить SOS</a>
+            <a class="module-action" href="emergency.html">включить SOS</a>
           </article>
         </div>
       </div>
@@ -1542,8 +1554,8 @@
             <div class="duty-board" id="dutyBoard"></div>
           </div>
           <div class="tool-actions">
-            <a class="open-link" href="2-Горн событий.html">создать событие</a>
-            <a class="open-link" href="6-Штабной аварийник.html">открыть SOS</a>
+            <a class="open-link" href="events.html">создать событие</a>
+            <a class="open-link" href="emergency.html">открыть SOS</a>
           </div>
         </article>
       </div>

@@ -7,13 +7,13 @@
   };
 
   const SERVICES = [
-    { id: 'pulse', title: 'Пульс НГО', file: '1-Пульс НГО.html', short: 'Пульс' },
-    { id: 'events', title: 'Горн событий', file: '2-Горн событий.html', short: 'События' },
-    { id: 'budget', title: 'Смета Горна', file: '3-Смета Горна.html', short: 'Смета' },
-    { id: 'voice', title: 'Голос НГО', file: '4-Голос НГО.html', short: 'Голос' },
-    { id: 'partners', title: 'Партнерский Горн', file: '5-Партнерский Горн.html', short: 'Партнеры' },
-    { id: 'sos', title: 'Штабной аварийник', file: '6-Штабной аварийник.html', short: 'SOS' },
-    { id: 'letters', title: 'Письменный горн', file: '7-Письменный горн.html', short: 'Письма' }
+    { id: 'pulse', title: 'Пульс НГО', file: 'pulse.html', short: 'Пульс' },
+    { id: 'events', title: 'Горн событий', file: 'events.html', short: 'События' },
+    { id: 'budget', title: 'Смета Горна', file: 'budget.html', short: 'Смета' },
+    { id: 'voice', title: 'Голос НГО', file: 'voice.html', short: 'Голос' },
+    { id: 'partners', title: 'Партнерский Горн', file: 'partners.html', short: 'Партнеры' },
+    { id: 'sos', title: 'Штабной аварийник', file: 'emergency.html', short: 'SOS' },
+    { id: 'letters', title: 'Письменный горн', file: 'letters.html', short: 'Письма' }
   ];
 
   const MODES = ['minimum', 'normal', 'wow'];
