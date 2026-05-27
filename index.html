@@ -264,8 +264,9 @@
       z-index: 2;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-bottom: 28px;
     }
 
@@ -286,10 +287,10 @@
     .status-pill {
       display: inline-flex;
       width: fit-content;
-      border: 2px solid rgba(255,255,255,.34);
+      border: 2px solid var(--red);
       padding: 8px 10px;
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.84);
+      background: var(--red);
+      color: var(--white);
       font-size: 10px;
       font-weight: 950;
       text-transform: uppercase;
@@ -359,11 +360,10 @@
       position: relative;
       z-index: 3;
       min-height: min(58vh, 560px);
-      border: 3px solid rgba(255,255,255,.72);
       background:
         radial-gradient(circle at 50% 46%, rgba(255,59,47,.42), transparent 28%),
-        linear-gradient(135deg, rgba(17,17,17,.72), rgba(17,17,17,.28));
-      box-shadow: 10px 10px 0 rgba(17,17,17,.76), inset 0 0 0 1px rgba(255,255,255,.14);
+        radial-gradient(ellipse at 50% 54%, rgba(17,17,17,.58), transparent 64%);
+      box-shadow: none;
       overflow: hidden;
       isolation: isolate;
       user-select: none;
@@ -1161,7 +1161,7 @@
         </div>
 
         <div class="hero-console" id="heroConsole" aria-label="Интерактивный пульт задач">
-          <div class="console-core">НГО<br>пульт</div>
+          <div class="console-core">Для чего<br>нужно</div>
           <button class="console-chip chip-events active" data-orbit-x="205" data-orbit-y="118" data-orbit-speed="0.00034" data-orbit-phase="-1.35" data-status="Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.">Собрать мероприятие</button>
           <button class="console-chip chip-budget" data-orbit-x="224" data-orbit-y="136" data-orbit-speed="0.00029" data-orbit-phase="-0.15" data-status="Посчитать бюджет: расходы, резерв, оргвзнос, партнерскую поддержку и итог.">Посчитать бюджет</button>
           <button class="console-chip chip-media" data-orbit-x="196" data-orbit-y="150" data-orbit-speed="0.00031" data-orbit-phase="2.18" data-status="Подготовить медиа: анонс, пост, отчет, сценарий Reels и текст для чата.">Подготовить медиа</button>
@@ -1365,7 +1365,7 @@
         const area = consoleNode.getBoundingClientRect();
         const sizeScale = Math.min(1, area.width / 720);
         chips.forEach(chip => {
-          if (chip === activeDrag || chip.classList.contains('manual-chip')) return;
+          if (chip === activeDrag) return;
           const chipRect = chip.getBoundingClientRect();
           const orbitX = Number(chip.dataset.orbitX || 190) * sizeScale;
           const orbitY = Number(chip.dataset.orbitY || 120) * sizeScale;
@@ -1406,7 +1406,6 @@
         chip.addEventListener('pointermove', event => {
           if (!dragging) return;
           moved = true;
-          chip.classList.add('manual-chip');
           const area = consoleNode.getBoundingClientRect();
           const chipRect = chip.getBoundingClientRect();
           const x = Math.min(Math.max(event.clientX - area.left - offsetX, 8), area.width - chipRect.width - 8);
@@ -1418,10 +1417,18 @@
         });
 
         chip.addEventListener('pointerup', event => {
+          if (moved) {
+            const area = consoleNode.getBoundingClientRect();
+            const chipRect = chip.getBoundingClientRect();
+            const chipCenterX = chipRect.left - area.left + (chipRect.width / 2);
+            const chipCenterY = chipRect.top - area.top + (chipRect.height / 2);
+            const angle = Math.atan2(chipCenterY - (area.height / 2), chipCenterX - (area.width / 2));
+            const speed = Number(chip.dataset.orbitSpeed || 0.0003);
+            chip.dataset.orbitPhase = String(angle - performance.now() * speed);
+          }
           dragging = false;
           activeDrag = null;
           chip.classList.remove('dragging');
-          if (!moved) chip.classList.remove('manual-chip');
           if (chip.hasPointerCapture(event.pointerId)) chip.releasePointerCapture(event.pointerId);
         });
 
