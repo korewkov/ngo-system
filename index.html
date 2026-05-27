@@ -189,8 +189,7 @@
       position: relative;
       min-height: calc(100vh - 92px);
       display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 18px;
+      grid-template-columns: 1fr;
       align-items: stretch;
       margin-top: 16px;
     }
@@ -208,7 +207,10 @@
       padding: clamp(22px, 4vw, 52px);
       box-shadow: var(--shadow-hard);
       display: grid;
-      align-content: space-between;
+      grid-template-columns: minmax(0, .95fr) minmax(360px, .72fr);
+      gap: clamp(18px, 4vw, 54px);
+      align-items: center;
+      min-height: calc(100vh - 112px);
     }
 
     .hero-main > * {
@@ -217,7 +219,7 @@
     }
 
     .hero-main .lead {
-      max-width: 760px;
+      max-width: 900px;
       text-shadow: 0 2px 24px rgba(0,0,0,.72);
     }
 
@@ -249,6 +251,10 @@
       line-height: .72;
       text-align: right;
       pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 980px;
     }
 
     .hero-kicker {
@@ -346,6 +352,113 @@
 
     .button.primary { background: var(--red); color: var(--white); }
     .button.dark { background: var(--black); color: var(--white); border-color: var(--white); }
+
+    .hero-console {
+      position: relative;
+      z-index: 3;
+      min-height: min(58vh, 560px);
+      border: 3px solid rgba(255,255,255,.72);
+      background:
+        radial-gradient(circle at 50% 46%, rgba(255,59,47,.42), transparent 28%),
+        linear-gradient(135deg, rgba(17,17,17,.72), rgba(17,17,17,.28));
+      box-shadow: 10px 10px 0 rgba(17,17,17,.76), inset 0 0 0 1px rgba(255,255,255,.14);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .hero-console::before,
+    .hero-console::after {
+      content: "";
+      position: absolute;
+      inset: 12%;
+      border: 2px dashed rgba(255,255,255,.2);
+      border-radius: 50%;
+      animation: rotateSteel 26s linear infinite;
+    }
+
+    .hero-console::after {
+      inset: 24% 18%;
+      animation-duration: 18s;
+      animation-direction: reverse;
+    }
+
+    .console-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 154px;
+      height: 154px;
+      border: 3px solid rgba(255,255,255,.85);
+      background:
+        radial-gradient(circle, rgba(255,59,47,.96), rgba(181,27,22,.92) 58%, rgba(17,17,17,.95) 59%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--white);
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 0 0 64px rgba(255,59,47,.48), 7px 7px 0 rgba(0,0,0,.65);
+      z-index: 3;
+    }
+
+    .console-status {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 4;
+      border: 2px solid rgba(255,255,255,.68);
+      background: rgba(17,17,17,.72);
+      color: rgba(255,255,255,.9);
+      padding: 11px 12px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .console-chip {
+      position: absolute;
+      z-index: 5;
+      min-width: 110px;
+      border: 3px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 12px 13px;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      box-shadow: 5px 5px 0 rgba(0,0,0,.55);
+      cursor: grab;
+      transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease), transform .16s var(--ease);
+      user-select: none;
+      touch-action: none;
+    }
+
+    .console-chip:hover,
+    .console-chip.active {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 8px 8px 0 rgba(0,0,0,.72);
+    }
+
+    .console-chip.dragging {
+      cursor: grabbing;
+      transform: scale(1.04);
+      transition: none;
+    }
+
+    .chip-events { left: 8%; top: 14%; }
+    .chip-budget { right: 8%; top: 22%; }
+    .chip-media { left: 14%; bottom: 26%; }
+    .chip-docs { right: 14%; bottom: 24%; }
+    .chip-sos { left: 43%; top: 8%; }
 
     .hero-side {
       display: grid;
@@ -979,7 +1092,7 @@
     }
 
     @media (max-width: 1180px) {
-      .hero,
+      .hero-main,
       .workflow,
       .system-map,
       .section-heading,
@@ -990,8 +1103,11 @@
 
     @media (max-width: 760px) {
       .app { width: min(100% - 18px, 1600px); padding-top: 10px; }
-      .hero-main { padding: 18px; min-height: 620px; }
+      .hero-main { padding: 18px; min-height: auto; }
       .hero-kicker { display: grid; }
+      .hero-console { min-height: 420px; }
+      .console-chip { min-width: 92px; padding: 10px; font-size: 9px; }
+      .console-core { width: 118px; height: 118px; }
       .mini-map { min-height: 420px; }
       .node { width: 74px; }
       .n1 { left: 4%; top: 35%; }
@@ -1024,28 +1140,37 @@
 
     <header class="hero" id="top">
       <section class="hero-main reveal">
-        <div>
+        <div class="hero-content">
           <div class="hero-kicker">
             <div class="tag"><span class="brand-spark"></span> НГО / КУЗНИЦА КАДРОВ / ЦИФРОВОЙ ШТАБ</div>
             <div class="status-pill">8 сервисов · 1 пульт</div>
           </div>
           <h1>Пульт<br>НГО</h1>
-          <p class="lead">Рабочий вход для сотрудников штаба: увидеть отряды, собрать событие, посчитать смету, подготовить тексты и закрыть срочные задачи.</p>
+          <p class="lead">Рабочий вход для штаба: событие, смета, тексты, письма и срочные задачи в одной системе.</p>
           <div class="hero-actions">
             <a class="button primary" href="#system-map">открыть карту</a>
-            <a class="button dark" href="6-Штабной аварийник.html">дежурный режим</a>
           </div>
         </div>
-        <div class="tag">одна папка · один пульт · общие данные</div>
+
+        <div class="hero-console" id="heroConsole" aria-label="Интерактивный пульт задач">
+          <div class="console-core">НГО<br>пульт</div>
+          <button class="console-chip chip-events active" data-status="Собрать мероприятие: смысл, программа, роли и тайминг." data-href="2-Горн событий.html">событие</button>
+          <button class="console-chip chip-budget" data-status="Посчитать деньги: расходы, резерв, оргвзнос и поддержку." data-href="3-Смета Горна.html">смета</button>
+          <button class="console-chip chip-media" data-status="Подготовить коммуникацию: анонс, итог, чат и клип." data-href="4-Голос НГО.html">медиа</button>
+          <button class="console-chip chip-docs" data-status="Собрать официальный документ или письмо партнёру." data-href="7-Письменный горн.html">письма</button>
+          <button class="console-chip chip-sos" data-status="Включить быстрый сценарий для срочной ситуации." data-href="6-Штабной аварийник.html">SOS</button>
+          <div class="console-status" id="consoleStatus">Собрать мероприятие: смысл, программа, роли и тайминг.</div>
+        </div>
       </section>
+    </header>
 
-      <aside class="hero-side">
-        <article class="mission-card reveal">
-          <div class="mission-number">01</div>
-          <h2>Рабочее место штаба.</h2>
-          <p>Главная не продаёт систему, а помогает быстро выбрать действие: событие, смета, текст, письмо, партнёр, аварийный сценарий или состояние отрядов.</p>
-        </article>
+    <section class="section" id="system-map">
+      <div class="section-heading reveal">
+        <h2>Карта<br>системы</h2>
+        <p>Не каталог страниц, а рабочая схема: выбери, что сейчас делает штаб, и открой нужный модуль без лишних технических кнопок.</p>
+      </div>
 
+      <div class="system-map">
         <article class="mini-map reveal">
           <div class="map-title">
             <h3>Карта<br>системы</h3>
@@ -1061,35 +1186,6 @@
           <a class="node n5" href="7-Письменный горн.html">письма</a>
           <a class="node n6" href="6-Штабной аварийник.html">аварийник</a>
           <a class="node n7" href="3-Смета Горна.html">смета</a>
-        </article>
-
-        <article class="signal-card reveal">
-          <div class="signal-row"><span>событие</span><div class="signal-line"><span style="width:100%"></span></div><b>→</b></div>
-          <div class="signal-row"><span>смета</span><div class="signal-line"><span style="width:100%"></span></div><b>auto</b></div>
-          <div class="signal-row"><span>письма</span><div class="signal-line"><span style="width:82%"></span></div><b>doc</b></div>
-          <div class="signal-row"><span>кризис</span><div class="signal-line"><span style="width:64%"></span></div><b>sos</b></div>
-        </article>
-      </aside>
-    </header>
-
-    <section class="section" id="system-map">
-      <div class="section-heading reveal">
-        <h2>Карта<br>системы</h2>
-        <p>Не каталог страниц, а рабочая схема: выбери, что сейчас делает штаб, и открой нужный модуль без лишних технических кнопок.</p>
-      </div>
-
-      <div class="system-map">
-        <article class="map-brief reveal">
-          <div>
-            <div class="tag"><span class="brand-spark"></span> рабочая навигация</div>
-            <h2>Открывай не страницу, а задачу.</h2>
-            <p>Главная карта оставляет только действия, которые реально нужны сотруднику: проверить отряды, спланировать событие, посчитать деньги, подготовить коммуникацию или включить аварийный сценарий.</p>
-          </div>
-          <div class="map-shortcuts">
-            <a href="2-Горн событий.html"><span>начать с события</span><b>01</b></a>
-            <a href="3-Смета Горна.html"><span>проверить смету</span><b>02</b></a>
-            <a href="6-Штабной аварийник.html"><span>открыть SOS</span><b>03</b></a>
-          </div>
         </article>
 
         <div class="map-grid">
@@ -1244,6 +1340,62 @@
       });
     }
 
+    function initHeroConsole() {
+      const consoleNode = qs('#heroConsole');
+      const statusNode = qs('#consoleStatus');
+      if (!consoleNode || !statusNode) return;
+      qsa('.console-chip').forEach(chip => {
+        let dragging = false;
+        let moved = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function activate() {
+          qsa('.console-chip').forEach(item => item.classList.toggle('active', item === chip));
+          statusNode.textContent = chip.dataset.status || chip.textContent;
+        }
+
+        chip.addEventListener('pointerdown', event => {
+          dragging = true;
+          moved = false;
+          chip.classList.add('dragging');
+          chip.setPointerCapture(event.pointerId);
+          const chipRect = chip.getBoundingClientRect();
+          offsetX = event.clientX - chipRect.left;
+          offsetY = event.clientY - chipRect.top;
+          activate();
+        });
+
+        chip.addEventListener('pointermove', event => {
+          if (!dragging) return;
+          moved = true;
+          const area = consoleNode.getBoundingClientRect();
+          const chipRect = chip.getBoundingClientRect();
+          const x = Math.min(Math.max(event.clientX - area.left - offsetX, 8), area.width - chipRect.width - 8);
+          const y = Math.min(Math.max(event.clientY - area.top - offsetY, 8), area.height - chipRect.height - 8);
+          chip.style.left = `${x}px`;
+          chip.style.top = `${y}px`;
+          chip.style.right = 'auto';
+          chip.style.bottom = 'auto';
+        });
+
+        chip.addEventListener('pointerup', event => {
+          dragging = false;
+          chip.classList.remove('dragging');
+          chip.releasePointerCapture(event.pointerId);
+          if (!moved && chip.dataset.href) window.location.href = chip.dataset.href;
+        });
+
+        chip.addEventListener('keydown', event => {
+          if (event.key === 'Enter' && chip.dataset.href) window.location.href = chip.dataset.href;
+          if (event.key === ' ') {
+            event.preventDefault();
+            activate();
+          }
+        });
+      });
+    }
+
     function renderDutyBoard() {
       const board = qs('#dutyBoard');
       if (!board || !window.NgoSystem) return;
@@ -1271,6 +1423,7 @@
     initSparks();
     initReveal();
     initTilt();
+    initHeroConsole();
     renderDutyBoard();
   </script>
 </body>
