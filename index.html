@@ -532,7 +532,7 @@
     .belt-track {
       position: relative;
       z-index: 3;
-      height: 220px;
+      min-height: 220px;
       margin: 12px 6px 72px;
       border: 3px solid rgba(255,255,255,.34);
       background:
@@ -571,11 +571,28 @@
       animation: beltFlow 1.2s linear infinite;
     }
 
-    .belt-item {
+    .belt-cards {
       position: absolute;
+      z-index: 3;
+      left: 120px;
+      right: 120px;
       top: 50%;
-      width: 164px;
-      min-height: 66px;
+      overflow: hidden;
+      transform: translateY(-50%);
+    }
+
+    .belt-card-row {
+      display: flex;
+      width: max-content;
+      gap: 18px;
+      animation: beltCardsRun 34s linear infinite;
+      will-change: transform;
+    }
+
+    .belt-item {
+      position: relative;
+      flex: 0 0 clamp(128px, 10vw, 156px);
+      min-height: 68px;
       border: 3px solid var(--black);
       background: rgba(248,244,236,.94);
       color: var(--black);
@@ -589,14 +606,12 @@
       letter-spacing: .04em;
       text-transform: uppercase;
       box-shadow: 6px 6px 0 rgba(0,0,0,.62);
-      transform: translateY(-50%);
     }
 
-    .belt-item:nth-child(2) { left: 10%; }
-    .belt-item:nth-child(3) { left: 28%; }
-    .belt-item:nth-child(4) { left: 46%; background: var(--red); color: var(--white); animation: pulseGlow 1.8s var(--ease) infinite alternate; }
-    .belt-item:nth-child(5) { left: 64%; }
-    .belt-item:nth-child(6) { left: 82%; transform: translate(-100%, -50%); }
+    .belt-item:nth-child(4n) {
+      background: var(--red);
+      color: var(--white);
+    }
 
     .belt-steps {
       position: relative;
@@ -1294,6 +1309,11 @@
       to { background-position-x: 36px; }
     }
 
+    @keyframes beltCardsRun {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
     @keyframes beltScan {
       from { transform: translate(-24%, -50%) scaleX(.2); opacity: 0; }
       20% { opacity: .8; }
@@ -1327,14 +1347,10 @@
       .belt-steps { grid-template-columns: 1fr; }
       .belt-track { height: 360px; margin: 8px 0 76px; }
       .belt-line { left: 76px; right: 76px; }
+      .belt-cards { left: 72px; right: 72px; }
       .belt-track::before,
       .belt-track::after { width: 62px; height: 62px; }
-      .belt-item { width: 132px; min-height: 56px; font-size: 8px; }
-      .belt-item:nth-child(2) { left: 50%; top: 15%; transform: translateX(-50%); }
-      .belt-item:nth-child(3) { left: 50%; top: 32%; transform: translateX(-50%); }
-      .belt-item:nth-child(4) { left: 50%; top: 49%; transform: translateX(-50%); }
-      .belt-item:nth-child(5) { left: 50%; top: 66%; transform: translateX(-50%); }
-      .belt-item:nth-child(6) { left: 50%; top: 83%; transform: translateX(-50%); }
+      .belt-item { flex-basis: 118px; min-height: 56px; font-size: 8px; }
       .mini-map { min-height: 420px; }
       .node { width: 74px; }
       .n1 { left: 4%; top: 35%; }
@@ -1391,11 +1407,30 @@
           </div>
           <div class="belt-track">
             <div class="belt-line" aria-hidden="true"></div>
-            <div class="belt-item">Заявка на событие</div>
-            <div class="belt-item">Смета и резерв</div>
-            <div class="belt-item">Анонс и чат</div>
-            <div class="belt-item">Письмо партнеру</div>
-            <div class="belt-item">Готовый пакет</div>
+            <div class="belt-cards" aria-hidden="true">
+              <div class="belt-card-row">
+                <div class="belt-item">Заявка на событие</div>
+                <div class="belt-item">План программы</div>
+                <div class="belt-item">Смета и резерв</div>
+                <div class="belt-item">Анонс и чат</div>
+                <div class="belt-item">Письмо партнеру</div>
+                <div class="belt-item">Пост-релиз</div>
+                <div class="belt-item">Чек-лист ролей</div>
+                <div class="belt-item">SOS-сценарий</div>
+                <div class="belt-item">Пакет печати</div>
+                <div class="belt-item">Готовый итог</div>
+                <div class="belt-item">Заявка на событие</div>
+                <div class="belt-item">План программы</div>
+                <div class="belt-item">Смета и резерв</div>
+                <div class="belt-item">Анонс и чат</div>
+                <div class="belt-item">Письмо партнеру</div>
+                <div class="belt-item">Пост-релиз</div>
+                <div class="belt-item">Чек-лист ролей</div>
+                <div class="belt-item">SOS-сценарий</div>
+                <div class="belt-item">Пакет печати</div>
+                <div class="belt-item">Готовый итог</div>
+              </div>
+            </div>
           </div>
           <div class="belt-status">Лента показывает путь задачи: штаб видит этап, следующий шаг и готовый результат.</div>
         </div>
