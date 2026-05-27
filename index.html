@@ -1350,6 +1350,7 @@
     function initHeroConsole() {
       const consoleNode = qs('#heroConsole');
       const statusNode = qs('#consoleStatus');
+      const coreNode = qs('.console-core');
       if (!consoleNode || !statusNode) return;
       const chips = qsa('.console-chip');
       const bodies = chips.map((chip, index) => ({
@@ -1389,6 +1390,44 @@
       }
 
       function resolveCollisions() {
+        const area = consoleNode.getBoundingClientRect();
+        const coreRect = coreNode ? coreNode.getBoundingClientRect() : null;
+        const core = coreRect ? {
+          x: coreRect.left - area.left + coreRect.width / 2,
+          y: coreRect.top - area.top + coreRect.height / 2,
+          r: Math.max(coreRect.width, coreRect.height) / 2 + 10
+        } : null;
+
+        if (core) {
+          bodies.forEach(body => {
+            if (body.dragging) return;
+            const closestX = Math.min(Math.max(core.x, body.x), body.x + body.w);
+            const closestY = Math.min(Math.max(core.y, body.y), body.y + body.h);
+            let dx = closestX - core.x;
+            let dy = closestY - core.y;
+            let distance = Math.hypot(dx, dy);
+
+            if (distance >= core.r) return;
+            if (distance < .01) {
+              dx = (body.x + body.w / 2) - core.x || 1;
+              dy = (body.y + body.h / 2) - core.y || 1;
+              distance = Math.hypot(dx, dy);
+            }
+
+            const nx = dx / distance;
+            const ny = dy / distance;
+            const push = core.r - distance + 2;
+            body.x += nx * push;
+            body.y += ny * push;
+
+            const dot = body.vx * nx + body.vy * ny;
+            if (dot < 0) {
+              body.vx = (body.vx - 2 * dot * nx) * .96;
+              body.vy = (body.vy - 2 * dot * ny) * .96;
+            }
+          });
+        }
+
         for (let i = 0; i < bodies.length; i++) {
           for (let j = i + 1; j < bodies.length; j++) {
             const a = bodies[i];
