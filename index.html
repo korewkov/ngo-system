@@ -135,21 +135,20 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: var(--paper);
+      background: transparent;
       color: var(--black);
-      border: 2px solid var(--black);
-      padding: 6px 10px;
+      border: 0;
+      padding: 0;
       font-size: 11px;
       font-weight: 1000;
       letter-spacing: .11em;
       text-transform: uppercase;
-      box-shadow: 3px 3px 0 rgba(17,17,17,.18);
     }
 
     .brand-logo {
       display: block;
       width: auto;
-      height: 34px;
+      height: 48px;
     }
 
     .brand-spark {
@@ -210,8 +209,7 @@
       border: 3px solid var(--black);
       background:
         linear-gradient(90deg, rgba(255,59,47,.82) 0 7px, transparent 7px 21px),
-        linear-gradient(120deg, rgba(17,17,17,.94), rgba(42,42,42,.76) 48%, rgba(17,17,17,.9)),
-        url("assets/ngo-command-center-hero.jpg") center / cover,
+        linear-gradient(120deg, rgba(17,17,17,.9), rgba(42,42,42,.64) 48%, rgba(17,17,17,.86)),
         repeating-linear-gradient(-22deg, rgba(255,59,47,.22) 0 12px, transparent 12px 25px);
       color: var(--white);
       padding: clamp(22px, 4vw, 52px);
@@ -227,6 +225,28 @@
     .hero-main > * {
       position: relative;
       z-index: 2;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .34;
+      filter: saturate(.9) contrast(1.08) brightness(.72);
+      pointer-events: none;
+    }
+
+    .hero-video-shade {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(17,17,17,.84) 0%, rgba(17,17,17,.66) 48%, rgba(17,17,17,.5) 100%),
+        radial-gradient(circle at 70% 36%, rgba(255,59,47,.22), transparent 28%);
     }
 
     .hero-main .lead {
@@ -536,46 +556,16 @@
       margin: 12px 6px 72px;
       border: 3px solid rgba(255,255,255,.34);
       background:
-        linear-gradient(90deg, rgba(255,59,47,.88), rgba(255,59,47,.62)),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 22px, rgba(17,17,17,.28) 22px 44px);
+        linear-gradient(90deg, rgba(255,59,47,.88), rgba(255,59,47,.62));
       box-shadow: 8px 8px 0 rgba(0,0,0,.48), inset 0 0 0 2px rgba(17,17,17,.36);
       overflow: hidden;
-    }
-
-    .belt-track::before,
-    .belt-track::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 92px;
-      height: 92px;
-      border: 3px solid rgba(255,255,255,.42);
-      border-radius: 50%;
-      transform: translateY(-50%);
-      box-shadow: inset 0 0 0 18px rgba(17,17,17,.64), 0 0 38px rgba(255,59,47,.22);
-      animation: rotateSteel 7s linear infinite;
-    }
-
-    .belt-track::before { left: 18px; }
-    .belt-track::after { right: 18px; }
-
-    .belt-line {
-      position: absolute;
-      left: 120px;
-      right: 120px;
-      top: 50%;
-      height: 18px;
-      transform: translateY(-50%);
-      background: repeating-linear-gradient(90deg, rgba(17,17,17,.42) 0 18px, rgba(255,255,255,.2) 18px 36px);
-      opacity: .78;
-      animation: beltFlow 1.2s linear infinite;
     }
 
     .belt-cards {
       position: absolute;
       z-index: 3;
-      left: 120px;
-      right: 120px;
+      left: 22px;
+      right: 22px;
       top: 50%;
       overflow: hidden;
       transform: translateY(-50%);
@@ -584,15 +574,15 @@
     .belt-card-row {
       display: flex;
       width: max-content;
-      gap: 18px;
-      animation: beltCardsRun 34s linear infinite;
+      gap: clamp(28px, 3vw, 48px);
+      animation: beltCardsRun 42s linear infinite;
       will-change: transform;
     }
 
     .belt-item {
       position: relative;
-      flex: 0 0 clamp(128px, 10vw, 156px);
-      min-height: 68px;
+      flex: 0 0 clamp(152px, 12vw, 188px);
+      min-height: 72px;
       border: 3px solid var(--black);
       background: rgba(248,244,236,.94);
       color: var(--black);
@@ -1304,11 +1294,6 @@
       to { transform: translate(min(52vw, 520px), -50%) scale(.86); opacity: 0; }
     }
 
-    @keyframes beltFlow {
-      from { background-position-x: 0; }
-      to { background-position-x: 36px; }
-    }
-
     @keyframes beltCardsRun {
       from { transform: translateX(0); }
       to { transform: translateX(-50%); }
@@ -1346,11 +1331,8 @@
       .belt-board { min-height: 460px; }
       .belt-steps { grid-template-columns: 1fr; }
       .belt-track { height: 360px; margin: 8px 0 76px; }
-      .belt-line { left: 76px; right: 76px; }
-      .belt-cards { left: 72px; right: 72px; }
-      .belt-track::before,
-      .belt-track::after { width: 62px; height: 62px; }
-      .belt-item { flex-basis: 118px; min-height: 56px; font-size: 8px; }
+      .belt-cards { left: 14px; right: 14px; }
+      .belt-item { flex-basis: 132px; min-height: 56px; font-size: 8px; }
       .mini-map { min-height: 420px; }
       .node { width: 74px; }
       .n1 { left: 4%; top: 35%; }
@@ -1370,9 +1352,9 @@
   <div class="forge-glow" aria-hidden="true"></div>
   <div class="spark-field" id="sparkField" aria-hidden="true"></div>
 
-  <div class="app">
+  <div class="app" id="page-start">
     <nav class="nav">
-      <a class="brand-mark" href="#top" aria-label="Пульт НГО">
+      <a class="brand-mark" href="#page-start" aria-label="Пульт НГО">
         <img class="brand-logo" src="assets/ngo-logo.svg" alt="НГО / Кузница кадров" />
       </a>
       <div class="nav-links">
@@ -1385,6 +1367,10 @@
 
     <header class="hero" id="top">
       <section class="hero-main reveal">
+        <video class="hero-video" id="heroVideo" autoplay muted playsinline preload="auto">
+          <source src="assets/hero-loop.mp4" type="video/mp4" />
+        </video>
+        <div class="hero-video-shade" aria-hidden="true"></div>
         <div class="hero-content">
           <div class="hero-kicker">
             <div class="tag"><span class="brand-spark"></span> НГО / МАРШРУТ ЗАДАЧИ</div>
@@ -1406,7 +1392,6 @@
             <div class="belt-step"><strong>05</strong>Итог</div>
           </div>
           <div class="belt-track">
-            <div class="belt-line" aria-hidden="true"></div>
             <div class="belt-cards" aria-hidden="true">
               <div class="belt-card-row">
                 <div class="belt-item">Заявка на событие</div>
@@ -1843,6 +1828,54 @@
       });
     }
 
+    function initHeroVideo() {
+      const video = qs('#heroVideo');
+      if (!video) return;
+      let reversing = false;
+      let lastFrame = 0;
+      let reverseFrame = null;
+
+      function playForward() {
+        reversing = false;
+        cancelAnimationFrame(reverseFrame);
+        video.playbackRate = 1;
+        video.play().catch(() => {});
+      }
+
+      function reverseStep(time) {
+        if (!reversing) return;
+        const delta = lastFrame ? Math.min((time - lastFrame) / 1000, .05) : 0;
+        lastFrame = time;
+        video.currentTime = Math.max(0, video.currentTime - delta);
+        if (video.currentTime <= .04) {
+          video.currentTime = 0;
+          playForward();
+          return;
+        }
+        reverseFrame = requestAnimationFrame(reverseStep);
+      }
+
+      video.addEventListener('ended', () => {
+        reversing = true;
+        lastFrame = 0;
+        video.pause();
+        reverseFrame = requestAnimationFrame(reverseStep);
+      });
+
+      video.addEventListener('loadedmetadata', () => {
+        video.currentTime = 0;
+        playForward();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          video.pause();
+        } else if (!reversing) {
+          playForward();
+        }
+      });
+    }
+
     function renderDutyBoard() {
       const board = qs('#dutyBoard');
       if (!board || !window.NgoSystem) return;
@@ -1871,6 +1904,7 @@
     initReveal();
     initTilt();
     initHeroConsole();
+    initHeroVideo();
     renderDutyBoard();
   </script>
 </body>
