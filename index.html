@@ -191,7 +191,7 @@
       display: grid;
       grid-template-columns: 1fr;
       align-items: stretch;
-      margin-top: 16px;
+      margin: 16px 0 28px;
     }
 
     .hero-main {
@@ -210,7 +210,8 @@
       grid-template-columns: minmax(0, .95fr) minmax(360px, .72fr);
       gap: clamp(18px, 4vw, 54px);
       align-items: center;
-      min-height: calc(100vh - 112px);
+      min-height: calc(100vh - 140px);
+      user-select: none;
     }
 
     .hero-main > * {
@@ -255,6 +256,7 @@
 
     .hero-content {
       max-width: 980px;
+      user-select: none;
     }
 
     .hero-kicker {
@@ -364,6 +366,7 @@
       box-shadow: 10px 10px 0 rgba(17,17,17,.76), inset 0 0 0 1px rgba(255,255,255,.14);
       overflow: hidden;
       isolation: isolate;
+      user-select: none;
     }
 
     .hero-console::before,
@@ -424,21 +427,26 @@
     .console-chip {
       position: absolute;
       z-index: 5;
-      min-width: 110px;
+      width: clamp(118px, 11vw, 158px);
+      min-height: 62px;
       border: 3px solid var(--black);
       background: var(--paper);
       color: var(--black);
-      padding: 12px 13px;
+      padding: 10px 12px;
       font: inherit;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 1000;
       text-transform: uppercase;
-      letter-spacing: .08em;
+      letter-spacing: .04em;
+      line-height: 1.04;
       box-shadow: 5px 5px 0 rgba(0,0,0,.55);
       cursor: grab;
       transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease), transform .16s var(--ease);
       user-select: none;
       touch-action: none;
+      display: grid;
+      place-items: center;
+      text-align: center;
     }
 
     .console-chip:hover,
@@ -454,11 +462,11 @@
       transition: none;
     }
 
-    .chip-events { left: 8%; top: 14%; }
-    .chip-budget { right: 8%; top: 22%; }
-    .chip-media { left: 14%; bottom: 26%; }
-    .chip-docs { right: 14%; bottom: 24%; }
-    .chip-sos { left: 43%; top: 8%; }
+    .chip-events,
+    .chip-budget,
+    .chip-media,
+    .chip-docs,
+    .chip-sos { left: 50%; top: 50%; }
 
     .hero-side {
       display: grid;
@@ -1106,7 +1114,7 @@
       .hero-main { padding: 18px; min-height: auto; }
       .hero-kicker { display: grid; }
       .hero-console { min-height: 420px; }
-      .console-chip { min-width: 92px; padding: 10px; font-size: 9px; }
+      .console-chip { width: 112px; min-height: 58px; padding: 9px; font-size: 8px; }
       .console-core { width: 118px; height: 118px; }
       .mini-map { min-height: 420px; }
       .node { width: 74px; }
@@ -1154,12 +1162,12 @@
 
         <div class="hero-console" id="heroConsole" aria-label="Интерактивный пульт задач">
           <div class="console-core">НГО<br>пульт</div>
-          <button class="console-chip chip-events active" data-status="Собрать мероприятие: смысл, программа, роли и тайминг." data-href="2-Горн событий.html">событие</button>
-          <button class="console-chip chip-budget" data-status="Посчитать деньги: расходы, резерв, оргвзнос и поддержку." data-href="3-Смета Горна.html">смета</button>
-          <button class="console-chip chip-media" data-status="Подготовить коммуникацию: анонс, итог, чат и клип." data-href="4-Голос НГО.html">медиа</button>
-          <button class="console-chip chip-docs" data-status="Собрать официальный документ или письмо партнёру." data-href="7-Письменный горн.html">письма</button>
-          <button class="console-chip chip-sos" data-status="Включить быстрый сценарий для срочной ситуации." data-href="6-Штабной аварийник.html">SOS</button>
-          <div class="console-status" id="consoleStatus">Собрать мероприятие: смысл, программа, роли и тайминг.</div>
+          <button class="console-chip chip-events active" data-orbit-x="205" data-orbit-y="118" data-orbit-speed="0.00034" data-orbit-phase="-1.35" data-status="Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.">Собрать мероприятие</button>
+          <button class="console-chip chip-budget" data-orbit-x="224" data-orbit-y="136" data-orbit-speed="0.00029" data-orbit-phase="-0.15" data-status="Посчитать бюджет: расходы, резерв, оргвзнос, партнерскую поддержку и итог.">Посчитать бюджет</button>
+          <button class="console-chip chip-media" data-orbit-x="196" data-orbit-y="150" data-orbit-speed="0.00031" data-orbit-phase="2.18" data-status="Подготовить медиа: анонс, пост, отчет, сценарий Reels и текст для чата.">Подготовить медиа</button>
+          <button class="console-chip chip-docs" data-orbit-x="236" data-orbit-y="104" data-orbit-speed="0.00025" data-orbit-phase="0.92" data-status="Собрать документы: письма, благодарности, реквизиты и печатные версии.">Собрать документы</button>
+          <button class="console-chip chip-sos" data-orbit-x="174" data-orbit-y="128" data-orbit-speed="0.00038" data-orbit-phase="3.25" data-status="Разобрать срочную ситуацию: риск, действие, ответственный и следующий шаг.">Разобрать срочное</button>
+          <div class="console-status" id="consoleStatus">Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.</div>
         </div>
       </section>
     </header>
@@ -1344,35 +1352,65 @@
       const consoleNode = qs('#heroConsole');
       const statusNode = qs('#consoleStatus');
       if (!consoleNode || !statusNode) return;
-      qsa('.console-chip').forEach(chip => {
+      const chips = qsa('.console-chip');
+      let activeDrag = null;
+      let rafId = null;
+
+      function activate(chip) {
+        chips.forEach(item => item.classList.toggle('active', item === chip));
+        statusNode.textContent = chip.dataset.status || chip.textContent;
+      }
+
+      function placeOrbitChips(time) {
+        const area = consoleNode.getBoundingClientRect();
+        const sizeScale = Math.min(1, area.width / 720);
+        chips.forEach(chip => {
+          if (chip === activeDrag || chip.classList.contains('manual-chip')) return;
+          const chipRect = chip.getBoundingClientRect();
+          const orbitX = Number(chip.dataset.orbitX || 190) * sizeScale;
+          const orbitY = Number(chip.dataset.orbitY || 120) * sizeScale;
+          const speed = Number(chip.dataset.orbitSpeed || 0.0003);
+          const phase = Number(chip.dataset.orbitPhase || 0);
+          const angle = phase + time * speed;
+          const x = (area.width / 2) + Math.cos(angle) * orbitX - (chipRect.width / 2);
+          const y = (area.height / 2) + Math.sin(angle) * orbitY - (chipRect.height / 2);
+          chip.style.left = `${Math.min(Math.max(x, 10), area.width - chipRect.width - 10)}px`;
+          chip.style.top = `${Math.min(Math.max(y, 10), area.height - chipRect.height - 72)}px`;
+          chip.style.right = 'auto';
+          chip.style.bottom = 'auto';
+        });
+        rafId = requestAnimationFrame(placeOrbitChips);
+      }
+
+      activate(chips[0]);
+      rafId = requestAnimationFrame(placeOrbitChips);
+
+      chips.forEach(chip => {
         let dragging = false;
         let moved = false;
         let offsetX = 0;
         let offsetY = 0;
 
-        function activate() {
-          qsa('.console-chip').forEach(item => item.classList.toggle('active', item === chip));
-          statusNode.textContent = chip.dataset.status || chip.textContent;
-        }
-
         chip.addEventListener('pointerdown', event => {
           dragging = true;
           moved = false;
+          activeDrag = chip;
           chip.classList.add('dragging');
           chip.setPointerCapture(event.pointerId);
           const chipRect = chip.getBoundingClientRect();
           offsetX = event.clientX - chipRect.left;
           offsetY = event.clientY - chipRect.top;
-          activate();
+          activate(chip);
         });
 
         chip.addEventListener('pointermove', event => {
           if (!dragging) return;
           moved = true;
+          chip.classList.add('manual-chip');
           const area = consoleNode.getBoundingClientRect();
           const chipRect = chip.getBoundingClientRect();
           const x = Math.min(Math.max(event.clientX - area.left - offsetX, 8), area.width - chipRect.width - 8);
-          const y = Math.min(Math.max(event.clientY - area.top - offsetY, 8), area.height - chipRect.height - 8);
+          const y = Math.min(Math.max(event.clientY - area.top - offsetY, 8), area.height - chipRect.height - 70);
           chip.style.left = `${x}px`;
           chip.style.top = `${y}px`;
           chip.style.right = 'auto';
@@ -1381,19 +1419,25 @@
 
         chip.addEventListener('pointerup', event => {
           dragging = false;
+          activeDrag = null;
           chip.classList.remove('dragging');
-          chip.releasePointerCapture(event.pointerId);
-          if (!moved && chip.dataset.href) window.location.href = chip.dataset.href;
+          if (!moved) chip.classList.remove('manual-chip');
+          if (chip.hasPointerCapture(event.pointerId)) chip.releasePointerCapture(event.pointerId);
+        });
+
+        chip.addEventListener('pointerenter', () => {
+          activate(chip);
         });
 
         chip.addEventListener('keydown', event => {
-          if (event.key === 'Enter' && chip.dataset.href) window.location.href = chip.dataset.href;
-          if (event.key === ' ') {
+          if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            activate();
+            activate(chip);
           }
         });
       });
+
+      window.addEventListener('pagehide', () => cancelAnimationFrame(rafId));
     }
 
     function renderDutyBoard() {
