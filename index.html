@@ -215,14 +215,14 @@
         linear-gradient(120deg, rgba(17,17,17,.9), rgba(42,42,42,.64) 48%, rgba(17,17,17,.86)),
         repeating-linear-gradient(-22deg, rgba(255,59,47,.22) 0 12px, transparent 12px 25px);
       color: var(--white);
-      padding: clamp(22px, 4vw, 52px);
+      padding: clamp(22px, 4vw, 42px);
       box-shadow: var(--shadow-hard);
       display: grid;
       grid-template-columns: minmax(0, 980px);
       gap: 0;
       align-items: center;
       justify-content: start;
-      min-height: clamp(560px, calc(100vh - 260px), 700px);
+      min-height: clamp(360px, 48vh, 520px);
       user-select: none;
     }
 
@@ -258,36 +258,6 @@
       text-shadow: 0 2px 24px rgba(0,0,0,.72);
     }
 
-    .hero-main::before {
-      content: "";
-      position: absolute;
-      right: 8%;
-      top: 8%;
-      width: min(24vw, 280px);
-      height: min(24vw, 280px);
-      border: 3px solid rgba(255,255,255,.18);
-      background:
-        linear-gradient(45deg, transparent 43%, rgba(255,59,47,.66) 44% 56%, transparent 57%),
-        linear-gradient(-45deg, transparent 43%, rgba(255,255,255,.14) 44% 56%, transparent 57%);
-      transform: rotate(8deg);
-      animation: rotateSteel 18s linear infinite;
-    }
-
-    .hero-main::after {
-      content: "ПУЛЬТ\\A УПРАВЛЕНИЯ";
-      white-space: pre;
-      position: absolute;
-      right: -8px;
-      bottom: -16px;
-      color: rgba(233,228,218,.07);
-      font-size: clamp(78px, 12vw, 190px);
-      font-weight: 1000;
-      letter-spacing: -.095em;
-      line-height: .72;
-      text-align: right;
-      pointer-events: none;
-    }
-
     .hero-content {
       max-width: 980px;
       user-select: none;
@@ -301,7 +271,7 @@
       justify-content: flex-start;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 28px;
+      margin-bottom: 18px;
     }
 
     .tag {
@@ -336,7 +306,7 @@
       z-index: 2;
       margin: 0;
       max-width: 1000px;
-      font-size: clamp(72px, 12vw, 190px);
+      font-size: clamp(58px, 9vw, 132px);
       line-height: .75;
       letter-spacing: -.105em;
       text-transform: uppercase;
@@ -347,10 +317,10 @@
       position: relative;
       z-index: 2;
       max-width: 780px;
-      margin: 22px 0 0;
+      margin: 18px 0 0;
       color: rgba(233,228,218,.86);
-      font-size: clamp(18px, 2.3vw, 32px);
-      line-height: 1.02;
+      font-size: clamp(16px, 1.7vw, 24px);
+      line-height: 1.08;
       font-weight: 900;
       letter-spacing: -.045em;
       text-transform: uppercase;
@@ -362,7 +332,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 30px;
+      margin-top: 24px;
     }
 
     .button {
@@ -390,36 +360,6 @@
     .button.primary { background: var(--red); color: var(--white); }
     .button.dark { background: var(--black); color: var(--white); border-color: var(--white); }
 
-    .hero-side {
-      display: grid;
-      gap: 14px;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    .mission-card,
-    .signal-card {
-      border: 3px solid var(--black);
-      background: rgba(248,244,236,.86);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow-hard);
-      overflow: hidden;
-    }
-
-    .mission-card {
-      padding: 18px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .mission-number {
-      font-size: clamp(54px, 7vw, 112px);
-      font-weight: 1000;
-      line-height: .74;
-      letter-spacing: -.09em;
-      color: var(--red);
-    }
-
-    .mission-card h2,
     .section-heading h2 {
       margin: 0;
       font-size: clamp(34px, 4.5vw, 68px);
@@ -429,47 +369,12 @@
       font-weight: 1000;
     }
 
-    .mission-card p,
     .section-heading p {
       margin: 0;
       font-size: 15px;
       line-height: 1.32;
       font-weight: 780;
       color: rgba(17,17,17,.66);
-    }
-
-    .signal-card {
-      padding: 16px;
-      background: var(--black);
-      color: var(--white);
-      display: grid;
-      gap: 10px;
-    }
-
-    .signal-row {
-      display: grid;
-      grid-template-columns: 92px 1fr auto;
-      gap: 10px;
-      align-items: center;
-      font-size: 10px;
-      font-weight: 950;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .signal-line {
-      height: 12px;
-      border: 1px solid rgba(255,255,255,.32);
-      background: rgba(255,255,255,.08);
-      overflow: hidden;
-    }
-
-    .signal-line span {
-      display: block;
-      height: 100%;
-      background: var(--red);
-      transform-origin: left;
-      animation: loadSignal 1.4s var(--ease) both;
     }
 
     .section {
@@ -487,121 +392,8 @@
       margin-bottom: 18px;
     }
 
-    .badge {
-      display: inline-flex;
-      width: fit-content;
-      border: 2px solid var(--black);
-      padding: 5px 8px;
-      background: rgba(17,17,17,.045);
-      font-size: 9px;
-      font-weight: 1000;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-
-    .badge.red { background: var(--red); color: var(--white); }
-    .badge.black { background: var(--black); color: var(--white); }
-    .badge.green { background: var(--green); color: var(--white); }
-    .badge.warn { background: var(--amber); color: var(--white); }
-
-    .tool-actions {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 24px;
-    }
-
-    .open-link {
-      border: 3px solid var(--black);
-      background: var(--red);
-      color: var(--white);
-      padding: 11px 13px;
-      font-size: 11px;
-      font-weight: 1000;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      box-shadow: 4px 4px 0 var(--black);
-      transition: .18s var(--ease);
-    }
-
-    .open-link:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--black); }
-
     .system-map {
       display: block;
-    }
-
-    .map-brief {
-      border: 3px solid var(--black);
-      background: var(--black);
-      color: var(--white);
-      padding: 18px;
-      min-height: 520px;
-      box-shadow: var(--shadow-hard);
-      display: grid;
-      align-content: space-between;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .map-brief::after {
-      content: "MAP";
-      position: absolute;
-      right: -10px;
-      bottom: -14px;
-      color: rgba(255,255,255,.055);
-      font-size: clamp(86px, 12vw, 190px);
-      font-weight: 1000;
-      letter-spacing: -.09em;
-      line-height: .75;
-    }
-
-    .map-brief h2 {
-      margin: 14px 0 0;
-      color: var(--white);
-      max-width: 760px;
-    }
-
-    .map-brief p {
-      position: relative;
-      z-index: 2;
-      margin: 14px 0 0;
-      color: rgba(255,255,255,.72);
-      font-size: 15px;
-      line-height: 1.35;
-      font-weight: 780;
-    }
-
-    .map-shortcuts {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .map-shortcuts a {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border: 2px solid rgba(255,255,255,.26);
-      background: rgba(255,255,255,.07);
-      color: var(--white);
-      padding: 11px 12px;
-      font-size: 11px;
-      font-weight: 1000;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      transition: .18s var(--ease);
-    }
-
-    .map-shortcuts a:hover {
-      border-color: var(--white);
-      background: var(--red);
-      transform: translate(-2px, -2px);
-      box-shadow: 4px 4px 0 rgba(255,255,255,.22);
     }
 
     .map-grid {
@@ -690,200 +482,6 @@
 
     .module-action:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--black); }
 
-    .workflow {
-      display: grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .flow-card {
-      border: 3px solid var(--black);
-      background: var(--black);
-      color: var(--white);
-      padding: 18px;
-      min-height: 380px;
-      box-shadow: var(--shadow-hard);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .flow-card::after {
-      content: "СИСТЕМА";
-      position: absolute;
-      right: -8px;
-      bottom: -8px;
-      color: rgba(255,255,255,.055);
-      font-size: clamp(70px, 10vw, 150px);
-      font-weight: 1000;
-      letter-spacing: -.08em;
-      line-height: .8;
-    }
-
-    .flow-steps {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .flow-step {
-      display: grid;
-      grid-template-columns: 64px 1fr;
-      gap: 12px;
-      align-items: start;
-      border: 2px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.06);
-      padding: 12px;
-    }
-
-    .flow-step b {
-      color: var(--red);
-      font-size: 34px;
-      line-height: .8;
-      font-weight: 1000;
-      letter-spacing: -.08em;
-    }
-
-    .flow-step strong {
-      display: block;
-      font-size: 16px;
-      line-height: .9;
-      text-transform: uppercase;
-      font-weight: 1000;
-      margin-bottom: 6px;
-    }
-
-    .flow-step span {
-      display: block;
-      font-size: 12px;
-      line-height: 1.32;
-      font-weight: 760;
-      color: rgba(255,255,255,.72);
-    }
-
-    .launch-card {
-      border: 3px solid var(--black);
-      background:
-        radial-gradient(circle at 74% 16%, rgba(255,59,47,.24), transparent 28%),
-        var(--paper);
-      padding: 18px;
-      box-shadow: var(--shadow-hard);
-      display: grid;
-      align-content: space-between;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .launch-card::after {
-      content: "01";
-      position: absolute;
-      right: -12px;
-      bottom: -20px;
-      font-size: 210px;
-      line-height: .8;
-      letter-spacing: -.12em;
-      font-weight: 1000;
-      color: rgba(17,17,17,.06);
-    }
-
-    .launch-card h3 {
-      margin: 0;
-      font-size: clamp(42px, 5vw, 80px);
-      line-height: .78;
-      letter-spacing: -.08em;
-      text-transform: uppercase;
-      font-weight: 1000;
-      position: relative;
-      z-index: 2;
-    }
-
-    .launch-card p {
-      position: relative;
-      z-index: 2;
-      margin: 14px 0 0;
-      font-size: 15px;
-      line-height: 1.32;
-      font-weight: 800;
-      color: rgba(17,17,17,.68);
-    }
-
-    .duty-board {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .duty-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      border: 2px solid rgba(17,17,17,.2);
-      background: rgba(255,255,255,.58);
-      padding: 10px;
-      font-size: 12px;
-      line-height: 1.2;
-      font-weight: 850;
-    }
-
-    .duty-row b {
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-
-    .duty-row span {
-      color: rgba(17,17,17,.62);
-      text-align: right;
-    }
-
-    .footer {
-      margin-top: 68px;
-      border: 3px solid var(--black);
-      background: var(--black);
-      color: var(--white);
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 14px;
-      align-items: end;
-      box-shadow: var(--shadow-hard);
-    }
-
-    .footer h2 {
-      color: var(--white);
-      max-width: 900px;
-    }
-
-    .footer p {
-      margin: 12px 0 0;
-      color: rgba(255,255,255,.68);
-      font-size: 13px;
-      line-height: 1.35;
-      font-weight: 760;
-    }
-
-    .toast {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 80;
-      transform: translateY(120px);
-      opacity: 0;
-      transition: .22s var(--ease);
-      background: var(--black);
-      color: var(--white);
-      border: 2px solid var(--white);
-      padding: 12px 14px;
-      font-weight: 900;
-      box-shadow: 6px 6px 0 var(--red);
-      max-width: 360px;
-    }
-
-    .toast.show { transform: translateY(0); opacity: 1; }
-
     .reveal {
       opacity: 0;
       transform: translateY(24px);
@@ -905,11 +503,6 @@
       to { transform: rotate(45deg) scale(1.14); }
     }
 
-    @keyframes rotateSteel {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
     @keyframes floatSpark {
       from { transform: translate3d(0, 110vh, 0) rotate(0deg); opacity: 0; }
       12% { opacity: .7; }
@@ -917,17 +510,9 @@
       to { transform: translate3d(var(--drift), -20vh, 0) rotate(360deg); opacity: 0; }
     }
 
-    @keyframes loadSignal {
-      from { transform: scaleX(.12); }
-      to { transform: scaleX(1); }
-    }
-
     @media (max-width: 1180px) {
       .hero-main,
-      .workflow,
-      .system-map,
-      .section-heading,
-      .footer { grid-template-columns: 1fr; }
+      .section-heading { grid-template-columns: 1fr; }
       .nav { grid-template-columns: 1fr; }
       .nav-links { justify-content: start; }
     }
@@ -937,7 +522,6 @@
       .hero-main { padding: 18px; min-height: auto; }
       .hero-kicker { display: grid; }
       .map-grid { grid-template-columns: 1fr; }
-      .footer { align-items: start; }
     }
   </style>
 </head>
@@ -951,9 +535,7 @@
         <img class="brand-logo" src="assets/ngo-logo.svg" alt="НГО / Кузница кадров" />
       </a>
       <div class="nav-links">
-        <a href="#system-map">карта</a>
-        <a href="#workflow">маршрут</a>
-        <a href="#duty">дежурный старт</a>
+        <a href="#system-map">системы</a>
       </div>
       <a class="nav-action" href="events.html">создать событие</a>
     </nav>
@@ -966,13 +548,13 @@
         <div class="hero-video-shade" aria-hidden="true"></div>
         <div class="hero-content">
           <div class="hero-kicker">
-            <div class="tag"><span class="brand-spark"></span> НГО / МАРШРУТ ЗАДАЧИ</div>
-            <div class="status-pill">от идеи до результата</div>
+            <div class="tag"><span class="brand-spark"></span> НГО / рабочие системы</div>
+            <div class="status-pill">для сотрудников штаба</div>
           </div>
-          <h1>Лента<br>штаба</h1>
-          <p class="lead">Задача проходит этапы: идея, план, смета, тексты, документы и итог — без ручной сборки с нуля.</p>
+          <h1>Пульт<br>штаба</h1>
+          <p class="lead">Выбери задачу: событие, смета, текст, письмо, партнёры, отряды или срочная ситуация.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#system-map">перейти к сервисам</a>
+            <a class="button primary" href="#system-map">выбрать систему</a>
           </div>
         </div>
 
@@ -981,125 +563,75 @@
 
     <section class="section" id="system-map">
       <div class="section-heading reveal">
-        <h2>Карта<br>системы</h2>
-        <p>Не каталог страниц, а рабочая схема: выбери, что сейчас делает штаб, и открой нужный модуль без лишних технических кнопок.</p>
+        <h2>Системы<br>штаба</h2>
+        <p>Выбери, какую задачу нужно закрыть прямо сейчас.</p>
       </div>
 
       <div class="system-map">
         <div class="map-grid">
           <article class="map-module reveal" id="pulse" data-code="01">
             <div>
-              <h3>Пульс НГО</h3>
-              <p>К кому пора вернуться: отряды, связи, касания, риски и точки роста.</p>
+              <h3>Отряды</h3>
+              <p>Посмотреть состояние отрядов, связи, риски и точки внимания.</p>
             </div>
-            <a class="module-action" href="pulse.html">проверить отряды</a>
+            <a class="module-action" href="pulse.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="events" data-code="02">
             <div>
-              <h3>Горн событий</h3>
-              <p>Создать мероприятие: смысл, программа, роли, тайминг и сценарий ведущего.</p>
+              <h3>События</h3>
+              <p>Собрать мероприятие: идея, программа, роли, тайминг и задачи.</p>
             </div>
-            <a class="module-action" href="events.html">собрать событие</a>
+            <a class="module-action" href="events.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="budget" data-code="03">
             <div>
-              <h3>Смета Горна</h3>
-              <p>Посчитать оргвзнос, поддержку, резерв и автоматически увидеть события из Горна.</p>
+              <h3>Смета</h3>
+              <p>Посчитать расходы, взносы, поддержку, резерв и итоговый бюджет.</p>
             </div>
-            <a class="module-action" href="budget.html">посчитать бюджет</a>
+            <a class="module-action" href="budget.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="voice" data-code="04">
             <div>
-              <h3>Голос НГО</h3>
-              <p>Быстро подготовить анонс, итог, пост, сообщение в чат или текст для клипа.</p>
+              <h3>Тексты</h3>
+              <p>Написать анонс, пост, итог, сообщение в чат или текст для ролика.</p>
             </div>
-            <a class="module-action" href="voice.html">написать текст</a>
+            <a class="module-action" href="voice.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="partners" data-code="05">
             <div>
-              <h3>Партнёрский горн</h3>
-              <p>Собрать предложение, письмо, скрипт звонка и базу контактов для поддержки проекта.</p>
+              <h3>Партнёры</h3>
+              <p>Подготовить предложение, письмо, звонок и список контактов.</p>
             </div>
-            <a class="module-action" href="partners.html">готовить партнёра</a>
+            <a class="module-action" href="partners.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="letters" data-code="06">
             <div>
-              <h3>Письменный горн</h3>
-              <p>Официальные письма, обращения и благодарности с предпросмотром и печатью.</p>
+              <h3>Документы</h3>
+              <p>Собрать письмо, обращение, благодарность и версию для печати.</p>
             </div>
-            <a class="module-action" href="letters.html">собрать письмо</a>
+            <a class="module-action" href="letters.html">открыть</a>
           </article>
 
           <article class="map-module reveal" id="sos" data-code="07">
             <div>
-              <h3>Штабной аварийник</h3>
-              <p>Когда нужно действовать сразу: сообщения, чек-листы, роли и порядок реакции.</p>
+              <h3>SOS</h3>
+              <p>Быстро открыть сообщения, роли, чек-листы и план реакции.</p>
             </div>
-            <a class="module-action" href="emergency.html">включить SOS</a>
+            <a class="module-action" href="emergency.html">открыть</a>
           </article>
         </div>
       </div>
     </section>
-
-    <section class="section" id="workflow">
-      <div class="section-heading reveal">
-        <h2>Как это<br>работает</h2>
-        <p>Логика не “набор сайтов”, а цифровая экосистема штаба. Каждый инструмент закрывает конкретную ситуацию и передаёт результат дальше.</p>
-      </div>
-      <div class="workflow">
-        <article class="flow-card reveal">
-          <div class="tag"><span class="brand-spark"></span> маршрут штаба</div>
-          <div class="flow-steps">
-            <div class="flow-step"><b>01</b><div><strong>Сначала видим систему</strong><span>Пульс НГО показывает отряды, связи, риски и людей, с которыми нужно работать.</span></div></div>
-            <div class="flow-step"><b>02</b><div><strong>Потом собираем событие</strong><span>Горн событий формирует смысл, программу, тайминг и сценарий.</span></div></div>
-            <div class="flow-step"><b>03</b><div><strong>Считаем деньги</strong><span>Смета Горна проверяет оргвзнос, поддержку, резерв и безубыточность.</span></div></div>
-            <div class="flow-step"><b>04</b><div><strong>Упаковываем коммуникацию</strong><span>Голос НГО, Партнёрский горн и Письменный горн собирают тексты, письма и предложения.</span></div></div>
-            <div class="flow-step"><b>05</b><div><strong>Если всё горит</strong><span>Штабной аварийник даёт готовые сообщения, инструкции и алгоритм действий.</span></div></div>
-          </div>
-        </article>
-        <article class="launch-card reveal" id="duty">
-          <div>
-            <div class="tag" style="color:var(--black); border-color:rgba(17,17,17,.28); background:rgba(255,255,255,.45)">дежурный старт</div>
-            <h3>Что делаем первым?</h3>
-            <p>Если задача только появилась, начни с события: оно автоматически попадёт в смету. Если ситуация срочная, сразу открывай аварийник и распределяй роли.</p>
-            <div class="duty-board" id="dutyBoard"></div>
-          </div>
-          <div class="tool-actions">
-            <a class="open-link" href="events.html">создать событие</a>
-            <a class="open-link" href="emergency.html">открыть SOS</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <footer class="footer reveal" id="duty-cta">
-      <div>
-        <div class="tag"><span class="brand-spark"></span> НГО / цифровая кузница</div>
-        <h2>Открой пульт, выбери задачу, оставь след в системе.</h2>
-        <p>Для сотрудника штаба главный результат простой: событие не теряется, смета подтягивается, тексты и документы собираются там же, где идёт работа.</p>
-      </div>
-      <a class="button primary" href="#system-map">к карте задач</a>
-    </footer>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <script src="assets/ngo-system.js"></script>
   <script>
     function qs(selector) { return document.querySelector(selector); }
     function qsa(selector) { return [...document.querySelectorAll(selector)]; }
-
-    function toast(message) {
-      const node = qs('#toast');
-      node.textContent = message;
-      node.classList.add('show');
-      setTimeout(() => node.classList.remove('show'), 2400);
-    }
 
     function initSparks() {
       const field = qs('#sparkField');
@@ -1122,20 +654,6 @@
         });
       }, { threshold: .12 });
       qsa('.reveal').forEach(el => observer.observe(el));
-    }
-
-    function initTilt() {
-      qsa('.map-module').forEach(card => {
-        card.addEventListener('mousemove', event => {
-          const rect = card.getBoundingClientRect();
-          const x = (event.clientX - rect.left) / rect.width - .5;
-          const y = (event.clientY - rect.top) / rect.height - .5;
-          card.style.transform = `translate(-2px, -2px) rotateX(${y * -2}deg) rotateY(${x * 2.5}deg)`;
-        });
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = '';
-        });
-      });
     }
 
     function initHeroVideo() {
@@ -1186,35 +704,9 @@
       });
     }
 
-    function renderDutyBoard() {
-      const board = qs('#dutyBoard');
-      if (!board || !window.NgoSystem) return;
-      const duty = window.NgoSystem.dutyState();
-      const rows = [
-        ['активное событие', duty.activeEvent?.name || 'ещё не выбрано'],
-        ['заполненность', duty.activeEvent ? `${duty.completion.done}/${duty.completion.total}` : 'создай событие'],
-        ['смета', duty.activeBudget ? 'связана с событием' : 'нужно открыть смету'],
-        ['следующий шаг', duty.actions[2]]
-      ];
-      board.innerHTML = rows.map(([label, value]) => `
-        <div class="duty-row"><b>${escapeHtml(label)}</b><span>${escapeHtml(value)}</span></div>
-      `).join('');
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
     initSparks();
     initReveal();
-    initTilt();
     initHeroVideo();
-    renderDutyBoard();
   </script>
 </body>
 </html>
