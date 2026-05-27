@@ -32,10 +32,7 @@
     }
 
     * { box-sizing: border-box; }
-    html {
-      scroll-behavior: smooth;
-      scroll-padding-top: 116px;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -47,7 +44,7 @@
         radial-gradient(circle at 92% 3%, rgba(255,59,47,.14), transparent 22%),
         radial-gradient(circle at 55% 82%, rgba(17,17,17,.22), transparent 32%),
         linear-gradient(135deg, var(--milk) 0%, #d8d0c4 48%, #bdb2a3 100%);
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     body::before {
@@ -85,7 +82,12 @@
     .app {
       width: min(1600px, calc(100vw - 28px));
       margin: 0 auto;
-      padding: 18px 0 76px;
+      height: 100dvh;
+      padding: 14px 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 12px;
+      overflow: hidden;
     }
 
     .forge-glow {
@@ -120,18 +122,11 @@
     }
 
     .nav {
-      position: sticky;
-      top: 12px;
       z-index: 30;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 12px;
+      display: flex;
       align-items: center;
-      border: 3px solid var(--black);
-      background: rgba(248,244,236,.86);
-      backdrop-filter: blur(18px);
-      padding: 10px;
-      box-shadow: 5px 5px 0 rgba(17,17,17,.16);
+      justify-content: flex-start;
+      min-height: 54px;
     }
 
     .brand-mark {
@@ -151,7 +146,7 @@
     .brand-logo {
       display: block;
       width: auto;
-      height: 48px;
+      height: 54px;
     }
 
     .brand-spark {
@@ -163,38 +158,13 @@
       animation: sparkBreath 1.8s var(--ease) infinite alternate;
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .nav-links a,
-    .nav-action {
-      border: 2px solid var(--black);
-      background: rgba(255,255,255,.55);
-      padding: 9px 11px;
-      font-size: 10px;
-      font-weight: 950;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      transition: .18s var(--ease);
-    }
-
-    .nav-links a:hover,
-    .nav-action:hover {
-      background: var(--black);
-      color: var(--white);
-      transform: translateY(-2px);
-    }
-
-    .nav-action {
-      cursor: pointer;
-      background: var(--red);
-      color: var(--white);
-      box-shadow: 3px 3px 0 var(--black);
+    .screen-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(360px, .78fr) minmax(0, 1.22fr);
+      gap: 12px;
+      align-items: stretch;
+      overflow: hidden;
     }
 
     .hero {
@@ -203,7 +173,9 @@
       display: grid;
       grid-template-columns: 1fr;
       align-items: stretch;
-      margin: 16px 0 28px;
+      margin: 0;
+      min-width: 0;
+      min-height: 0;
     }
 
     .hero-main {
@@ -215,14 +187,15 @@
         linear-gradient(120deg, rgba(17,17,17,.9), rgba(42,42,42,.64) 48%, rgba(17,17,17,.86)),
         repeating-linear-gradient(-22deg, rgba(255,59,47,.22) 0 12px, transparent 12px 25px);
       color: var(--white);
-      padding: clamp(22px, 4vw, 42px);
+      padding: clamp(18px, 3vw, 34px);
       box-shadow: var(--shadow-hard);
       display: grid;
       grid-template-columns: minmax(0, 980px);
       gap: 0;
       align-items: center;
       justify-content: start;
-      min-height: clamp(360px, 48vh, 520px);
+      min-height: 0;
+      height: 100%;
       user-select: none;
     }
 
@@ -306,7 +279,7 @@
       z-index: 2;
       margin: 0;
       max-width: 1000px;
-      font-size: clamp(58px, 9vw, 132px);
+      font-size: clamp(48px, 7vw, 112px);
       line-height: .75;
       letter-spacing: -.105em;
       text-transform: uppercase;
@@ -319,46 +292,12 @@
       max-width: 780px;
       margin: 18px 0 0;
       color: rgba(233,228,218,.86);
-      font-size: clamp(16px, 1.7vw, 24px);
+      font-size: clamp(15px, 1.45vw, 21px);
       line-height: 1.08;
       font-weight: 900;
       letter-spacing: -.045em;
       text-transform: uppercase;
     }
-
-    .hero-actions {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 24px;
-    }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 3px solid var(--black);
-      background: var(--paper);
-      color: var(--black);
-      padding: 14px 16px;
-      font-size: 12px;
-      font-weight: 1000;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      box-shadow: 5px 5px 0 rgba(17,17,17,.45);
-      transition: .18s var(--ease);
-    }
-
-    .button:hover {
-      transform: translate(-3px, -3px);
-      box-shadow: 8px 8px 0 var(--black);
-    }
-
-    .button.primary { background: var(--red); color: var(--white); }
-    .button.dark { background: var(--black); color: var(--white); border-color: var(--white); }
 
     .section-heading h2 {
       margin: 0;
@@ -378,8 +317,9 @@
     }
 
     .section {
-      margin-top: 68px;
-      scroll-margin-top: 116px;
+      min-height: 0;
+      margin-top: 0;
+      overflow: hidden;
     }
 
     .section-heading {
@@ -388,26 +328,27 @@
       gap: 18px;
       align-items: end;
       border-top: 4px solid var(--black);
-      padding-top: 16px;
-      margin-bottom: 18px;
+      padding-top: 12px;
+      margin-bottom: 10px;
     }
 
     .system-map {
       display: block;
+      min-height: 0;
     }
 
     .map-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
     }
 
     .map-module {
       position: relative;
-      min-height: 178px;
+      min-height: 132px;
       border: 3px solid var(--black);
       background: var(--white);
-      padding: 14px;
+      padding: 12px;
       box-shadow: 4px 4px 0 rgba(17,17,17,.12);
       display: grid;
       align-content: space-between;
@@ -447,7 +388,7 @@
       margin: 0;
       max-width: 90%;
       font-size: clamp(22px, 2vw, 32px);
-      line-height: .88;
+      line-height: .9;
       letter-spacing: -.045em;
       text-transform: uppercase;
       font-weight: 1000;
@@ -456,11 +397,11 @@
     .map-module p {
       position: relative;
       z-index: 2;
-      margin: 10px 0 0;
+      margin: 8px 0 0;
       max-width: 94%;
       color: rgba(17,17,17,.68);
-      font-size: 12px;
-      line-height: 1.28;
+      font-size: 11px;
+      line-height: 1.22;
       font-weight: 780;
     }
 
@@ -471,8 +412,8 @@
       border: 2px solid var(--black);
       background: var(--red);
       color: var(--white);
-      padding: 9px 10px;
-      font-size: 9px;
+      padding: 8px 9px;
+      font-size: 8px;
       font-weight: 1000;
       text-transform: uppercase;
       letter-spacing: .08em;
@@ -511,14 +452,14 @@
     }
 
     @media (max-width: 1180px) {
-      .hero-main,
+      .screen-grid,
       .section-heading { grid-template-columns: 1fr; }
-      .nav { grid-template-columns: 1fr; }
-      .nav-links { justify-content: start; }
+      .screen-grid { overflow: auto; }
+      body { overflow: auto; }
     }
 
     @media (max-width: 760px) {
-      .app { width: min(100% - 18px, 1600px); padding-top: 10px; }
+      .app { width: min(100% - 18px, 1600px); height: auto; min-height: 100dvh; padding-top: 10px; overflow: visible; }
       .hero-main { padding: 18px; min-height: auto; }
       .hero-kicker { display: grid; }
       .map-grid { grid-template-columns: 1fr; }
@@ -534,99 +475,94 @@
       <a class="brand-mark" href="#page-start" aria-label="Пульт НГО">
         <img class="brand-logo" src="assets/ngo-logo.svg" alt="НГО / Кузница кадров" />
       </a>
-      <div class="nav-links">
-        <a href="#system-map">системы</a>
-      </div>
-      <a class="nav-action" href="events.html">создать событие</a>
     </nav>
 
-    <header class="hero" id="top">
-      <section class="hero-main reveal">
-        <video class="hero-video" id="heroVideo" autoplay muted playsinline preload="auto">
-          <source src="assets/hero-loop.mp4" type="video/mp4" />
-        </video>
-        <div class="hero-video-shade" aria-hidden="true"></div>
-        <div class="hero-content">
-          <div class="hero-kicker">
-            <div class="tag"><span class="brand-spark"></span> НГО / рабочие системы</div>
-            <div class="status-pill">для сотрудников штаба</div>
+    <main class="screen-grid">
+      <header class="hero" id="top">
+        <section class="hero-main reveal">
+          <video class="hero-video" id="heroVideo" autoplay muted playsinline preload="auto">
+            <source src="assets/hero-loop.mp4" type="video/mp4" />
+          </video>
+          <div class="hero-video-shade" aria-hidden="true"></div>
+          <div class="hero-content">
+            <div class="hero-kicker">
+              <div class="tag"><span class="brand-spark"></span> НГО / рабочие системы</div>
+              <div class="status-pill">для сотрудников штаба</div>
+            </div>
+            <h1>Пульт<br>штаба</h1>
+            <p class="lead">Выбери задачу: событие, смета, текст, письмо, партнёры, отряды или срочная ситуация.</p>
           </div>
-          <h1>Пульт<br>штаба</h1>
-          <p class="lead">Выбери задачу: событие, смета, текст, письмо, партнёры, отряды или срочная ситуация.</p>
-          <div class="hero-actions">
-            <a class="button primary" href="#system-map">выбрать систему</a>
-          </div>
+
+        </section>
+      </header>
+
+      <section class="section" id="system-map">
+        <div class="section-heading reveal">
+          <h2>Системы<br>штаба</h2>
+          <p>Выбери, какую задачу нужно закрыть прямо сейчас.</p>
         </div>
 
+        <div class="system-map">
+          <div class="map-grid">
+            <article class="map-module reveal" id="pulse" data-code="01">
+              <div>
+                <h3>Отряды</h3>
+                <p>Посмотреть состояние отрядов, связи, риски и точки внимания.</p>
+              </div>
+              <a class="module-action" href="pulse.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="events" data-code="02">
+              <div>
+                <h3>События</h3>
+                <p>Собрать мероприятие: идея, программа, роли, тайминг и задачи.</p>
+              </div>
+              <a class="module-action" href="events.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="budget" data-code="03">
+              <div>
+                <h3>Смета</h3>
+                <p>Посчитать расходы, взносы, поддержку, резерв и итоговый бюджет.</p>
+              </div>
+              <a class="module-action" href="budget.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="voice" data-code="04">
+              <div>
+                <h3>Тексты</h3>
+                <p>Написать анонс, пост, итог, сообщение в чат или текст для ролика.</p>
+              </div>
+              <a class="module-action" href="voice.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="partners" data-code="05">
+              <div>
+                <h3>Партнёры</h3>
+                <p>Подготовить предложение, письмо, звонок и список контактов.</p>
+              </div>
+              <a class="module-action" href="partners.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="letters" data-code="06">
+              <div>
+                <h3>Документы</h3>
+                <p>Собрать письмо, обращение, благодарность и версию для печати.</p>
+              </div>
+              <a class="module-action" href="letters.html">открыть</a>
+            </article>
+
+            <article class="map-module reveal" id="sos" data-code="07">
+              <div>
+                <h3>SOS</h3>
+                <p>Быстро открыть сообщения, роли, чек-листы и план реакции.</p>
+              </div>
+              <a class="module-action" href="emergency.html">открыть</a>
+            </article>
+          </div>
+        </div>
       </section>
-    </header>
-
-    <section class="section" id="system-map">
-      <div class="section-heading reveal">
-        <h2>Системы<br>штаба</h2>
-        <p>Выбери, какую задачу нужно закрыть прямо сейчас.</p>
-      </div>
-
-      <div class="system-map">
-        <div class="map-grid">
-          <article class="map-module reveal" id="pulse" data-code="01">
-            <div>
-              <h3>Отряды</h3>
-              <p>Посмотреть состояние отрядов, связи, риски и точки внимания.</p>
-            </div>
-            <a class="module-action" href="pulse.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="events" data-code="02">
-            <div>
-              <h3>События</h3>
-              <p>Собрать мероприятие: идея, программа, роли, тайминг и задачи.</p>
-            </div>
-            <a class="module-action" href="events.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="budget" data-code="03">
-            <div>
-              <h3>Смета</h3>
-              <p>Посчитать расходы, взносы, поддержку, резерв и итоговый бюджет.</p>
-            </div>
-            <a class="module-action" href="budget.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="voice" data-code="04">
-            <div>
-              <h3>Тексты</h3>
-              <p>Написать анонс, пост, итог, сообщение в чат или текст для ролика.</p>
-            </div>
-            <a class="module-action" href="voice.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="partners" data-code="05">
-            <div>
-              <h3>Партнёры</h3>
-              <p>Подготовить предложение, письмо, звонок и список контактов.</p>
-            </div>
-            <a class="module-action" href="partners.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="letters" data-code="06">
-            <div>
-              <h3>Документы</h3>
-              <p>Собрать письмо, обращение, благодарность и версию для печати.</p>
-            </div>
-            <a class="module-action" href="letters.html">открыть</a>
-          </article>
-
-          <article class="map-module reveal" id="sos" data-code="07">
-            <div>
-              <h3>SOS</h3>
-              <p>Быстро открыть сообщения, роли, чек-листы и план реакции.</p>
-            </div>
-            <a class="module-action" href="emergency.html">открыть</a>
-          </article>
-        </div>
-      </div>
-    </section>
+    </main>
   </div>
 
   <script>
