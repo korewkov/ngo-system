@@ -467,6 +467,219 @@
     .chip-docs,
     .chip-sos { left: 50%; top: 50%; }
 
+    .hero-variant {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin-bottom: 14px;
+      border: 2px solid rgba(255,255,255,.48);
+      background: rgba(17,17,17,.42);
+      color: var(--white);
+      padding: 8px 10px;
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .magnet-board,
+    .belt-board {
+      position: relative;
+      z-index: 3;
+      min-height: min(58vh, 560px);
+      overflow: hidden;
+      isolation: isolate;
+      user-select: none;
+    }
+
+    .magnet-board {
+      border: 2px solid rgba(255,255,255,.22);
+      background:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px),
+        radial-gradient(circle at 52% 48%, rgba(255,59,47,.28), transparent 36%),
+        rgba(17,17,17,.28);
+      background-size: 34px 34px, 34px 34px, auto, auto;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    .magnet-zone {
+      position: absolute;
+      width: 42%;
+      min-height: 118px;
+      border: 2px dashed rgba(255,255,255,.32);
+      background: rgba(17,17,17,.32);
+      padding: 12px;
+      color: rgba(255,255,255,.78);
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: .18s var(--ease);
+    }
+
+    .magnet-zone strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--white);
+      font-size: 15px;
+      letter-spacing: -.02em;
+    }
+
+    .magnet-zone.is-hot {
+      border-color: var(--red);
+      background: rgba(255,59,47,.16);
+      box-shadow: inset 0 0 0 2px rgba(255,59,47,.22), 0 0 38px rgba(255,59,47,.24);
+    }
+
+    .zone-plan { left: 4%; top: 6%; }
+    .zone-money { right: 4%; top: 6%; }
+    .zone-text { left: 4%; bottom: 18%; }
+    .zone-risk { right: 4%; bottom: 18%; }
+
+    .magnet-card {
+      position: absolute;
+      z-index: 6;
+      width: clamp(124px, 12vw, 170px);
+      min-height: 66px;
+      border: 3px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      padding: 11px 12px;
+      box-shadow: 6px 6px 0 rgba(0,0,0,.62);
+      cursor: grab;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.05;
+      font-weight: 1000;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      touch-action: none;
+      transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease), transform .16s var(--ease);
+    }
+
+    .magnet-card:hover,
+    .magnet-card.dragging {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 9px 9px 0 rgba(0,0,0,.72);
+      transform: translate(-2px, -2px);
+    }
+
+    .magnet-status,
+    .belt-status {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 7;
+      border: 2px solid rgba(255,255,255,.68);
+      background: rgba(17,17,17,.78);
+      color: rgba(255,255,255,.92);
+      padding: 11px 12px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .belt-board {
+      display: grid;
+      align-content: center;
+      gap: 26px;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(255,59,47,.24), transparent 36%),
+        linear-gradient(135deg, rgba(17,17,17,.58), rgba(17,17,17,.22));
+    }
+
+    .belt-track {
+      position: relative;
+      height: 168px;
+      border-top: 3px solid rgba(255,255,255,.34);
+      border-bottom: 3px solid rgba(255,255,255,.34);
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 22px, rgba(17,17,17,.38) 22px 44px),
+        rgba(17,17,17,.28);
+      box-shadow: 8px 8px 0 rgba(0,0,0,.42);
+      overflow: hidden;
+    }
+
+    .belt-track::before,
+    .belt-track::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 86px;
+      height: 86px;
+      border: 3px solid rgba(255,255,255,.36);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      box-shadow: inset 0 0 0 18px rgba(255,59,47,.38);
+      animation: rotateSteel 7s linear infinite;
+    }
+
+    .belt-track::before { left: 18px; }
+    .belt-track::after { right: 18px; }
+
+    .belt-item {
+      position: absolute;
+      top: 50%;
+      left: -190px;
+      width: 170px;
+      min-height: 72px;
+      border: 3px solid var(--black);
+      background: var(--paper);
+      color: var(--black);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 10px;
+      font-size: 10px;
+      line-height: 1.05;
+      font-weight: 1000;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      box-shadow: 6px 6px 0 rgba(0,0,0,.62);
+      transform: translateY(-50%);
+      animation: beltMove 15s linear infinite;
+    }
+
+    .belt-item:nth-child(2) { animation-delay: -12s; }
+    .belt-item:nth-child(3) { animation-delay: -9s; background: var(--red); color: var(--white); }
+    .belt-item:nth-child(4) { animation-delay: -6s; }
+    .belt-item:nth-child(5) { animation-delay: -3s; }
+
+    .belt-steps {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .belt-step {
+      border: 2px solid rgba(255,255,255,.38);
+      background: rgba(17,17,17,.42);
+      color: rgba(255,255,255,.86);
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.08;
+      font-weight: 1000;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .belt-step strong {
+      display: block;
+      color: var(--red);
+      margin-bottom: 6px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
     .hero-side {
       display: grid;
       gap: 14px;
@@ -1098,6 +1311,11 @@
       to { transform: scaleX(1); }
     }
 
+    @keyframes beltMove {
+      from { left: -210px; }
+      to { left: calc(100% + 40px); }
+    }
+
     @media (max-width: 1180px) {
       .hero-main,
       .workflow,
@@ -1115,6 +1333,12 @@
       .hero-console { min-height: 420px; }
       .console-chip { width: 112px; min-height: 58px; padding: 9px; font-size: 8px; }
       .console-core { width: 118px; height: 118px; }
+      .magnet-board,
+      .belt-board { min-height: 460px; }
+      .magnet-zone { width: 46%; min-height: 104px; font-size: 8px; }
+      .magnet-card { width: 118px; min-height: 58px; padding: 9px; font-size: 8px; }
+      .belt-steps { grid-template-columns: 1fr; }
+      .belt-track { height: 142px; }
       .mini-map { min-height: 420px; }
       .node { width: 74px; }
       .n1 { left: 4%; top: 35%; }
@@ -1148,6 +1372,7 @@
     <header class="hero" id="top">
       <section class="hero-main reveal">
         <div class="hero-content">
+          <div class="hero-variant">Вариант 01 / магнитная доска</div>
           <div class="hero-kicker">
             <div class="tag"><span class="brand-spark"></span> НГО / КУЗНИЦА КАДРОВ / ЦИФРОВОЙ ШТАБ</div>
             <div class="status-pill">8 сервисов · 1 пульт</div>
@@ -1159,14 +1384,52 @@
           </div>
         </div>
 
-        <div class="hero-console" id="heroConsole" aria-label="Интерактивный пульт задач">
-          <div class="console-core">Для чего<br>нужно</div>
-          <button class="console-chip chip-events active" data-x=".10" data-y=".16" data-vx="72" data-vy="46" data-status="Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.">Собрать мероприятие</button>
-          <button class="console-chip chip-budget" data-x=".66" data-y=".15" data-vx="-54" data-vy="62" data-status="Посчитать бюджет: расходы, резерв, оргвзнос, партнерскую поддержку и итог.">Посчитать бюджет</button>
-          <button class="console-chip chip-media" data-x=".18" data-y=".68" data-vx="58" data-vy="-52" data-status="Подготовить медиа: анонс, пост, отчет, сценарий Reels и текст для чата.">Подготовить медиа</button>
-          <button class="console-chip chip-docs" data-x=".72" data-y=".58" data-vx="-70" data-vy="-38" data-status="Собрать документы: письма, благодарности, реквизиты и печатные версии.">Собрать документы</button>
-          <button class="console-chip chip-sos" data-x=".44" data-y=".78" data-vx="44" data-vy="-70" data-status="Разобрать срочную ситуацию: риск, действие, ответственный и следующий шаг.">Разобрать срочное</button>
-          <div class="console-status" id="consoleStatus">Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.</div>
+        <div class="magnet-board" data-magnet-board aria-label="Вариант hero: магнитная доска задач">
+          <div class="magnet-zone zone-plan" data-zone="plan"><strong>Собрать</strong>Программа, роли, тайминг</div>
+          <div class="magnet-zone zone-money" data-zone="money"><strong>Посчитать</strong>Расходы, резерв, поддержка</div>
+          <div class="magnet-zone zone-text" data-zone="text"><strong>Написать</strong>Посты, письма, сценарии</div>
+          <div class="magnet-zone zone-risk" data-zone="risk"><strong>Закрыть</strong>Срочное, риск, ответственный</div>
+          <button class="magnet-card" style="left: 13%; top: 26%;" data-status="На выходе: программа события, роли команды и понятный тайминг.">Собрать мероприятие</button>
+          <button class="magnet-card" style="left: 56%; top: 28%;" data-status="На выходе: смета, оргвзнос, резерв и партнерская поддержка.">Посчитать бюджет</button>
+          <button class="magnet-card" style="left: 20%; top: 58%;" data-status="На выходе: анонс, итоговый пост, текст для чата и медиа-план.">Подготовить медиа</button>
+          <button class="magnet-card" style="left: 60%; top: 58%;" data-status="На выходе: письмо, благодарность, реквизиты и печатная версия.">Собрать документы</button>
+          <button class="magnet-card" style="left: 38%; top: 43%;" data-status="На выходе: быстрый план действий для срочной ситуации.">Разобрать срочное</button>
+          <div class="magnet-status" data-magnet-status>Перетащи карточку в рабочую зону: доска покажет, какой результат получает штаб.</div>
+        </div>
+      </section>
+    </header>
+
+    <header class="hero hero-compare" id="belt-hero">
+      <section class="hero-main reveal">
+        <div class="hero-content">
+          <div class="hero-variant">Вариант 02 / конвейерная лента</div>
+          <div class="hero-kicker">
+            <div class="tag"><span class="brand-spark"></span> НГО / МАРШРУТ ЗАДАЧИ</div>
+            <div class="status-pill">от идеи до результата</div>
+          </div>
+          <h1>Лента<br>штаба</h1>
+          <p class="lead">Задача проходит этапы: идея, план, смета, тексты, документы и итог — без ручной сборки с нуля.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#system-map">сравнить с картой</a>
+          </div>
+        </div>
+
+        <div class="belt-board" aria-label="Вариант hero: конвейерная лента штаба">
+          <div class="belt-steps">
+            <div class="belt-step"><strong>01</strong>Идея</div>
+            <div class="belt-step"><strong>02</strong>План</div>
+            <div class="belt-step"><strong>03</strong>Смета</div>
+            <div class="belt-step"><strong>04</strong>Тексты</div>
+            <div class="belt-step"><strong>05</strong>Итог</div>
+          </div>
+          <div class="belt-track">
+            <div class="belt-item">Заявка на событие</div>
+            <div class="belt-item">Смета и резерв</div>
+            <div class="belt-item">Анонс и чат</div>
+            <div class="belt-item">Письмо партнеру</div>
+            <div class="belt-item">Готовый пакет</div>
+          </div>
+          <div class="belt-status">Лента показывает путь задачи: штаб видит этап, следующий шаг и готовый результат.</div>
         </div>
       </section>
     </header>
@@ -1577,6 +1840,70 @@
       });
     }
 
+    function initMagnetBoards() {
+      qsa('[data-magnet-board]').forEach(board => {
+        const cards = [...board.querySelectorAll('.magnet-card')];
+        const zones = [...board.querySelectorAll('.magnet-zone')];
+        const status = board.querySelector('[data-magnet-status]');
+
+        cards.forEach(card => {
+          let dragging = false;
+          let offsetX = 0;
+          let offsetY = 0;
+
+          function setStatus(text) {
+            if (status) status.textContent = text;
+          }
+
+          function findHotZone(cardRect) {
+            const cardCenterX = cardRect.left + cardRect.width / 2;
+            const cardCenterY = cardRect.top + cardRect.height / 2;
+            return zones.find(zone => {
+              const rect = zone.getBoundingClientRect();
+              return cardCenterX >= rect.left && cardCenterX <= rect.right && cardCenterY >= rect.top && cardCenterY <= rect.bottom;
+            });
+          }
+
+          function moveCard(event) {
+            if (!dragging) return;
+            const boardRect = board.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            const x = Math.min(Math.max(event.clientX - boardRect.left - offsetX, 8), boardRect.width - cardRect.width - 8);
+            const y = Math.min(Math.max(event.clientY - boardRect.top - offsetY, 8), boardRect.height - cardRect.height - 72);
+            card.style.left = `${x}px`;
+            card.style.top = `${y}px`;
+
+            const hotZone = findHotZone(card.getBoundingClientRect());
+            zones.forEach(zone => zone.classList.toggle('is-hot', zone === hotZone));
+            setStatus(hotZone ? `${hotZone.querySelector('strong').textContent}: ${card.dataset.status}` : card.dataset.status);
+          }
+
+          function release(event) {
+            if (!dragging) return;
+            dragging = false;
+            card.classList.remove('dragging');
+            zones.forEach(zone => zone.classList.remove('is-hot'));
+            if (card.hasPointerCapture(event.pointerId)) card.releasePointerCapture(event.pointerId);
+          }
+
+          card.addEventListener('pointerdown', event => {
+            dragging = true;
+            card.classList.add('dragging');
+            card.setPointerCapture(event.pointerId);
+            const rect = card.getBoundingClientRect();
+            offsetX = event.clientX - rect.left;
+            offsetY = event.clientY - rect.top;
+            setStatus(card.dataset.status);
+          });
+
+          card.addEventListener('pointermove', moveCard);
+          card.addEventListener('pointerup', release);
+          card.addEventListener('pointercancel', release);
+          card.addEventListener('pointerenter', () => setStatus(card.dataset.status));
+        });
+      });
+    }
+
     function renderDutyBoard() {
       const board = qs('#dutyBoard');
       if (!board || !window.NgoSystem) return;
@@ -1605,6 +1932,7 @@
     initReveal();
     initTilt();
     initHeroConsole();
+    initMagnetBoards();
     renderDutyBoard();
   </script>
 </body>
