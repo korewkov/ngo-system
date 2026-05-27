@@ -187,7 +187,7 @@
 
     .hero {
       position: relative;
-      min-height: calc(100vh - 92px);
+      min-height: auto;
       display: grid;
       grid-template-columns: 1fr;
       align-items: stretch;
@@ -207,10 +207,10 @@
       padding: clamp(22px, 4vw, 52px);
       box-shadow: var(--shadow-hard);
       display: grid;
-      grid-template-columns: minmax(0, .95fr) minmax(360px, .72fr);
-      gap: clamp(18px, 4vw, 54px);
+      grid-template-columns: minmax(0, .9fr) minmax(430px, .88fr);
+      gap: clamp(18px, 3vw, 42px);
       align-items: center;
-      min-height: calc(100vh - 140px);
+      min-height: clamp(560px, calc(100vh - 260px), 700px);
       user-select: none;
     }
 
@@ -362,7 +362,7 @@
       min-height: min(58vh, 560px);
       background:
         radial-gradient(circle at 50% 46%, rgba(255,59,47,.42), transparent 28%),
-        radial-gradient(ellipse at 50% 54%, rgba(17,17,17,.58), transparent 64%);
+        radial-gradient(ellipse at 50% 54%, rgba(17,17,17,.42), transparent 70%);
       box-shadow: none;
       overflow: hidden;
       isolation: isolate;
@@ -441,7 +441,7 @@
       line-height: 1.04;
       box-shadow: 5px 5px 0 rgba(0,0,0,.55);
       cursor: grab;
-      transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease), transform .16s var(--ease);
+      transition: background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease);
       user-select: none;
       touch-action: none;
       display: grid;
@@ -458,7 +458,6 @@
 
     .console-chip.dragging {
       cursor: grabbing;
-      transform: scale(1.04);
       transition: none;
     }
 
@@ -1162,11 +1161,11 @@
 
         <div class="hero-console" id="heroConsole" aria-label="Интерактивный пульт задач">
           <div class="console-core">Для чего<br>нужно</div>
-          <button class="console-chip chip-events active" data-orbit-x="205" data-orbit-y="118" data-orbit-speed="0.00034" data-orbit-phase="-1.35" data-status="Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.">Собрать мероприятие</button>
-          <button class="console-chip chip-budget" data-orbit-x="224" data-orbit-y="136" data-orbit-speed="0.00029" data-orbit-phase="-0.15" data-status="Посчитать бюджет: расходы, резерв, оргвзнос, партнерскую поддержку и итог.">Посчитать бюджет</button>
-          <button class="console-chip chip-media" data-orbit-x="196" data-orbit-y="150" data-orbit-speed="0.00031" data-orbit-phase="2.18" data-status="Подготовить медиа: анонс, пост, отчет, сценарий Reels и текст для чата.">Подготовить медиа</button>
-          <button class="console-chip chip-docs" data-orbit-x="236" data-orbit-y="104" data-orbit-speed="0.00025" data-orbit-phase="0.92" data-status="Собрать документы: письма, благодарности, реквизиты и печатные версии.">Собрать документы</button>
-          <button class="console-chip chip-sos" data-orbit-x="174" data-orbit-y="128" data-orbit-speed="0.00038" data-orbit-phase="3.25" data-status="Разобрать срочную ситуацию: риск, действие, ответственный и следующий шаг.">Разобрать срочное</button>
+          <button class="console-chip chip-events active" data-x=".10" data-y=".16" data-vx="72" data-vy="46" data-status="Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.">Собрать мероприятие</button>
+          <button class="console-chip chip-budget" data-x=".66" data-y=".15" data-vx="-54" data-vy="62" data-status="Посчитать бюджет: расходы, резерв, оргвзнос, партнерскую поддержку и итог.">Посчитать бюджет</button>
+          <button class="console-chip chip-media" data-x=".18" data-y=".68" data-vx="58" data-vy="-52" data-status="Подготовить медиа: анонс, пост, отчет, сценарий Reels и текст для чата.">Подготовить медиа</button>
+          <button class="console-chip chip-docs" data-x=".72" data-y=".58" data-vx="-70" data-vy="-38" data-status="Собрать документы: письма, благодарности, реквизиты и печатные версии.">Собрать документы</button>
+          <button class="console-chip chip-sos" data-x=".44" data-y=".78" data-vx="44" data-vy="-70" data-status="Разобрать срочную ситуацию: риск, действие, ответственный и следующий шаг.">Разобрать срочное</button>
           <div class="console-status" id="consoleStatus">Собрать мероприятие: программа, роли, тайминг, задачи и итоговый план.</div>
         </div>
       </section>
@@ -1353,84 +1352,173 @@
       const statusNode = qs('#consoleStatus');
       if (!consoleNode || !statusNode) return;
       const chips = qsa('.console-chip');
-      let activeDrag = null;
+      const bodies = chips.map((chip, index) => ({
+        chip,
+        x: 0,
+        y: 0,
+        vx: Number(chip.dataset.vx || 50),
+        vy: Number(chip.dataset.vy || 45),
+        w: 0,
+        h: 0,
+        dragging: false,
+        lastPointerX: 0,
+        lastPointerY: 0,
+        lastPointerTime: 0
+      }));
       let rafId = null;
+      let lastTime = performance.now();
 
       function activate(chip) {
         chips.forEach(item => item.classList.toggle('active', item === chip));
         statusNode.textContent = chip.dataset.status || chip.textContent;
       }
 
-      function placeOrbitChips(time) {
+      function measureBodies() {
         const area = consoleNode.getBoundingClientRect();
-        const sizeScale = Math.min(1, area.width / 720);
-        chips.forEach(chip => {
-          if (chip === activeDrag) return;
-          const chipRect = chip.getBoundingClientRect();
-          const orbitX = Number(chip.dataset.orbitX || 190) * sizeScale;
-          const orbitY = Number(chip.dataset.orbitY || 120) * sizeScale;
-          const speed = Number(chip.dataset.orbitSpeed || 0.0003);
-          const phase = Number(chip.dataset.orbitPhase || 0);
-          const angle = phase + time * speed;
-          const x = (area.width / 2) + Math.cos(angle) * orbitX - (chipRect.width / 2);
-          const y = (area.height / 2) + Math.sin(angle) * orbitY - (chipRect.height / 2);
-          chip.style.left = `${Math.min(Math.max(x, 10), area.width - chipRect.width - 10)}px`;
-          chip.style.top = `${Math.min(Math.max(y, 10), area.height - chipRect.height - 72)}px`;
-          chip.style.right = 'auto';
-          chip.style.bottom = 'auto';
+        bodies.forEach(body => {
+          const rect = body.chip.getBoundingClientRect();
+          body.w = rect.width;
+          body.h = rect.height;
+          body.x = Number(body.chip.dataset.x || .5) * Math.max(1, area.width - body.w);
+          body.y = Number(body.chip.dataset.y || .5) * Math.max(1, area.height - body.h - 78);
+          body.chip.style.left = `${body.x}px`;
+          body.chip.style.top = `${body.y}px`;
+          body.chip.style.right = 'auto';
+          body.chip.style.bottom = 'auto';
         });
-        rafId = requestAnimationFrame(placeOrbitChips);
       }
 
-      activate(chips[0]);
-      rafId = requestAnimationFrame(placeOrbitChips);
+      function resolveCollisions() {
+        for (let i = 0; i < bodies.length; i++) {
+          for (let j = i + 1; j < bodies.length; j++) {
+            const a = bodies[i];
+            const b = bodies[j];
+            if (a.dragging || b.dragging) continue;
+            const ax = a.x + a.w / 2;
+            const ay = a.y + a.h / 2;
+            const bx = b.x + b.w / 2;
+            const by = b.y + b.h / 2;
+            const overlapX = (a.w + b.w) / 2 - Math.abs(ax - bx);
+            const overlapY = (a.h + b.h) / 2 - Math.abs(ay - by);
+            if (overlapX <= 0 || overlapY <= 0) continue;
 
-      chips.forEach(chip => {
-        let dragging = false;
+            if (overlapX < overlapY) {
+              const push = overlapX / 2 + 1;
+              const dir = ax < bx ? -1 : 1;
+              a.x += dir * push;
+              b.x -= dir * push;
+              const avx = a.vx;
+              a.vx = b.vx * .92;
+              b.vx = avx * .92;
+            } else {
+              const push = overlapY / 2 + 1;
+              const dir = ay < by ? -1 : 1;
+              a.y += dir * push;
+              b.y -= dir * push;
+              const avy = a.vy;
+              a.vy = b.vy * .92;
+              b.vy = avy * .92;
+            }
+          }
+        }
+      }
+
+      function tick(time) {
+        const area = consoleNode.getBoundingClientRect();
+        const bottomGuard = 76;
+        const dt = Math.min((time - lastTime) / 1000, .032);
+        lastTime = time;
+
+        bodies.forEach(body => {
+          if (body.dragging) return;
+          body.x += body.vx * dt;
+          body.y += body.vy * dt;
+
+          const maxX = area.width - body.w - 8;
+          const maxY = area.height - body.h - bottomGuard;
+          if (body.x <= 8 || body.x >= maxX) {
+            body.x = Math.min(Math.max(body.x, 8), maxX);
+            body.vx *= -1;
+          }
+          if (body.y <= 8 || body.y >= maxY) {
+            body.y = Math.min(Math.max(body.y, 8), maxY);
+            body.vy *= -1;
+          }
+        });
+
+        resolveCollisions();
+
+        bodies.forEach(body => {
+          const maxX = area.width - body.w - 8;
+          const maxY = area.height - body.h - bottomGuard;
+          body.x = Math.min(Math.max(body.x, 8), maxX);
+          body.y = Math.min(Math.max(body.y, 8), maxY);
+          body.chip.style.left = `${body.x}px`;
+          body.chip.style.top = `${body.y}px`;
+        });
+
+        rafId = requestAnimationFrame(tick);
+      }
+
+      measureBodies();
+      activate(chips[0]);
+      rafId = requestAnimationFrame(tick);
+      window.addEventListener('resize', measureBodies);
+
+      bodies.forEach(body => {
+        const { chip } = body;
         let moved = false;
         let offsetX = 0;
         let offsetY = 0;
 
         chip.addEventListener('pointerdown', event => {
-          dragging = true;
+          body.dragging = true;
           moved = false;
-          activeDrag = chip;
           chip.classList.add('dragging');
           chip.setPointerCapture(event.pointerId);
           const chipRect = chip.getBoundingClientRect();
           offsetX = event.clientX - chipRect.left;
           offsetY = event.clientY - chipRect.top;
+          body.lastPointerX = event.clientX;
+          body.lastPointerY = event.clientY;
+          body.lastPointerTime = performance.now();
           activate(chip);
         });
 
         chip.addEventListener('pointermove', event => {
-          if (!dragging) return;
+          if (!body.dragging) return;
           moved = true;
           const area = consoleNode.getBoundingClientRect();
           const chipRect = chip.getBoundingClientRect();
+          const now = performance.now();
+          const pointerDt = Math.max((now - body.lastPointerTime) / 1000, .016);
           const x = Math.min(Math.max(event.clientX - area.left - offsetX, 8), area.width - chipRect.width - 8);
-          const y = Math.min(Math.max(event.clientY - area.top - offsetY, 8), area.height - chipRect.height - 70);
-          chip.style.left = `${x}px`;
-          chip.style.top = `${y}px`;
+          const y = Math.min(Math.max(event.clientY - area.top - offsetY, 8), area.height - chipRect.height - 76);
+          body.vx = Math.max(Math.min((event.clientX - body.lastPointerX) / pointerDt, 260), -260);
+          body.vy = Math.max(Math.min((event.clientY - body.lastPointerY) / pointerDt, 260), -260);
+          body.x = x;
+          body.y = y;
+          body.lastPointerX = event.clientX;
+          body.lastPointerY = event.clientY;
+          body.lastPointerTime = now;
+          chip.style.left = `${body.x}px`;
+          chip.style.top = `${body.y}px`;
           chip.style.right = 'auto';
           chip.style.bottom = 'auto';
         });
 
-        chip.addEventListener('pointerup', event => {
-          if (moved) {
-            const area = consoleNode.getBoundingClientRect();
-            const chipRect = chip.getBoundingClientRect();
-            const chipCenterX = chipRect.left - area.left + (chipRect.width / 2);
-            const chipCenterY = chipRect.top - area.top + (chipRect.height / 2);
-            const angle = Math.atan2(chipCenterY - (area.height / 2), chipCenterX - (area.width / 2));
-            const speed = Number(chip.dataset.orbitSpeed || 0.0003);
-            chip.dataset.orbitPhase = String(angle - performance.now() * speed);
+        function releaseChip(event) {
+          if (!moved) {
+            body.vx = body.vx || 70;
+            body.vy = body.vy || 50;
           }
-          dragging = false;
-          activeDrag = null;
+          body.dragging = false;
           chip.classList.remove('dragging');
           if (chip.hasPointerCapture(event.pointerId)) chip.releasePointerCapture(event.pointerId);
-        });
+        }
+
+        chip.addEventListener('pointerup', releaseChip);
+        chip.addEventListener('pointercancel', releaseChip);
 
         chip.addEventListener('pointerenter', () => {
           activate(chip);
@@ -1444,7 +1532,10 @@
         });
       });
 
-      window.addEventListener('pagehide', () => cancelAnimationFrame(rafId));
+      window.addEventListener('pagehide', () => {
+        cancelAnimationFrame(rafId);
+        window.removeEventListener('resize', measureBodies);
+      });
     }
 
     function renderDutyBoard() {
