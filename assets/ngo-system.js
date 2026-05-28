@@ -234,8 +234,9 @@
 
   function serviceUrl(file) {
     const active = getActiveEvent();
-    if (!active?.id) return file;
-    return `${file}?event=${encodeURIComponent(active.id)}`;
+    const url = new URL(file, location.href);
+    if (active?.id) url.searchParams.set('event', active.id);
+    return url.href;
   }
 
   function contextHtml() {
@@ -244,7 +245,7 @@
       return `
         <div class="ngo-context-title">событие не выбрано</div>
         <div class="ngo-context-meta">Создай мероприятие в Горне событий, и оно станет общим контекстом для сметы, текстов, партнёров и писем.</div>
-        <div class="ngo-context-actions"><a href="${SERVICES[1].file}">создать событие</a></div>
+        <div class="ngo-context-actions"><a href="${serviceUrl(SERVICES[1].file)}">создать событие</a></div>
       `;
     }
     const budget = budgetForEvent(active);
@@ -299,7 +300,7 @@
     const rail = document.createElement('nav');
     rail.className = 'ngo-system-rail';
     rail.setAttribute('aria-label', 'Навигация системы НГО');
-    rail.innerHTML = `<a href="index.html">Пульт</a>` + SERVICES
+    rail.innerHTML = `<a href="${serviceUrl('index.html')}">Пульт</a>` + SERVICES
       .filter(service => service.file !== current)
       .slice(0, 4)
       .map(service => `<a href="${serviceUrl(service.file)}">${service.short}</a>`)

@@ -204,20 +204,22 @@
     }
 
     .logo-drop {
-      width: 86px;
+      width: 120px;
       height: 86px;
       flex: 0 0 auto;
-      border: 2px dashed rgba(255,255,255,.62);
+      border: 2px solid rgba(255,255,255,.62);
       display: grid;
       place-items: center;
-      color: rgba(255,255,255,.78);
-      text-align: center;
-      font-size: 9px;
-      line-height: 1.1;
-      font-weight: 950;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      background: rgba(255,255,255,.06);
+      padding: 10px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 5px 5px 0 rgba(255,59,47,.72);
+    }
+
+    .logo-drop img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .kicker {
@@ -291,6 +293,11 @@
       overflow: hidden;
     }
 
+    .panel-actions .muted-action {
+      font-size: 12px;
+      padding: 10px 12px;
+    }
+
     .panel-actions::before {
       content: "ШТАБНЫЙ БЛОК";
       position: absolute;
@@ -315,26 +322,22 @@
 
     .dash {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 12px;
+      grid-template-columns: 1fr;
       margin: 18px 0;
+      align-items: stretch;
     }
 
-    .stat {
-      grid-column: span 2;
-      min-height: 136px;
+    .overview-panel {
       border: 3px solid var(--black);
       border-radius: 0;
       background: var(--white);
-      padding: 14px;
-      box-shadow: 5px 5px 0 rgba(17,17,17,.15);
+      padding: 16px;
+      box-shadow: var(--shadow-hard);
       position: relative;
       overflow: hidden;
     }
 
-    .stat.wide { grid-column: span 4; }
-
-    .stat::before {
+    .overview-panel::before {
       content: "";
       position: absolute;
       inset: 0 auto 0 0;
@@ -342,40 +345,84 @@
       background: var(--red);
     }
 
-    .stat::after {
+    .overview-panel::after {
       content: "№";
       position: absolute;
-      right: 10px;
-      top: 6px;
+      right: 16px;
+      top: 10px;
       color: rgba(17,17,17,.08);
-      font-size: 60px;
+      font-size: 72px;
       font-weight: 1000;
       line-height: 1;
     }
 
-    .stat-value {
-      display: block;
-      font-size: 64px;
-      line-height: .78;
-      font-weight: 1000;
-      color: var(--red);
-      letter-spacing: -.09em;
+    .overview-head {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--black);
+      padding: 0 52px 11px 0;
     }
 
-    .stat-title {
-      margin-top: 11px;
-      max-width: 150px;
-      font-size: 12px;
-      line-height: .95;
+    .overview-title {
+      margin: 0;
+      font-size: clamp(30px, 4.4vw, 58px);
+      line-height: .82;
+      letter-spacing: -.075em;
+      text-transform: uppercase;
+      font-weight: 1000;
+    }
+
+    .overview-total {
+      display: grid;
+      justify-items: end;
+      gap: 3px;
       font-weight: 950;
       text-transform: uppercase;
+      min-width: 150px;
     }
 
-    .mini-bars { display: grid; gap: 8px; margin-top: 12px; }
+    .overview-total b {
+      color: var(--red);
+      font-size: 58px;
+      line-height: .78;
+      letter-spacing: -.08em;
+    }
+
+    .overview-total span {
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: rgba(17,17,17,.62);
+    }
+
+    .overview-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(340px, .92fr) minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .overview-card {
+      border: 2px solid var(--black);
+      background: rgba(248,244,236,.5);
+      padding: 13px;
+      min-width: 0;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .mini-bars { display: grid; gap: 8px; }
 
     .bar-row {
       display: grid;
-      grid-template-columns: 92px 1fr 32px;
+      grid-template-columns: minmax(64px, 86px) 1fr 26px;
       gap: 8px;
       align-items: center;
       font-size: 10px;
@@ -391,6 +438,92 @@
     }
 
     .bar span { display: block; height: 100%; background: var(--red); }
+
+    .pulse-summary {
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 14px;
+      align-items: center;
+      height: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .donut {
+      width: 128px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 3px solid var(--black);
+      background: conic-gradient(var(--red) 0 var(--live-angle), var(--mid) var(--live-angle) var(--mid-angle), var(--sleep) var(--mid-angle) 360deg);
+      display: grid;
+      place-items: center;
+      box-shadow: 5px 5px 0 rgba(17,17,17,.13);
+    }
+
+    .donut::after {
+      content: attr(data-total);
+      width: 78px;
+      aspect-ratio: 1;
+      border: 3px solid var(--black);
+      border-radius: 50%;
+      background: var(--white);
+      display: grid;
+      place-items: center;
+      color: var(--red);
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+    }
+
+    .legend-list { display: grid; gap: 9px; }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 14px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--black);
+      background: var(--dot-color);
+    }
+
+    .attention-strip {
+      margin-top: 4px;
+      border: 3px solid var(--black);
+      background: rgba(17,17,17,.06);
+      height: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .attention-strip span {
+      display: block;
+      height: 100%;
+      width: var(--attention-width);
+      background: repeating-linear-gradient(45deg, var(--red) 0 10px, var(--black) 10px 14px);
+    }
+
+    .attention-note {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 950;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+    }
+
+    .attention-note b { color: var(--red); font-size: 20px; letter-spacing: -.04em; }
 
     .workspace {
       display: grid;
@@ -788,21 +921,6 @@
       line-height: 1.35;
     }
 
-    .screen-mode .sidebar,
-    .screen-mode .tabs,
-    .screen-mode .controls-hide,
-    .screen-mode .panel-actions,
-    .screen-mode .card-actions,
-    .screen-mode #listPanel,
-    .screen-mode #tablePanel { display: none !important; }
-
-    .screen-mode .topbar { grid-template-columns: 1fr; }
-    .screen-mode .hero { min-height: 180px; }
-    .screen-mode .workspace { grid-template-columns: 1fr; }
-    .screen-mode .dash .stat { min-height: 112px; }
-    .screen-mode #mapPanel,
-    .screen-mode #linksPanel { display: block !important; }
-
     .hidden { display: none !important; }
 
     .toast {
@@ -829,7 +947,7 @@
       body::before, body::after, .panel-actions, .sidebar, .tabs, .card-actions, .modal, .toast { display: none !important; }
       .app { width: 100%; padding: 0; }
       .topbar, .workspace { grid-template-columns: 1fr; }
-      .hero, .stat, .main-section, .contour-lane, .brigade-card, .table-wrap { box-shadow: none; break-inside: avoid; }
+      .hero, .overview-panel, .main-section, .contour-lane, .brigade-card, .table-wrap { box-shadow: none; break-inside: avoid; }
       #listPanel, #mapPanel, #linksPanel, #tablePanel { display: block !important; }
       .hidden { display: block !important; }
     }
@@ -837,8 +955,10 @@
     @media (max-width: 1100px) {
       .topbar, .workspace { grid-template-columns: 1fr; }
       .sidebar { position: static; }
-      .stat { grid-column: span 4; }
-      .stat.wide { grid-column: span 6; }
+      .overview-grid { grid-template-columns: 1fr 1fr; }
+      .overview-card:first-child { grid-column: span 2; }
+      .pulse-summary { grid-template-columns: 132px 1fr; }
+      .donut { width: 122px; }
     }
 
     @media (max-width: 720px) {
@@ -846,9 +966,12 @@
       .hero { padding: 16px; min-height: 220px; }
       .brand-row { align-items: start; }
       .logo-drop { width: 68px; height: 68px; }
-      .dash { grid-template-columns: repeat(2, 1fr); }
-      .stat, .stat.wide { grid-column: span 1; }
-      .stat-value { font-size: 44px; }
+      .overview-head { display: grid; padding-right: 40px; }
+      .overview-total { justify-items: start; min-width: 0; }
+      .overview-grid { grid-template-columns: 1fr; }
+      .overview-card:first-child { grid-column: span 1; }
+      .pulse-summary { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 58px 1fr 24px; }
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .span-2, .form-grid .span-4 { grid-column: span 1; }
       .modal-head { display: grid; }
@@ -862,7 +985,9 @@
       <section class="hero">
         <div class="brand-row">
           <div class="kicker"><span class="spark"></span> НГО / ВНУТРЕННИЙ КОНТУР / ШТАБ</div>
-          <div class="logo-drop" title="Сюда можно вставить SVG/PNG логотип через тег img">место<br>для<br>логотипа</div>
+          <a class="logo-drop" href="index.html" aria-label="На пульт НГО">
+            <img src="assets/ngo-logo.svg" alt="НГО" />
+          </a>
         </div>
         <h1>Пульс НГО</h1>
         <p class="subtitle">карта отрядов, связей и точек роста</p>
@@ -872,12 +997,7 @@
       <aside class="panel-actions controls-hide">
         <div class="technical">операции с базой</div>
         <button class="primary" id="addBrigadeBtn">+ добавить отряд</button>
-        <button id="exportJsonBtn">резервная копия</button>
-        <button id="importJsonBtn">загрузить данные</button>
         <button id="exportCsvBtn">таблица для отчёта</button>
-        <button id="printBtn">печать PDF</button>
-        <button class="dark" id="screenModeBtn">режим штабного экрана</button>
-        <input type="file" id="jsonFileInput" accept="application/json" hidden />
       </aside>
     </header>
 
@@ -1212,20 +1332,41 @@
       const attention = all.filter(b => b.attention).length;
       const byDirection = countBy(all, 'direction');
       const byContour = countBy(all, 'contour');
+      const total = Math.max(all.length, 1);
+      const liveAngle = live / total * 360;
+      const midAngle = (live + middle) / total * 360;
 
       qs('#dashboard').innerHTML = `
-        <article class="stat"><span class="stat-value">${all.length}</span><div class="stat-title">отрядов в карте</div></article>
-        <article class="stat"><span class="stat-value">${live}</span><div class="stat-title">живые</div></article>
-        <article class="stat"><span class="stat-value">${middle}</span><div class="stat-title">нейтральные / средние</div></article>
-        <article class="stat"><span class="stat-value">${sleeping}</span><div class="stat-title">спящие</div></article>
-        <article class="stat"><span class="stat-value">${attention}</span><div class="stat-title">зона внимания</div></article>
-        <article class="stat wide">
-          <div class="technical">по направлениям</div>
-          <div class="mini-bars">${renderBars(byDirection, all.length)}</div>
-        </article>
-        <article class="stat wide">
-          <div class="technical">по контурам</div>
-          <div class="mini-bars">${renderBars(byContour, all.length)}</div>
+        <article class="overview-panel">
+          <div class="overview-head">
+            <h2 class="overview-title">Сводка отрядов</h2>
+            <div class="overview-total"><b>${all.length}</b><span>отрядов в карте</span></div>
+          </div>
+          <div class="overview-grid">
+            <section class="overview-card">
+              <div class="technical">пульс активности</div>
+              <div class="pulse-summary">
+                <div class="donut" data-total="${all.length}" style="--live-angle:${liveAngle}deg; --mid-angle:${midAngle}deg"></div>
+                <div>
+                  <div class="legend-list">
+                    <div class="legend-row"><span class="legend-dot" style="--dot-color:var(--red)"></span><span>живые</span><b>${live}</b></div>
+                    <div class="legend-row"><span class="legend-dot" style="--dot-color:var(--mid)"></span><span>средние</span><b>${middle}</b></div>
+                    <div class="legend-row"><span class="legend-dot" style="--dot-color:var(--sleep)"></span><span>спящие</span><b>${sleeping}</b></div>
+                  </div>
+                  <div class="attention-strip" title="Доля отрядов в зоне внимания"><span style="--attention-width:${attention / total * 100}%"></span></div>
+                  <div class="attention-note"><span>зона внимания штаба</span><b>${attention}</b></div>
+                </div>
+              </div>
+            </section>
+            <section class="overview-card">
+              <div class="technical">по направлениям</div>
+              <div class="mini-bars">${renderBars(byDirection, all.length)}</div>
+            </section>
+            <section class="overview-card">
+              <div class="technical">по контурам</div>
+              <div class="mini-bars">${renderBars(byContour, all.length)}</div>
+            </section>
+          </div>
         </article>
       `;
     }
@@ -1543,35 +1684,41 @@
       qsa('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== tabId));
     }
 
-    function exportJson() {
-      downloadFile('puls-ngo-data.json', JSON.stringify(state.brigades, null, 2), 'application/json');
-    }
-
-    function importJson(file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const parsed = JSON.parse(reader.result);
-          if (!Array.isArray(parsed)) throw new Error('JSON должен быть массивом отрядов');
-          state.brigades = enrichDefaults(parsed);
-          renderAll();
-          toast('JSON импортирован.');
-        } catch (error) {
-          toast('Ошибка импорта: ' + error.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
     function exportCsv() {
-      const fields = ['name','direction','contour','commander','commissar','contacts','size','activity','loyalty','leaderStrength','growth','attention','description','lastTouch','nextAction','notes'];
-      const rows = [fields.join(';')].concat(state.brigades.map(b => fields.map(field => csvCell(b[field])).join(';')));
-      downloadFile('puls-ngo-brigades.csv', rows.join('\n'), 'text/csv;charset=utf-8');
+      const columns = [
+        ['name', 'Отряд'],
+        ['direction', 'Направление'],
+        ['contour', 'Контур'],
+        ['commander', 'Командир'],
+        ['commissar', 'Комиссар'],
+        ['contacts', 'Контакты'],
+        ['size', 'Численность'],
+        ['activity', 'Активность'],
+        ['loyalty', 'Лояльность'],
+        ['leaderStrength', 'Сила командира'],
+        ['growth', 'Потенциал роста'],
+        ['attention', 'Зона внимания'],
+        ['description', 'Описание ситуации'],
+        ['lastTouch', 'Последнее касание'],
+        ['nextAction', 'Следующее действие'],
+        ['notes', 'Заметки']
+      ];
+      const header = columns.map(([, title]) => csvCell(title)).join(';');
+      const rows = state.brigades.map(b => columns.map(([field]) => csvCell(reportValue(field, b[field]))).join(';'));
+      downloadFile('puls-ngo-report.csv', '\uFEFF' + [header, ...rows].join('\r\n'), 'text/csv;charset=utf-8');
     }
 
     function csvCell(value) {
-      const text = String(value ?? '').replaceAll('"', '""');
+      const text = String(value ?? '')
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .replaceAll('"', '""');
       return `"${text}"`;
+    }
+
+    function reportValue(field, value) {
+      if (field === 'attention') return value ? 'да' : 'нет';
+      return value;
     }
 
     function downloadFile(filename, content, type) {
@@ -1622,16 +1769,7 @@
 
       qsa('.tab').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
       qs('#resetFiltersBtn').addEventListener('click', resetFilters);
-      qs('#exportJsonBtn').addEventListener('click', exportJson);
-      qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());
-      qs('#jsonFileInput').addEventListener('change', event => event.target.files[0] && importJson(event.target.files[0]));
       qs('#exportCsvBtn').addEventListener('click', exportCsv);
-      qs('#printBtn').addEventListener('click', () => window.print());
-      qs('#screenModeBtn').addEventListener('click', () => {
-        document.body.classList.toggle('screen-mode');
-        qs('#screenModeBtn').textContent = document.body.classList.contains('screen-mode') ? 'обычный режим' : 'режим штабного экрана';
-        if (document.body.classList.contains('screen-mode')) setTab('mapPanel');
-      });
 
       qs('#addRelationBtn').addEventListener('click', () => qs('#relationForm').style.display = qs('#relationForm').style.display === 'none' ? 'grid' : 'none');
       qs('#saveRelationBtn').addEventListener('click', addRelation);
