@@ -1,0 +1,141 @@
+.ngo-event-context {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  top: 10px;
+  z-index: 9998;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 2px solid #111;
+  background: rgba(248, 244, 236, .94);
+  backdrop-filter: blur(14px);
+  box-shadow: 5px 5px 0 rgba(17, 17, 17, .16);
+  font-family: Inter, Arial, sans-serif;
+  color: #111;
+}
+
+.ngo-context-title {
+  font-size: 12px;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  line-height: 1;
+}
+
+.ngo-context-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(17, 17, 17, .66);
+  line-height: 1.2;
+}
+
+.ngo-context-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ngo-context-actions a {
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  padding: 7px 9px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .06em;
+}
+
+.ngo-context-actions a:first-child {
+  background: #FF3B2F;
+  color: #fff;
+}
+
+.ngo-context-actions a:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #111;
+}
+
+body.ngo-system-context-ready {
+  padding-top: 58px;
+}
+
+.ngo-system-rail {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9999;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: calc(100vw - 28px);
+  padding: 8px;
+  border: 2px solid #111;
+  background: rgba(248, 244, 236, .92);
+  backdrop-filter: blur(14px);
+  box-shadow: 5px 5px 0 rgba(17, 17, 17, .18);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.ngo-system-rail a {
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  padding: 8px 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .06em;
+}
+
+.ngo-system-rail a:first-child {
+  background: #FF3B2F;
+  color: #fff;
+}
+
+.ngo-system-rail a:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #111;
+}
+
+@media (max-width: 720px) {
+  body.ngo-system-context-ready {
+    padding-top: 118px;
+  }
+
+  .ngo-event-context {
+    display: grid;
+    top: 8px;
+    left: 9px;
+    right: 9px;
+  }
+
+  .ngo-context-actions {
+    justify-content: start;
+  }
+
+  .ngo-system-rail {
+    left: 9px;
+    right: 9px;
+    bottom: 9px;
+    overflow-x: auto;
+  }
+
+  .ngo-system-rail a {
+    white-space: nowrap;
+  }
+}
+
+@media print {
+  .ngo-event-context,
+  .ngo-system-rail {
+    display: none !important;
+  }
+}

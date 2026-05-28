@@ -6,6 +6,8 @@
   <title>Штабной аварийник — оперативные тексты НГО</title>
   <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
+  <link rel="stylesheet" href="assets/ngo-shell.css" />
+  <script src="assets/ngo-core.js"></script>
   <style>
     /* =========================================================
        ШТАБНОЙ АВАРИЙНИК — оперативная панель НГО
@@ -662,6 +664,93 @@
       else generateChat();
     }
 
+    function activeAiKind() {
+      if (state.activeTab === 'chatPanel') return 'chat';
+      if (state.activeTab === 'instructionPanel') return 'instruction';
+      if (state.activeTab === 'crisisPanel') return 'crisis';
+      return '';
+    }
+
+    function emergencyAiPrompt(kind, data) {
+      const context = kind === 'chat'
+        ? `тип сообщения: ${state.chatType}`
+        : kind === 'instruction'
+          ? `тип инструкции: ${state.instructionType}`
+          : `тип внештатной ситуации: ${state.crisisType}`;
+      const expected = kind === 'crisis'
+        ? '5 объектов: сообщение участникам, сообщение командирам, сообщение партнёру / администрации, внутренний алгоритм действий, кому написать'
+        : '3 объекта: короткая версия, расширенная версия, очень короткая версия';
+      return `Ты помогаешь оперативному штабу НГО подготовить текст. Пиши спокойно, точно, без паники и без неподтверждённых фактов.
+
+Верни только JSON-массив без markdown. Нужно вернуть ${expected}. Каждый объект:
+{"type":"название варианта","text":"текст"}
+
+Режим: ${kind}
+${context}
+
+Вводные:
+- аудитория: ${data.audience || 'не указана'}
+- тональность: ${data.tone || 'не душно'}
+- событие: ${data.event || 'не указано'}
+- дата: ${data.date || 'не указана'}
+- место: ${data.place || 'не указано'}
+- дедлайн: ${data.deadline || 'не указан'}
+- ссылка: ${data.link || 'нет'}
+- дополнительные вводные: ${data.details || data.comment || 'нет'}
+
+Правила безопасности:
+- Не выдумывай причины, имена, диагнозы, суммы, точное время и решения.
+- Если данных не хватает, пиши "уточняется" или "сообщим дополнительно".
+- Не давай медицинских, юридических или опасных инструкций; только организационные шаги и рекомендацию обратиться к ответственным/специалистам при необходимости.
+- Для кризисного режима обязательно добавь шаг "не распространять неподтверждённые версии".
+- Текст должен быть пригоден для копирования в чат штаба.`;
+    }
+
+    function parseEmergencyAiOutputs(text, limit) {
+      const cleaned = String(text || '').replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) throw new Error('AI вернул не массив.');
+      return parsed
+        .filter(item => item && item.type && item.text)
+        .slice(0, limit)
+        .map(item => ({ id: crypto.randomUUID(), type: String(item.type), text: String(item.text) }));
+    }
+
+    function runTemplateForKind(kind) {
+      if (kind === 'chat') generateChat();
+      else if (kind === 'instruction') generateInstruction();
+      else if (kind === 'crisis') generateCrisis();
+    }
+
+    async function generateAiByActiveTab() {
+      if (state.activeTab === 'checklistPanel') return buildChecklist();
+      const kind = activeAiKind();
+      if (!kind) return generateByActiveTab();
+      const button = qs('#generateBtn');
+      const data = formData();
+      button.disabled = true;
+      button.textContent = 'AI собирает...';
+      try {
+        const result = await NgoCore.ai.generateText({
+          prompt: emergencyAiPrompt(kind, data),
+          temperature: kind === 'crisis' ? 0.28 : 0.48,
+          maxOutputTokens: kind === 'crisis' ? 1800 : 1000
+        });
+        const outputs = parseEmergencyAiOutputs(result.text, kind === 'crisis' ? 5 : 3);
+        if (!outputs.length) throw new Error('AI вернул пустой список.');
+        state.outputs[kind] = outputs;
+        renderAll();
+        toast('AI-текст собран. Проверь факты перед отправкой.');
+      } catch (error) {
+        console.warn('Штабной аварийник: AI недоступен, включены шаблоны.', error);
+        runTemplateForKind(kind);
+        toast('AI недоступен, текст собран на шаблонах.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'собрать текст';
+      }
+    }
+
     function allOutputs() { return [...state.outputs.chat, ...state.outputs.instruction, ...state.outputs.crisis]; }
     function findOutput(id) { return allOutputs().find(o => o.id === id); }
 
@@ -738,7 +827,7 @@
     function toast(message) { const node = qs('#toast'); node.textContent = message; node.classList.add('show'); setTimeout(()=>node.classList.remove('show'), 2400); }
 
     function bindEvents() {
-      qs('#generateBtn').addEventListener('click', generateByActiveTab);
+      qs('#generateBtn').addEventListener('click', generateAiByActiveTab);
       qs('#saveOutputBtn').addEventListener('click', saveCurrentOutputs);
       qs('#printInstructionBtn').addEventListener('click', () => printPanel('instructionPanel', 'print-instruction'));
       qs('#printChecklistBtn').addEventListener('click', () => printPanel('checklistPanel', 'print-checklist'));

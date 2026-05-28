@@ -6,6 +6,8 @@
   <title>Горн событий — конструктор мероприятий НГО</title>
   <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
+  <link rel="stylesheet" href="assets/ngo-shell.css" />
+  <script src="assets/ngo-core.js"></script>
   <style>
     /* =========================================================
        ГОРН СОБЫТИЙ — единый стиль НГО
@@ -999,7 +1001,9 @@
       activeTab: 'eventsPanel',
       timingMode: 'participant',
       editingBlockId: null,
-      filters: { search:'', type:'' }
+      filters: { search:'', type:'' },
+      aiScriptParts: null,
+      aiScriptEventId: null
     };
 
     function cloneBlock(block) {
@@ -1324,13 +1328,20 @@
         qs('#scriptBox').innerHTML = `<div class="empty-state">Сначала выбери мероприятие.</div>`;
         return;
       }
-      const parts = generateScript(event);
+      const parts = currentScriptParts(event);
       qs('#scriptBox').innerHTML = parts.map(part => `
         <section class="script-part">
           <h3>${escapeHtml(part.title)}</h3>
           <p>${escapeHtml(part.text)}</p>
         </section>
       `).join('');
+    }
+
+    function currentScriptParts(event) {
+      if (state.aiScriptEventId === event?.id && Array.isArray(state.aiScriptParts) && state.aiScriptParts.length) {
+        return state.aiScriptParts;
+      }
+      return generateScript(event);
     }
 
     function renderAll() {
@@ -1546,6 +1557,93 @@
       ];
     }
 
+    function eventScriptPrompt(event) {
+      const timing = computeTiming(event.blocks || []).map(item => ({
+        time: `${item.start}-${item.end}`,
+        title: item.block.title,
+        type: item.block.type,
+        duration: item.block.duration,
+        owner: item.block.owner,
+        stage: item.block.stage,
+        comment: item.block.comment
+      }));
+      return `Ты сценарист ведущего для события НГО. Собери живой, пригодный для чтения сценарий ведущего на русском языке.
+
+Верни только JSON-массив без markdown. В массиве должно быть 6 объектов:
+[
+  {"title":"Открытие","text":"..."},
+  {"title":"Представление гостей","text":"..."},
+  {"title":"Переходы между блоками","text":"..."},
+  {"title":"Подводки к награждениям","text":"..."},
+  {"title":"Финал","text":"..."},
+  {"title":"Анонс следующего события","text":"..."}
+]
+
+Вводные события:
+- название: ${event.name || 'не указано'}
+- тип: ${event.type || 'не указан'}
+- дата: ${event.date || 'не указана'}
+- место: ${event.place || 'не указано'}
+- аудитория: ${event.audience || 'не указана'}
+- участников: ${event.participants || 'не указано'}
+- тон: ${event.tone || 'не душно'}
+- цель: ${event.goal || 'не указана'}
+- главный смысл: ${event.meaning || 'не указан'}
+- обязательные блоки: ${event.requiredBlocks || 'не указаны'}
+- ответственный: ${event.owner || 'не указан'}
+- команда: ${event.team || 'не указана'}
+
+Программа:
+${JSON.stringify(timing, null, 2)}
+
+Требования:
+- Не выдумывай имена гостей, должности, даты и факты.
+- Если нужны имена, оставь понятные места для вставки.
+- Тон должен соответствовать событию: живо, уважительно, без канцелярита.
+- Переходы между блоками должны идти по программе и таймингу.
+- Текст должен быть удобен ведущему: абзацы, короткие реплики, без лишнего пафоса.`;
+    }
+
+    function parseAiScript(text) {
+      const cleaned = String(text || '').replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) throw new Error('AI вернул не массив.');
+      return parsed
+        .filter(part => part && part.title && part.text)
+        .slice(0, 6)
+        .map(part => ({ title: String(part.title), text: String(part.text) }));
+    }
+
+    async function generateAiScript() {
+      const event = currentEvent();
+      if (!event) return toast('Сначала выбери событие.');
+      const button = qs('#generateScriptBtn');
+      button.disabled = true;
+      button.textContent = 'AI собирает...';
+      try {
+        const result = await NgoCore.ai.generateText({
+          prompt: eventScriptPrompt(event),
+          temperature: 0.62,
+          maxOutputTokens: 2600
+        });
+        const parts = parseAiScript(result.text);
+        if (!parts.length) throw new Error('AI вернул пустой сценарий.');
+        state.aiScriptParts = parts;
+        state.aiScriptEventId = event.id;
+        renderScript();
+        toast('AI-сценарий собран. Проверь имена и факты перед сценой.');
+      } catch (error) {
+        console.warn('Горн событий: AI недоступен, включён шаблон сценария.', error);
+        state.aiScriptParts = null;
+        state.aiScriptEventId = null;
+        renderScript();
+        toast('AI недоступен, сценарий собран на шаблонах.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'собрать сценарий';
+      }
+    }
+
     function makeTransition(block, index) {
       const byType = {
         'регистрация': `Начинаем с точки входа: участники собираются, получают информацию и постепенно входят в атмосферу события.`,
@@ -1562,7 +1660,7 @@
     function copyScript() {
       const event = currentEvent();
       if (!event) return;
-      const text = generateScript(event).map(part => `${part.title.toUpperCase()}\n${part.text}`).join('\n\n---\n\n');
+      const text = currentScriptParts(event).map(part => `${part.title.toUpperCase()}\n${part.text}`).join('\n\n---\n\n');
       navigator.clipboard.writeText(text).then(() => toast('Сценарий скопирован.'));
     }
 
@@ -1579,7 +1677,7 @@
       if (!event) return toast('Сначала выбери событие.');
       const budget = window.NgoSystem?.budgetForEvent(event);
       const warnings = analyzeProgram(event);
-      const script = generateScript(event);
+      const script = currentScriptParts(event);
       const expenses = budget
         ? Object.values(budget.modes?.[budget.activeMode]?.expenses || []).map(expense => `
             <tr><td>${escapeHtml(expense.name)}</td><td>${escapeHtml(expense.category)}</td><td>${expense.qty}</td><td>${expense.price}</td><td>${escapeHtml(expense.payer)}</td></tr>
@@ -1710,7 +1808,7 @@ ${computeTiming(event.blocks || []).map(item => `<tr><td>${item.start}-${item.en
       qs('#saveEventBtn').addEventListener('click', saveCurrentEventFromForm);
       qs('#deleteEventBtn').addEventListener('click', deleteCurrentEvent);
       qs('#addBlockBtn').addEventListener('click', addBlockFromInputs);
-      qs('#generateScriptBtn').addEventListener('click', () => { renderScript(); toast('Сценарий пересобран.'); });
+      qs('#generateScriptBtn').addEventListener('click', generateAiScript);
       qs('#copyScriptBtn').addEventListener('click', copyScript);
       qs('#exportJsonBtn').addEventListener('click', exportJson);
       qs('#importJsonBtn').addEventListener('click', () => qs('#jsonFileInput').click());

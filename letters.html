@@ -6,6 +6,8 @@
   <title>Письменный горн — официальные письма НГО</title>
   <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
+  <link rel="stylesheet" href="assets/ngo-shell.css" />
+  <script src="assets/ngo-core.js"></script>
   <style>
     /* =========================================================
        ПИСЬМЕННЫЙ ГОРН — генератор официальных писем НГО
@@ -657,6 +659,7 @@
         <div class="technical">операции письма</div>
         <div class="save-indicator" id="saveIndicator">черновик сохранён</div>
         <button class="primary" id="newLetterBtn">новое письмо</button>
+        <button id="aiDraftBtn">AI-черновик текста</button>
         <button id="saveDraftBtn">сохранить черновик</button>
         <button id="duplicateBtn">дублировать письмо</button>
         <button id="downloadHtmlBtn">HTML-файл</button>
@@ -1018,6 +1021,68 @@
         parts.push('Будем признательны за рассмотрение настоящего обращения и обратную связь.');
       }
       return parts.join('\n\n');
+    }
+
+    function aiBodyPrompt(data) {
+      return `Ты помогаешь штабу НГО подготовить официальное письмо. Напиши только основной текст письма без шапки, адресата, темы, обращения, подписи и приложений.
+
+Стиль: официальный русский язык, ясно, уважительно, без канцелярского перегруза. Не выдумывай реквизиты, даты, должности и факты.
+
+Вводные:
+- тип письма: ${data.letterType || 'не указан'}
+- тон: ${data.tone || 'официальный'}
+- режим официальности: ${data.officialMode || 'стандартное письмо'}
+- тема: ${data.subject || 'не указана'}
+- получатель: ${[data.recipientPosition, data.recipientOrg, data.recipient].filter(Boolean).join(', ') || 'не указан'}
+- контекст: ${data.context || 'не указан'}
+- просьба или решение: ${data.request || 'не указаны'}
+- приложение: ${data.attachment || 'нет'}
+
+Требования:
+- 2-4 абзаца.
+- Первый абзац объясняет основание обращения.
+- Второй абзац раскрывает пользу или смысл.
+- Последний абзац формулирует просьбу или ожидаемое действие.
+- Не добавляй "Уважаемые коллеги", подпись, исходящий номер или дату.`;
+    }
+
+    function cleanupAiBody(text) {
+      return String(text || '')
+        .replace(/^```(?:text)?/i, '')
+        .replace(/```$/i, '')
+        .trim();
+    }
+
+    async function generateAiDraft() {
+      const form = qs('#letterForm');
+      const button = qs('#aiDraftBtn');
+      const data = getFormData();
+      button.disabled = true;
+      button.textContent = 'AI пишет...';
+      try {
+        const result = await NgoCore.ai.generateText({
+          prompt: aiBodyPrompt(data),
+          temperature: 0.45,
+          maxOutputTokens: 900
+        });
+        const text = cleanupAiBody(result.text);
+        if (!text) throw new Error('AI вернул пустой текст.');
+        form.elements.body.value = text;
+        renderAll();
+        qs('#saveIndicator').textContent = 'есть несохранённые правки';
+        toast('AI-черновик добавлен в основной текст.');
+      } catch (error) {
+        console.warn('Письменный горн: AI недоступен, включён шаблон.', error);
+        if (!form.elements.body.value.trim()) {
+          form.elements.body.value = typePhrase(data.letterType, data.tone);
+          renderAll();
+          qs('#saveIndicator').textContent = 'есть несохранённые правки';
+        }
+        toast('AI недоступен, использован шаблонный текст.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'AI-черновик текста';
+      }
     }
 
     function buildLetterData() {
@@ -1396,6 +1461,7 @@
         renderAll();
       });
       qs('#newLetterBtn').addEventListener('click', newLetter);
+      qs('#aiDraftBtn').addEventListener('click', generateAiDraft);
       qs('#saveDraftBtn').addEventListener('click', () => saveDraft());
       qs('#duplicateBtn').addEventListener('click', () => { saveDraft(); duplicateLetter(); });
       qs('#downloadHtmlBtn').addEventListener('click', downloadHtml);

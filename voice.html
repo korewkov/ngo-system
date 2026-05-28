@@ -6,6 +6,8 @@
   <title>Голос НГО — генератор текстов пресс-службы</title>
   <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
+  <link rel="stylesheet" href="assets/ngo-shell.css" />
+  <script src="assets/ngo-core.js"></script>
   <style>
     /* =========================================================
        ГОЛОС НГО — медиа-инструмент пресс-службы
@@ -837,8 +839,7 @@
       return dict[tone] || dict['не душно'];
     }
 
-    function generateOutputs() {
-      const d = formData();
+    function buildTemplateOutputs(d) {
       const hook = pickHook(d.type);
       const facts = d.facts ? d.facts.trim() : 'Подробности появятся в новостях штаба.';
       const link = d.link ? `\n\nСсылка: ${d.link}` : '';
@@ -862,15 +863,83 @@
         d.link ? 'Ссылка — в описании' : 'Следи за новостями штаба'
       ].join('\n---\n');
 
-      state.outputs = [
+      return [
         { id: crypto.randomUUID(), type:'VK-пост', text: vk },
         { id: crypto.randomUUID(), type:'Telegram/MAX', text: tg },
         { id: crypto.randomUUID(), type:'подпись для VK-клипа', text: clip },
         { id: crypto.randomUUID(), type:'сообщение в чат', text: chat },
         { id: crypto.randomUUID(), type:'сторис/клип-плашки', text: stories }
       ];
-      renderAll();
-      toast('Тексты собраны на шаблонах.');
+    }
+
+    function aiPrompt(d) {
+      return `Ты пресс-служба НГО. Собери тексты в фирменном стиле: живо, ясно, без канцелярита, с красной нитью штаба и уважением к людям.
+
+Верни только JSON-массив без markdown. В массиве должно быть ровно 5 объектов:
+[
+  {"type":"VK-пост","text":"..."},
+  {"type":"Telegram/MAX","text":"..."},
+  {"type":"подпись для VK-клипа","text":"..."},
+  {"type":"сообщение в чат","text":"..."},
+  {"type":"сторис/клип-плашки","text":"..."}
+]
+
+Вводные:
+- тип текста: ${d.type}
+- тон: ${d.tone}
+- событие: ${d.eventName || 'не указано'}
+- дата: ${d.date || 'не указана'}
+- место: ${d.place || 'не указано'}
+- аудитория: ${d.audience || 'не указана'}
+- главная мысль: ${d.mainIdea || 'не указана'}
+- факты: ${d.facts || 'не указаны'}
+- обязательные слова: ${d.requiredWords || 'нет'}
+- ссылка: ${d.link || 'нет'}
+- хэштеги: ${d.hashtags || 'нет'}
+
+Требования:
+- VK-пост до 1400 знаков.
+- Telegram/MAX короче VK и плотнее по смыслу.
+- Чат: максимально конкретно, что сделать и когда.
+- Сторис: отдельные короткие плашки через строку "---".
+- Не начинай с "Состоялось мероприятие".`;
+    }
+
+    function parseAiOutputs(text) {
+      const cleaned = String(text || '').replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) throw new Error('AI вернул не массив.');
+      return parsed
+        .filter(item => item && item.type && item.text)
+        .slice(0, 5)
+        .map(item => ({ id: crypto.randomUUID(), type: String(item.type), text: String(item.text) }));
+    }
+
+    async function generateOutputs() {
+      const d = formData();
+      const button = qs('#generateBtn');
+      const fallback = buildTemplateOutputs(d);
+      button.disabled = true;
+      button.textContent = 'генерация...';
+      try {
+        const result = await NgoCore.ai.generateText({
+          prompt: aiPrompt(d),
+          temperature: 0.72,
+          maxOutputTokens: 1900
+        });
+        const outputs = parseAiOutputs(result.text);
+        state.outputs = outputs.length ? outputs : fallback;
+        renderAll();
+        toast(outputs.length ? 'Тексты собраны через AI.' : 'AI ответ пустой, включены шаблоны.');
+      } catch (error) {
+        console.warn('Голос НГО: AI недоступен, включены шаблоны.', error);
+        state.outputs = fallback;
+        renderAll();
+        toast('AI недоступен, тексты собраны на шаблонах.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'сгенерировать тексты';
+      }
     }
 
     function checklist() {
@@ -1080,7 +1149,8 @@
 
     initControls();
     bindEvents();
-    generateOutputs();
+    state.outputs = buildTemplateOutputs(formData());
+    renderAll();
   </script>
 </body>
 </html>

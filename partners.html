@@ -6,6 +6,8 @@
   <title>Партнёрский горн — предложения НГО</title>
   <link rel="icon" href="assets/ngo-mark.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/ngo-mark.svg" />
+  <link rel="stylesheet" href="assets/ngo-shell.css" />
+  <script src="assets/ngo-core.js"></script>
   <style>
     /* =========================================================
        ПАРТНЁРСКИЙ ГОРН — машина сборки партнёрств НГО
@@ -351,7 +353,7 @@
         </form>
         <div class="subcard">
           <div class="technical">контекст</div>
-          <p style="margin:8px 0 0; font-size:13px; font-weight:800; line-height:1.35;">Инструмент собирает письмо, сообщение, звонок, структуру презентации, слайды и тезисы встречи без API — только шаблоны и ваши вводные.</p>
+          <p style="margin:8px 0 0; font-size:13px; font-weight:800; line-height:1.35;">Инструмент собирает письмо, сообщение, звонок, структуру презентации, слайды и тезисы встречи. При подключённом Gemini тексты персонализируются через AI, без API работает шаблонный режим.</p>
         </div>
       </aside>
 
@@ -497,8 +499,7 @@
       return byType[d.partnerType] || 'социально значимое партнёрство с городской молодёжной командой';
     }
 
-    function generate() {
-      const d = formData();
+    function buildTemplatePackage(d) {
       const value = partnerValue(d);
       const project = d.projectName || 'проект НГО';
       const ask = d.ask || 'поддержать проект';
@@ -518,7 +519,7 @@
 
       const meeting = `Главный тезис: мы приходим не “просить ради просьбы”, а предлагаем понятное партнёрство с молодёжной командой города.\n\nАргументы:\n— проект имеет социальную значимость: ${d.socialValue || 'развитие студентов и городской активности'};\n— аудитория понятная: ${d.audience || 'молодёжь Новокузнецка'};\n— масштаб измеримый: ${d.participants || 'участники проекта'};\n— запрос конкретный: ${ask};\n— отдача партнёру ясная: ${offer};\n— упоминание будет здесь: ${mention}.`;
 
-      state.outputs = [
+      return [
         { id: crypto.randomUUID(), type:'официальное письмо', text: letter },
         { id: crypto.randomUUID(), type:'сообщение в мессенджер', text: messenger },
         { id: crypto.randomUUID(), type:'текст для звонка', text: call },
@@ -526,10 +527,84 @@
         { id: crypto.randomUUID(), type:'текст слайдов', text: slidesText },
         { id: crypto.randomUUID(), type:'тезисы для встречи', text: meeting }
       ];
+    }
 
-      state.slides = buildSlides(d);
-      renderAll();
-      toast('Пакет партнёрства собран.');
+    function partnerAiPrompt(d) {
+      return `Ты помогаешь штабу НГО собрать партнёрское предложение. Нужно персонализировать тексты под тип партнёра, цель обращения и пользу для партнёра.
+
+Верни только JSON-массив без markdown. В массиве должно быть ровно 6 объектов:
+[
+  {"type":"официальное письмо","text":"..."},
+  {"type":"сообщение в мессенджер","text":"..."},
+  {"type":"текст для звонка","text":"..."},
+  {"type":"структура презентации","text":"..."},
+  {"type":"текст слайдов","text":"..."},
+  {"type":"тезисы для встречи","text":"..."}
+]
+
+Вводные:
+- тип партнёра: ${d.partnerType || 'не указан'}
+- цель обращения: ${d.goal || 'не указана'}
+- проект: ${d.projectName || 'не указан'}
+- дата: ${d.date || 'не указана'}
+- место: ${d.place || 'не указано'}
+- аудитория: ${d.audience || 'не указана'}
+- участников: ${d.participants || 'не указано'}
+- организатор: ${d.organizer || 'не указан'}
+- социальная значимость: ${d.socialValue || 'не указана'}
+- что просим: ${d.ask || 'не указано'}
+- что предлагаем партнёру: ${d.offer || 'не указано'}
+- точки упоминания: ${d.mentions || 'не указаны'}
+- контакты: ${d.contacts || 'не указаны'}
+- дедлайн ответа: ${d.deadline || 'не указан'}
+- базовая польза для такого партнёра: ${partnerValue(d)}
+
+Требования:
+- Письмо официальное, но не деревянное.
+- Сообщение в мессенджер короткое и человеческое.
+- Текст звонка — нумерованный сценарий.
+- Структура презентации — 6-8 пунктов.
+- Текст слайдов — блоки "Слайд 1..." и так далее.
+- Тезисы встречи — сильные аргументы и следующий шаг.
+- Не выдумывай факты, суммы, имена и обещания.`;
+    }
+
+    function parsePartnerAiOutputs(text) {
+      const cleaned = String(text || '').replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) throw new Error('AI вернул не массив.');
+      return parsed
+        .filter(item => item && item.type && item.text)
+        .slice(0, 6)
+        .map(item => ({ id: crypto.randomUUID(), type: String(item.type), text: String(item.text) }));
+    }
+
+    async function generate() {
+      const d = formData();
+      const button = qs('#generateBtn');
+      const fallback = buildTemplatePackage(d);
+      button.disabled = true;
+      button.textContent = 'сборка...';
+      try {
+        const result = await NgoCore.ai.generateText({
+          prompt: partnerAiPrompt(d),
+          temperature: 0.62,
+          maxOutputTokens: 2400
+        });
+        const outputs = parsePartnerAiOutputs(result.text);
+        state.outputs = outputs.length ? outputs : fallback;
+        toast(outputs.length ? 'AI-пакет партнёрства собран.' : 'AI ответ пустой, включены шаблоны.');
+      } catch (error) {
+        console.warn('Партнёрский горн: AI недоступен, включены шаблоны.', error);
+        state.outputs = fallback;
+        toast('AI недоступен, пакет собран на шаблонах.');
+      } finally {
+        state.slides = buildSlides(d);
+        renderAll();
+        button.disabled = false;
+        button.textContent = 'собрать предложение';
+      }
+
     }
 
     function buildSlides(d) {
@@ -703,7 +778,9 @@
 
     initControls();
     bindEvents();
-    generate();
+    state.outputs = buildTemplatePackage(formData());
+    state.slides = buildSlides(formData());
+    renderAll();
   </script>
 </body>
 </html>
